@@ -1,0 +1,9 @@
+Below are the operating protocols for this code repository.
+
+1) Commands
+All registered commands are listed at /docs/commands.json
+These are to be read, understood in context, and followed accordingly when working on this project
+
+2) Code Changes, Reviews, Updates, Status
+Before any specific changes or code updates are to be made for any file in this repo, you must first read the current and latest code for the specific file in question.
+You must also confirm that you have reviewed the file in context of the work you are performing.
