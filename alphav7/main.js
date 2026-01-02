@@ -60,8 +60,8 @@ async function main() {
 
     const solvedGenerations = new Set();
     function sendAck(genId) {
-        const ackBuf = Buffer.alloc(4); 
-        ackBuf.writeUInt32BE(genId, 0); 
+        const ackBuf = Buffer.alloc(4);
+        ackBuf.writeUInt32BE(genId, 0);
         returnNet.send(ackBuf);
     }
 

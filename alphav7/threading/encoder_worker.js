@@ -82,6 +82,7 @@ function sendPacket(encoder, protocol) {
 function producePackets(limit, protocol, budgets) {
     let produced = 0;
     const stats = {};
+    const packets = [];
 
     // scheduler: prioritize IDs with remaining budget
     const activeIds = budgets ? Object.keys(budgets) : Array.from(encoders.keys());
@@ -89,24 +90,60 @@ function producePackets(limit, protocol, budgets) {
 
     while (produced < limit) {
         const randomId = activeIds[Math.floor(Math.random() * activeIds.length)];
-        // DECENTRALIZED ENFORCEMENT
+
+// Safety check to prevent "Ghost ID" crashes from array shifts
+        if (randomId === undefined) {
+            if (activeIds.length === 0) break;
+            continue;
+        }
+
         if (budgets && budgets[randomId] <= 0) {
             const idx = activeIds.indexOf(randomId);
-            activeIds.splice(idx, 1);
+            if (idx !== -1) activeIds.splice(idx, 1);
             if (activeIds.length === 0) break;
             continue;
         }
 
         const encoder = encoders.get(Number(randomId));
-        if (encoder && sendPacket(encoder, protocol)) {
+	const piece = encoder.codedPiece();
+
+        if (piece) {
             produced++;
-	    stats[randomId] = (stats[randomId] || 0) + 1; // Increment local stats
-            if (budgets) budgets[randomId]--; // Local decrement
+            stats[randomId] = (stats[randomId] || 0) + 1;
+            if (budgets) budgets[randomId]--;
+            packets.push(piece);
         } else {
             break;
         }
     }
+
     if (produced > 0) {
+        // 1. HIGH PRIORITY: Send stats first to clear the Manager's budget logic
         parentPort.postMessage({ type: 'STATS', stats });
+
+        // 2. DATA DISPATCH: Send the actual payloads
+        for (const piece of packets) {
+            sendPacketData(piece, protocol);
+        }
     }
+}
+
+/**
+ * Optimized standalone packet sender
+ */
+function sendPacketData(piece, protocol) {
+    let buf = PacketSerializer.serialize(piece, protocol);
+
+    // Pool Detachment Safety
+    if (buf.byteOffset !== 0 || buf.byteLength !== buf.buffer.byteLength) {
+        const unique = new Uint8Array(buf.byteLength);
+        unique.set(buf);
+        buf = unique;
+    }
+
+    parentPort.postMessage({
+        type: 'PACKET',
+        genId: piece.genId,
+        payload: buf
+    }, [buf.buffer]);
 }

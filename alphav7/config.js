@@ -16,7 +16,7 @@ module.exports = {
     },
     NETWORK: {
         LOSS_RATE: 0.0,
-        REDUNDANCY: 1.1,
+        REDUNDANCY: 1.2,
         LATENCY: 5,
         JITTER: 0
     },
@@ -26,6 +26,6 @@ module.exports = {
     },
     SYSTEM: {
         TARGET_THROUGHPUT_MB: 50,
-        TICK_RATE: 10
+        TICK_RATE: 50
     }
 };
