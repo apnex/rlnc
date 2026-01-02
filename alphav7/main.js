@@ -53,6 +53,10 @@ async function main() {
     enc.on('packet', (buf) => {
         // Pass Config with PIECE_COUNT included
         const header = PacketSerializer.deserialize(buf, config.PROTOCOL);
+
+	// FIX: Safety Check - Ignore invalid/mismatched packets
+        if (!header) return;
+
         dash.initGen(header.genId, config.TRANSCODE.PIECE_COUNT);
         dash.updateGen(header.genId, { sent: dash.generations.get(header.genId).sent + 1 });
         dash.addGlobalStat('totalPackets');

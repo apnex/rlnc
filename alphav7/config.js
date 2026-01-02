@@ -1,7 +1,7 @@
 module.exports = {
     DATA: {
-        INPUT_PATH: './logo.png',       
-        DUMMY_SIZE: 1024 * 1024 * 10    
+        INPUT_PATH: './logo.png',
+        DUMMY_SIZE: 1024 * 1024 * 10
     },
     PROTOCOL: {
         MAGIC_BYTE: 0xCC,
@@ -10,22 +10,22 @@ module.exports = {
         PIECE_COUNT: 64 // Added for Serializer logic
     },
     TRANSCODE: {
-        PIECE_COUNT: 64,      
-        PIECE_SIZE: 8192,     
-        SYSTEMATIC: false
+        PIECE_COUNT: 64,
+        PIECE_SIZE: 8192,
+        SYSTEMATIC: true
     },
     NETWORK: {
-        LOSS_RATE: 0.00,      
-        REDUNDANCY: 1.1,      
-        LATENCY: 5,          
-        JITTER: 20            
+        LOSS_RATE: 0.0,
+        REDUNDANCY: 1.0,
+        LATENCY: 20,
+        JITTER: 20
     },
     WINDOW: {
-        SIZE: 8,             
-        TIMEOUT: 1000         
+        SIZE: 8,
+        TIMEOUT: 1000
     },
     SYSTEM: {
-        TARGET_THROUGHPUT_MB: 1, 
-        TICK_RATE: 50             
+        TARGET_THROUGHPUT_MB: 1,
+        TICK_RATE: 50
     }
 };
