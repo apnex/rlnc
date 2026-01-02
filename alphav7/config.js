@@ -22,7 +22,7 @@ module.exports = {
     },
     WINDOW: {
         SIZE: 8,
-        TIMEOUT: 5000
+        TIMEOUT: 1000
     },
     SYSTEM: {
         TARGET_THROUGHPUT_MB: 50,

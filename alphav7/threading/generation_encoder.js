@@ -6,7 +6,7 @@ class GenerationEncoder extends EventEmitter {
         super();
         this.data = data;
         this.config = config;
-        
+
         this.transcodeConfig = config.TRANSCODE;
         this.netConfig = config.NETWORK;
         this.windowConfig = config.WINDOW;
@@ -16,7 +16,7 @@ class GenerationEncoder extends EventEmitter {
         this.pieceSize = this.transcodeConfig.PIECE_SIZE;
         this.blockSize = this.pieceCount * this.pieceSize;
         this.totalGenerations = Math.ceil(data.length / this.blockSize);
-        
+
         this.currentGenId = 0;
         this.window = new Set(); 
         this.ackedGenerations = new Set();
@@ -54,9 +54,11 @@ class GenerationEncoder extends EventEmitter {
         for (const id of this.window) {
             const sent = this.sentCounts.get(id) || 0;
             const limit = Math.ceil(this.pieceCount * this.netConfig.REDUNDANCY);
-            if (sent < limit) {
-                // Pass the remaining allowance for this generation
-                budgets[id] = limit - sent;
+
+	    // Safety: Ensure we only send positive remaining balances
+            const remaining = limit - sent;
+            if (remaining > 0) {
+                budgets[id] = remaining;
                 eligibleCount++;
             }
         }
@@ -70,11 +72,11 @@ class GenerationEncoder extends EventEmitter {
 
     acknowledge(genId) {
         if (this.ackedGenerations.has(genId)) return;
-        
+
         this.ackedGenerations.add(genId);
         this.window.delete(genId);
         this.pool.ack(genId);
-        
+
         if (genId === this.currentGenId) {
             this.currentGenId++;
             while(this.ackedGenerations.has(this.currentGenId)) {
