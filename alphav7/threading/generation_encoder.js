@@ -83,7 +83,7 @@ class GenerationEncoder extends EventEmitter {
     _activateGeneration(genId) {
         const start = genId * this.blockSize;
         const end = Math.min(start + this.blockSize, this.data.length);
-        
+
         // v7 Optimization: FORCE DEDICATED ALLOCATION
         // We create a specific buffer for this generation.
         // This ensures chunk.buffer.byteLength === chunk.byteLength.
@@ -109,8 +109,8 @@ class GenerationEncoder extends EventEmitter {
 
         this.watchdogTimer = setTimeout(() => {
             this.emit('watchdog_slide', this.currentGenId);
-            this.pool.boost(this.currentGenId, 4); 
-            this.watchdogTimer = null; 
+            this.pool.boost(this.currentGenId, 4, this.protocolConfig);
+            this.watchdogTimer = null;
         }, this.windowConfig.TIMEOUT);
     }
 

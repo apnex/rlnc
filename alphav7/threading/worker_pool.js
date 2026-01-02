@@ -66,7 +66,9 @@ class WorkerPool extends EventEmitter {
     }
 
     boost(genId, count) {
-        for (const w of this.workers) w.postMessage({ type: 'BOOST', genId, count });
+        for (const w of this.workers) {
+		w.postMessage({ type: 'BOOST', genId, count, protocolConfig });
+	}
     }
 
     ack(genId) {
