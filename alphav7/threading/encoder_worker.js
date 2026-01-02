@@ -21,7 +21,7 @@ parentPort.on('message', (msg) => {
             break;
 
         case 'PRODUCE':
-            producePackets(msg.limit, msg.protocolConfig);
+            producePackets(msg.limit, msg.protocolConfig, msg.eligibleGens);
             break;
 
         case 'BOOST':
@@ -50,10 +50,10 @@ parentPort.on('message', (msg) => {
  */
 function sendPacket(encoder, protocol) {
     const piece = encoder.codedPiece();
-    
+
     if (piece) {
         let buf = PacketSerializer.serialize(piece, protocol);
-        
+
         // v7 Optimization: POOL DETACHMENT SAFETY
         // PacketSerializer (via Buffer.allocUnsafe) likely allocates from Node's shared 8KB pool.
         // We CANNOT transfer a shared buffer (it would detach the whole pool and crash other parts of the app).
@@ -74,16 +74,15 @@ function sendPacket(encoder, protocol) {
             genId: piece.genId,
             payload: buf
         }, [buf.buffer]); // <--- Ownership moved here
-        
         return true;
     }
     return false;
 }
 
-function producePackets(limit, protocol) {
+function producePackets(limit, protocol, eligibleGens) {
     let produced = 0;
-    const activeIds = Array.from(encoders.keys());
-    
+    // scheduler: Only use GenIDs allowed by the Manager's Soft Cap
+    const activeIds = eligibleGens || Array.from(encoders.keys());
     if (activeIds.length === 0) return;
 
     while (produced < limit) {
@@ -91,8 +90,7 @@ function producePackets(limit, protocol) {
         const randomId = activeIds[Math.floor(Math.random() * activeIds.length)];
         const encoder = encoders.get(randomId);
 
-        if (!encoder) break; 
-
+        if (!encoder) break;
         if (sendPacket(encoder, protocol)) {
             produced++;
         } else {

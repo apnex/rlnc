@@ -43,32 +43,35 @@ class WorkerPool extends EventEmitter {
              transferList.push(data.buffer);
         } else {
             // If data is a view (e.g., a slice of a larger file), we cannot transfer
-            // just the view without detaching the whole file. 
+            // just the view without detaching the whole file.
             // In this specific case, Node.js will fallback to cloning (copying) the data.
             // Ideally, 'data' passed here should be a dedicated buffer for max performance.
         }
 
-        worker.postMessage({ 
-            type: 'INIT', 
-            genId, 
-            data, 
-            config 
+        worker.postMessage({
+            type: 'INIT',
+            genId,
+            data,
+            config
         }, transferList); // <--- Transfer List for Input
 
         this.nextWorkerIdx = (this.nextWorkerIdx + 1) % this.workers.length;
     }
 
-    produce(totalPackets, protocolConfig) {
+    produce(totalPackets, protocolConfig, eligibleGens) {
         const perWorker = Math.ceil(totalPackets / this.workers.length);
         for (const w of this.workers) {
-            w.postMessage({ type: 'PRODUCE', limit: perWorker, protocolConfig });
+        	w.postMessage({
+			type: 'PRODUCE',
+			limit: perWorker,
+			protocolConfig,
+			eligibleGens // Forward whitelist to workers
+		});
         }
     }
 
     boost(genId, count, protocolConfig) {
-        for (const w of this.workers) {
-		w.postMessage({ type: 'BOOST', genId, count, protocolConfig });
-	}
+        for (const w of this.workers) w.postMessage({ type: 'BOOST', genId, count, protocolConfig });
     }
 
     ack(genId) {

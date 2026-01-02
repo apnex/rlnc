@@ -15,17 +15,17 @@ module.exports = {
         SYSTEMATIC: true
     },
     NETWORK: {
-        LOSS_RATE: 0.3,
+        LOSS_RATE: 0.00,
         REDUNDANCY: 1.1,
         LATENCY: 0,
         JITTER: 0
     },
     WINDOW: {
-        SIZE: 1,
-        TIMEOUT: 100
+        SIZE: 8,
+        TIMEOUT: 1000
     },
     SYSTEM: {
-        TARGET_THROUGHPUT_MB: 0.01,
-        TICK_RATE: 500
+        TARGET_THROUGHPUT_MB: 10,
+        TICK_RATE: 50
     }
 };

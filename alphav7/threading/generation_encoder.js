@@ -20,10 +20,14 @@ class GenerationEncoder extends EventEmitter {
         this.currentGenId = 0;
         this.window = new Set(); 
         this.ackedGenerations = new Set();
-        
-        this.pool = new WorkerPool(4); 
-        
+
+	this.sentCounts = new Map();
+        this.pool = new WorkerPool(4);
+
         this.pool.on('packet', (buffer) => {
+	    // Extract GenID from the packet to update our throttle counter
+            const genId = buffer.readUInt32BE(2); // Offset 2 based on Protocol v7
+            this.sentCounts.set(genId, (this.sentCounts.get(genId) || 0) + 1);
             this.emit('packet', buffer);
             this._checkWatchdog(); 
         });
@@ -39,8 +43,19 @@ class GenerationEncoder extends EventEmitter {
     produce(packetLimit) {
         if (this.isFinished()) return;
         this._fillWindow();
-        this.pool.produce(packetLimit, this.protocolConfig);
-        this._checkWatchdog();
+
+	// SOFT CAP LOGIC: Only allow production for generations under the redundancy limit
+        const eligibleGens = Array.from(this.window).filter(id => {
+            const sent = this.sentCounts.get(id) || 0;
+            const limit = this.pieceCount * this.netConfig.REDUNDANCY;
+            return sent < limit;
+        });
+
+        if (eligibleGens.length > 0) {
+            // Pass the whitelist of eligible GenIDs to the pool
+            this.pool.produce(packetLimit, this.protocolConfig, eligibleGens);
+            this._checkWatchdog();
+        }
     }
 
     acknowledge(genId) {
