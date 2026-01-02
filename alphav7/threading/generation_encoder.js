@@ -53,7 +53,7 @@ class GenerationEncoder extends EventEmitter {
 
         for (const id of this.window) {
             const sent = this.sentCounts.get(id) || 0;
-            const limit = Math.ceil(this.pieceCount * this.netConfig.REDUNDANCY);
+            const limit = Math.ceil(this.pieceCount * this.netConfig.REDUNDANCY) + 2; // +2 Grace margin
 
 	    // Safety: Ensure we only send positive remaining balances
             const remaining = limit - sent;

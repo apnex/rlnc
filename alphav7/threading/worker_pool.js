@@ -62,14 +62,15 @@ class WorkerPool extends EventEmitter {
         const perWorker = Math.ceil(totalPackets / this.workers.length);
         const workerCount = this.workers.length;
 
-        for (const w of this.workers) {
+	for (let i = 0; i < workerCount; i++) {
 		const workerBudgets = {};
 		// Proportional split logic
             	for (const [id, totalBudget] of Object.entries(budgets)) {
-                	// We use ceil to ensure we don't round down to zero on small budgets
-                	workerBudgets[id] = Math.ceil(totalBudget / workerCount);
+			const baseShare = Math.floor(totalBudget / workerCount);
+			const remainder = (i === 0) ? (totalBudget % workerCount) : 0;
+	                workerBudgets[id] = baseShare + remainder;
             	}
-        	w.postMessage({
+        	this.workers[i].postMessage({
 			type: 'PRODUCE',
 			limit: perWorker,
 			protocolConfig,
