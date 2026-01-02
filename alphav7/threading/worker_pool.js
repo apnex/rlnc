@@ -20,6 +20,8 @@ class WorkerPool extends EventEmitter {
                     // This is an O(1) operation.
                     const safeView = Buffer.from(msg.payload);
                     this.emit('packet', safeView);
+                } else if (msg.type === 'STATS') {
+                    this.emit('stats', msg.stats);
                 }
             });
 

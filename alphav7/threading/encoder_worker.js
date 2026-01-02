@@ -81,6 +81,8 @@ function sendPacket(encoder, protocol) {
 
 function producePackets(limit, protocol, budgets) {
     let produced = 0;
+    const stats = {};
+
     // scheduler: prioritize IDs with remaining budget
     const activeIds = budgets ? Object.keys(budgets) : Array.from(encoders.keys());
     if (activeIds.length === 0) return;
@@ -98,9 +100,13 @@ function producePackets(limit, protocol, budgets) {
         const encoder = encoders.get(Number(randomId));
         if (encoder && sendPacket(encoder, protocol)) {
             produced++;
+	    stats[randomId] = (stats[randomId] || 0) + 1; // Increment local stats
             if (budgets) budgets[randomId]--; // Local decrement
         } else {
             break;
         }
+    }
+    if (produced > 0) {
+        parentPort.postMessage({ type: 'STATS', stats });
     }
 }

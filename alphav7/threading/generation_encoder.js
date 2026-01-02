@@ -29,6 +29,13 @@ class GenerationEncoder extends EventEmitter {
             this._checkWatchdog();
         });
 
+	this.pool.on('stats', (workerStats) => {
+            for (const [genId, count] of Object.entries(workerStats)) {
+                const id = Number(genId);
+                const current = this.sentCounts.get(id) || 0;
+                this.sentCounts.set(id, current + count);
+            }
+        });
         this.watchdogTimer = null;
         this._fillWindow();
     }

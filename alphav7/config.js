@@ -15,9 +15,9 @@ module.exports = {
         SYSTEMATIC: true
     },
     NETWORK: {
-        LOSS_RATE: 0.00,
+        LOSS_RATE: 0.0,
         REDUNDANCY: 1.1,
-        LATENCY: 10,
+        LATENCY: 5,
         JITTER: 0
     },
     WINDOW: {
