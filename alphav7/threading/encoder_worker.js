@@ -105,6 +105,12 @@ function producePackets(limit, protocol, budgets) {
         }
 
         const encoder = encoders.get(Number(randomId));
+	// FIX: Add safety check for the encoder object
+	if (!encoder) {
+	        const idx = activeIds.indexOf(randomId);
+	        if (idx !== -1) activeIds.splice(idx, 1);
+        	continue;
+   	 }
 	const piece = encoder.codedPiece();
 
         if (piece) {
