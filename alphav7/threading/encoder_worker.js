@@ -21,7 +21,7 @@ parentPort.on('message', (msg) => {
             break;
 
         case 'PRODUCE':
-            producePackets(msg.limit, msg.protocolConfig, msg.eligibleGens);
+            producePackets(msg.limit, msg.protocolConfig, msg.budgets);
             break;
 
         case 'BOOST':
@@ -79,22 +79,27 @@ function sendPacket(encoder, protocol) {
     return false;
 }
 
-function producePackets(limit, protocol, eligibleGens) {
+function producePackets(limit, protocol, budgets) {
     let produced = 0;
-    // scheduler: Only use GenIDs allowed by the Manager's Soft Cap
-    const activeIds = eligibleGens || Array.from(encoders.keys());
+    // scheduler: prioritize IDs with remaining budget
+    const activeIds = budgets ? Object.keys(budgets) : Array.from(encoders.keys());
     if (activeIds.length === 0) return;
 
     while (produced < limit) {
-        // Simple random scheduler
         const randomId = activeIds[Math.floor(Math.random() * activeIds.length)];
-        const encoder = encoders.get(randomId);
+        // DECENTRALIZED ENFORCEMENT
+        if (budgets && budgets[randomId] <= 0) {
+            const idx = activeIds.indexOf(randomId);
+            activeIds.splice(idx, 1);
+            if (activeIds.length === 0) break;
+            continue;
+        }
 
-        if (!encoder) break;
-        if (sendPacket(encoder, protocol)) {
+        const encoder = encoders.get(Number(randomId));
+        if (encoder && sendPacket(encoder, protocol)) {
             produced++;
+            if (budgets) budgets[randomId]--; // Local decrement
         } else {
-            // If an encoder fails to produce (e.g. error), stop trying this cycle
             break;
         }
     }

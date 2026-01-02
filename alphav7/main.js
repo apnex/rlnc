@@ -21,13 +21,11 @@ async function main() {
         }
         console.log(`[Source] Reading from CLI Argument: '${filename}'...`);
         data = fs.readFileSync(filename);
-    } 
-    else if (config.DATA.INPUT_PATH && fs.existsSync(config.DATA.INPUT_PATH)) {
+    } else if (config.DATA.INPUT_PATH && fs.existsSync(config.DATA.INPUT_PATH)) {
         filename = config.DATA.INPUT_PATH;
         console.log(`[Source] Reading from Config: '${filename}'...`);
         data = fs.readFileSync(filename);
-    } 
-    else {
+    } else {
         filename = "RandomBytes";
         const sizeMB = (config.DATA.DUMMY_SIZE / (1024 * 1024)).toFixed(1);
         console.log(`[Source] No input file found. Generating ${sizeMB}MB random data...`);
@@ -47,21 +45,19 @@ async function main() {
         delay: config.NETWORK.LATENCY,
         jitter: config.NETWORK.JITTER
     };
-    const forwardNet = new NetworkSimulator(netOptions); 
-    const returnNet = new NetworkSimulator(netOptions);  
+    const forwardNet = new NetworkSimulator(netOptions);
+    const returnNet = new NetworkSimulator(netOptions);
 
     enc.on('packet', (buf) => {
-        // Pass Config with PIECE_COUNT included
         const header = PacketSerializer.deserialize(buf, config.PROTOCOL);
-
-	// FIX: Safety Check - Ignore invalid/mismatched packets
         if (!header) return;
 
+	enc.sentCounts.set(header.genId, (enc.sentCounts.get(header.genId) || 0) + 1);
         dash.initGen(header.genId, config.TRANSCODE.PIECE_COUNT);
         dash.updateGen(header.genId, { sent: dash.generations.get(header.genId).sent + 1 });
         dash.addGlobalStat('totalPackets');
         dash.registerTraffic(buf.length, 'tx');
-        forwardNet.send(buf); 
+        forwardNet.send(buf);
     });
 
     const solvedGenerations = new Set();

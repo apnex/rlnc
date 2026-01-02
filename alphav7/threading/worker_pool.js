@@ -12,7 +12,6 @@ class WorkerPool extends EventEmitter {
 
         for (let i = 0; i < numThreads; i++) {
             const w = new Worker(path.join(__dirname, 'encoder_worker.js'));
-            
             w.on('message', (msg) => {
                 if (msg.type === 'PACKET') {
                     // v7 Optimization: ZERO-COPY RECEIVE
@@ -21,9 +20,9 @@ class WorkerPool extends EventEmitter {
                     // This is an O(1) operation.
                     const safeView = Buffer.from(msg.payload);
                     this.emit('packet', safeView);
-                } 
+                }
             });
-            
+
             w.on('error', (err) => console.error(`Worker ${i} error:`, err));
             this.workers.push(w);
         }
@@ -31,13 +30,12 @@ class WorkerPool extends EventEmitter {
 
     addJob(genId, data, config) {
         const worker = this.workers[this.nextWorkerIdx];
-        
+
         // v7 Optimization: ZERO-COPY SUBMISSION
         // We attempt to transfer ownership of the 'data' buffer to the worker.
         // This avoids cloning the generation data (which is the heaviest copy in the system).
-        
         let transferList = [];
-        
+
         // Check if the buffer is eligible for transfer (occupies full underlying memory)
         if (data.buffer && data.byteLength === data.buffer.byteLength) {
              transferList.push(data.buffer);
@@ -58,14 +56,14 @@ class WorkerPool extends EventEmitter {
         this.nextWorkerIdx = (this.nextWorkerIdx + 1) % this.workers.length;
     }
 
-    produce(totalPackets, protocolConfig, eligibleGens) {
+    produce(totalPackets, protocolConfig, budgets) {
         const perWorker = Math.ceil(totalPackets / this.workers.length);
         for (const w of this.workers) {
         	w.postMessage({
 			type: 'PRODUCE',
 			limit: perWorker,
 			protocolConfig,
-			eligibleGens // Forward whitelist to workers
+			budgets // forward decentralized budget map
 		});
         }
     }
