@@ -1,0 +1,68 @@
+{
+  "version": "v7-roadmap",
+  "project": "ALPHAv6",
+  "status": "Development Cycle Init",
+  "current_state_review": {
+    "architecture": "Hierarchical (v6 baseline committed)",
+    "integrity": "Verified via audit_paths.js (Positional Certainty)",
+    "functionality": "Stable internal RLNC simulation with multi-threaded encoding.",
+    "limitation": "Logic is currently trapped in a simulated local environment."
+  },
+  "core_intent": "To transition from a structural proof-of-concept to a high-performance, real-world network utility focused on resilience and throughput.",
+  "strategic_roadmap": [
+    {
+      "id": 1,
+      "title": "Congestion & Loss Simulation",
+      "domain": "network/",
+      "objective": "Simulate real-world degradation (jitter, latency spikes, and burst loss).",
+      "metric": "Redundancy Efficiency Ratio (RER)."
+    },
+    {
+      "id": 2,
+      "title": "Hardware-Aware Concurrency",
+      "domain": "threading/",
+      "objective": "Dynamic worker scaling based on logical CPU core detection and memory pressure.",
+      "metric": "CPU Saturation Percentage."
+    },
+    {
+      "id": 3,
+      "title": "SIMD / WASM Optimization",
+      "domain": "core/",
+      "objective": "Migrate GF(256) math from pure JS to WebAssembly or SIMD instructions.",
+      "metric": "Encoding/Decoding Operations Per Second (OPS)."
+    },
+    {
+      "id": 4,
+      "title": "Streaming API Integration",
+      "domain": "root/",
+      "objective": "Transition from fixed-block processing to a continuous data stream buffer.",
+      "metric": "End-to-End Latency (ms)."
+    },
+    {
+      "id": 5,
+      "title": "Real Networking",
+      "domain": "network/",
+      "objective": "Replace simulation with UDP/IP sockets or WebRTC for cross-machine packet exchange.",
+      "metric": "Packet Recovery Rate over physical links."
+    },
+    {
+      "id": 6,
+      "title": "Advanced Testing & Verification",
+      "domain": "tests/",
+      "objective": "Implement property-based fuzzing and 10k+ iteration matrix stress tests.",
+      "metric": "Edge-case Failure Rate / Mean Time Between Failures (MTBF)."
+    },
+    {
+      "id": 7,
+      "title": "v6-to-v7 Bridge Review",
+      "domain": "root/",
+      "objective": "Formalize the transition from the v6 Post-Mortem into active v7 development branches.",
+      "metric": "Feature implementation velocity vs v6 baseline."
+    }
+  ],
+  "milestones": {
+    "phase_1": "Stress-test v6 math with the new Advanced Testing suite.",
+    "phase_2": "Implement UDP Socket transport in the network layer.",
+    "phase_3": "Optimize throughput via threading and WASM."
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "project": "ALPHAv6",
+  "current_state": "Stable / Production Ready",
+  "description": "ALPHAv6 is a high-performance, asynchronous multi-threaded implementation of Random Linear Network Coding (RLNC), separating UI logic from heavy computational math.",
+  "purpose": "To provide a low-latency, resilient data transmission framework capable of recovering lost information in hostile network environments without retransmission.",
+  "key_features": [
+    {
+      "feature": "Asynchronous Multi-Threading",
+      "detail": "Offloads CPU-intensive encoding/decoding to background worker threads."
+    },
+    {
+      "feature": "Sliding Window RLNC",
+      "detail": "Manages data generations for continuous transmission flow."
+    },
+    {
+      "feature": "Zero-Copy Buffer Management",
+      "detail": "Minimizes memory allocation overhead via a custom buffer pool."
+    },
+    {
+      "feature": "Real-Time Dashboard",
+      "detail": "60FPS terminal telemetry for throughput and recovery monitoring."
+    }
+  ]
+}
