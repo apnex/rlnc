@@ -51,8 +51,6 @@ async function main() {
     enc.on('packet', (buf) => {
         const header = PacketSerializer.deserialize(buf, config.PROTOCOL);
         if (!header) return;
-
-	enc.sentCounts.set(header.genId, (enc.sentCounts.get(header.genId) || 0) + 1);
         dash.initGen(header.genId, config.TRANSCODE.PIECE_COUNT);
         dash.updateGen(header.genId, { sent: dash.generations.get(header.genId).sent + 1 });
         dash.addGlobalStat('totalPackets');
