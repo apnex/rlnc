@@ -1,7 +1,25 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const config = require('./config');
+
+// --- Configuration Injector ---
+let config;
+const args = process.argv.slice(2);
+const firstArg = args[0];
+
+if (firstArg && firstArg.endsWith('.js')) {
+    try {
+        const configPath = path.resolve(process.cwd(), firstArg);
+        config = require(configPath);
+        console.log(`[System] Injected Config: ${firstArg}`);
+    } catch (e) {
+        console.error(`[Error] Failed to load config file: ${firstArg}`);
+        process.exit(1);
+    }
+} else {
+    console.log(`[System] No injector config provided. Using default ./config.js`);
+    config = require('./config');
+}
 
 const GenerationEncoder = require('./threading/generation_encoder');
 const GenerationDecoder = require('./threading/generation_decoder');
@@ -11,17 +29,9 @@ const VisualDashboard = require('./utils/visual_dashboard');
 
 async function main() {
     let data, filename;
-    const args = process.argv.slice(2);
 
-    if (args.length > 0) {
-        filename = args[0];
-        if (!fs.existsSync(filename)) {
-            console.error(`Error: File '${filename}' not found.`);
-            process.exit(1);
-        }
-        console.log(`[Source] Reading from CLI Argument: '${filename}'...`);
-        data = fs.readFileSync(filename);
-    } else if (config.DATA.INPUT_PATH && fs.existsSync(config.DATA.INPUT_PATH)) {
+    // Data selection priority: Config.INPUT_PATH -> Dummy Data
+    if (config.DATA.INPUT_PATH && fs.existsSync(config.DATA.INPUT_PATH)) {
         filename = config.DATA.INPUT_PATH;
         console.log(`[Source] Reading from Config: '${filename}'...`);
         data = fs.readFileSync(filename);
@@ -124,7 +134,7 @@ async function main() {
         if (result) {
             const cleanResult = result.slice(0, data.length);
             finalHash = crypto.createHash('sha256').update(cleanResult).digest('hex');
-            if (args.length > 0 || (config.DATA.INPUT_PATH && fs.existsSync(config.DATA.INPUT_PATH))) {
+            if (config.DATA.INPUT_PATH && fs.existsSync(config.DATA.INPUT_PATH)) {
                 const outName = `restored_${path.basename(filename)}`;
                 fs.writeFileSync(outName, cleanResult);
             }

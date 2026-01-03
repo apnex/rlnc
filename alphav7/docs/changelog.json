@@ -1,0 +1,31 @@
+{
+  "changelog": [
+    {
+      "version": "7.1.0",
+      "date": "2026-01-03",
+      "changes": [
+        "Implemented ONBOARD_V1 protocol with self-bootstrapping handshake.",
+        "Created generate_readme.js utility for automated documentation.",
+        "Finalized Test Library (T1-T6) covering Systematic vs. Full-Coded modes."
+      ]
+    },
+    {
+      "version": "7.0.5",
+      "date": "2026-01-02",
+      "changes": [
+        "Migrated to Configuration Injection (CFG_V1) via CLI arguments.",
+        "Decoupled engine logic from test parameters.",
+        "Renamed roles to Director and Engineer for clarity of authority."
+      ]
+    },
+    {
+      "version": "7.0.0",
+      "date": "2026-01-01",
+      "changes": [
+        "Initialized GSD_V1 protocol for gated development.",
+        "Established Zero-Copy Buffer management in WorkerPool.",
+        "Implemented Systematic RLNC encoder with 4-thread concurrency."
+      ]
+    }
+  ]
+}

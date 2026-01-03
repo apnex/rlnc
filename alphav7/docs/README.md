@@ -1,29 +1,45 @@
-# 🚀 ALPHAv6
+# Alpha v7 RLNC Engine - v7.1.0
+**Status:** STABLE / CHARACTERIZED  
 
-**Current State:** `Stable / Production Ready`
+## 🚀 One-Sentence Bootstrap
+> "You are the Engineer in this session. Your first task is to read protocols.json. Follow ONBOARD_V1 to bootstrap."
 
-### Description
-ALPHAv6 is a high-performance, asynchronous multi-threaded implementation of Random Linear Network Coding (RLNC), separating UI logic from heavy computational math.
+## 📜 Active Protocols
+Operated under the **DOC_V1** automated standard:
+- **System Onboarding & Philosophy**: v1.2.1
+- **Gated Sequential Development (GSD)**: v1.1.3
+- **Automated Documentation Standard**: v1.0.0
+- **Configuration Injection (CFG)**: v1.0.1
+- **Concurrency Validation**: v1.0.0
 
-### Purpose
-To provide a low-latency, resilient data transmission framework capable of recovering lost information in hostile network environments without retransmission.
+## 📊 Performance Baselines
+| ID | Test Name | Environment | Result | Status |
+|:---|:---|:---|:---|:---|
+| T1 | Throughput Baseline | 16MB / 0% Loss / 1KB Symbols | 4.5s | ✅ PASS |
+| T2 | Network Resilience | 16MB / 10% Loss / Jitter | 4.6s | ✅ PASS |
+| T3 | High-Bandwidth Pressure | 32MB / 5% Loss / 8KB Symbols | 4.7s | ✅ PASS |
+| T4 | Extreme Sustenance | 16MB / 30% Loss / High Redundancy | 6.7s | ✅ PASS |
+| T5 | Full-Coded Integrity | 16MB / 5% Loss / Non-Systematic | 7.5s | ⚠️ CPU HEAVY |
+| T6 | The Wall | 16MB / 8KB Symbols / Full-Coded | 8.8s | ⚠️ CPU LIMIT |
 
-### Key Features
-* **Asynchronous Multi-Threading**: Offloads CPU-intensive encoding/decoding to background worker threads.
-* **Sliding Window RLNC**: Manages data generations for continuous transmission flow.
-* **Zero-Copy Buffer Management**: Minimizes memory allocation overhead via a custom buffer pool.
-* **Real-Time Dashboard**: 60FPS terminal telemetry for throughput and recovery monitoring.
+## 🏗 Roadmap
+- [ ] **Next Milestone:** Parallelizing Decoder Math (Alpha v8)
+
+## 🕒 Version History
+### v7.1.0 (2026-01-03)
+- Implemented ONBOARD_V1 protocol with self-bootstrapping handshake.
+- Created generate_readme.js utility for automated documentation.
+- Finalized Test Library (T1-T6) covering Systematic vs. Full-Coded modes.
+
+### v7.0.5 (2026-01-02)
+- Migrated to Configuration Injection (CFG_V1) via CLI arguments.
+- Decoupled engine logic from test parameters.
+- Renamed roles to Director and Engineer for clarity of authority.
+
+### v7.0.0 (2026-01-01)
+- Initialized GSD_V1 protocol for gated development.
+- Established Zero-Copy Buffer management in WorkerPool.
+- Implemented Systematic RLNC encoder with 4-thread concurrency.
 
 ---
-
-## 🛠️ User-Defined Commands
-
-| Command | Description | Purpose | Instruction |
-| :--- | :--- | :--- | :--- |
-| **`TREE`** | File Structure Visualization | To quickly view the current project file hierarchy in a clean, visual format. | Provide the current project file listing in an ASCII format similar to the Linux tree command. |
-| **`COMMIT`** | Version Snapshot | To freeze the current state of the project as a tagged reference for future comparison. | Signal the end of a version; confirm the tag value and seek explicit consent before snapshotting. |
-| **`README`** | Documentation Generator | To automatically update the documentation data source when the project state changes. | Generate a new fully updated docs/readme_data.json file to reflect the latest state of the current version of the project. |
-| **`LIST`** | Command Directory | To review all custom tools available in this session. | Show me a summarised output of all other specifically defined commands, along with a description, purpose and the instruction provided for each one. |
-| **`EXPORT`** | JSON Command Export | To extract the command definitions in a machine-readable format for docs/commands.json. | Provide the output of the LIST command (command details) in JSON format. |
-| **`FILES`** | Project Inventory | To see a summarized breakdown of every file, including those in the /docs folder. | Provide a summarised output of all files in this current version of the project, along with a description and purpose. |
-| **`STATUS`** | Project Status Overview | To provide a high-level summary of the project's health and features. | Provide a summary of the status of this version of the project. Include a description, purpose, and a summary of the key features. |
+*Generated via DOC_V1 Protocol*

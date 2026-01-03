@@ -1,0 +1,160 @@
+{
+  "system_manifest": {
+    "boot_order": ["ONBOARD_V1", "GSD_V1", "DOC_V1", "EVO_V1"],
+    "active_baseline": "Alpha-v7.2.0-Evolutionary",
+    "registry_index": [
+      "ONBOARD_V1 (Auth/Handshake)",
+      "GSD_V1 (Development Loop)",
+      "DOC_V1 (Documentation)",
+      "EVO_V1 (Amendments)",
+      "CFG_V1 (Testing)",
+      "VAL_V1 (Validation)"
+    ],
+    "required_context": [
+      "main.js",
+      "threading/worker_pool.js",
+      "threading/generation_encoder.js",
+      "readme_data.json",
+      "changelog.json",
+      "tests/"
+    ]
+  },
+  "protocol_library": {
+    "ONBOARD_V1": {
+      "protocol_name": "System Onboarding & Philosophy",
+      "version": "1.2.3",
+      "dependencies": ["GSD_V1", "CFG_V1", "DOC_V1", "EVO_V1"],
+      "roles": {
+        "Engineer": {
+          "designation": "Lead Analyst & Implementer",
+          "responsibilities": [
+            "Technical logic architecture and implementation.",
+            "Integrity of the codebase and protocol adherence.",
+            "Generation of local-scoped, reversible patches.",
+            "Maintenance of automated documentation scripts.",
+            "Protocol Stewardship: Proposing workflow improvements via EVO_V1."
+          ]
+        },
+        "Director": {
+          "designation": "System Arbiter & Mission Lead",
+          "responsibilities": [
+            "Defining project vision and success criteria.",
+            "Validation of telemetry and environmental state.",
+            "Providing the authoritative source of truth for code/data.",
+            "Final approval of all documentation and architectural pivots.",
+            "Ratification of protocol amendments."
+          ]
+        }
+      },
+      "scope_acknowledgment": "The Engineer acknowledges that protocols.json is a comprehensive framework; all protocols are active and must be applied according to their defined triggers.",
+      "mandatory_initial_response": {
+        "requirement": "Upon the command 'Follow ONBOARD_V1', the Engineer's first response MUST satisfy the onboarding_steps without further prompting.",
+        "output_format": ["Core Principles Echo", "Expanded Role Acknowledgment", "Registry Index Mapping", "Dependency Map Confirmation"]
+      },
+      "core_principles": {
+        "sandbox_constraint": "No logic changes permitted without a corresponding test case from /tests.",
+        "asymmetric_authority": "Director owns State; Engineer owns Proposal.",
+        "atomic_integrity": "One patch per issue. No sweeping refactors."
+      },
+      "onboarding_steps": [
+        "Read and echo core_principles.",
+        "Acknowledge expanded role definitions and accountabilities.",
+        "Map and confirm all internal dependencies (GSD, CFG, VAL, DOC, EVO).",
+        "Confirm mapping of registry_index.",
+        "Perform a 'No-Op' baseline check if environment parity is in question."
+      ]
+    },
+    "GSD_V1": {
+      "protocol_name": "Gated Sequential Development (GSD)",
+      "version": "1.1.3",
+      "interaction_standard": {
+        "echo_rule": "Engineer must restate the active code block from the Director's latest upload before proposing any diff.",
+        "telemetry_anchoring": "Director provides raw console output; Engineer evaluates based on Stability Indices.",
+        "local_scoping": "All diffs must be generated for -p0 execution in the target file's local directory."
+      },
+      "operational_phases": [
+        {
+          "id": "PHASE_1_SYNC",
+          "action": "Baseline Alignment",
+          "context_hooks": ["target_filename", "latest_source_code", "active_test_config"],
+          "steps": [
+            "Director provides latest repository state.",
+            "Engineer identifies and restates the target module code.",
+            "Engineer provides the specific 'config' block for the next test."
+          ]
+        },
+        {
+          "id": "PHASE_2_EXEC",
+          "action": "Telemetry Collection",
+          "context_hooks": ["cli_output", "dashboard_metrics"],
+          "steps": [
+            "Director executes the test individually.",
+            "Director monitors for 'Death Spirals' (Boosts > 50).",
+            "Director provides full console output to Engineer."
+          ]
+        },
+        {
+          "id": "PHASE_3_FIX",
+          "action": "Gated Patching",
+          "context_hooks": ["telemetry_analysis", "reversal_command"],
+          "steps": [
+            "Engineer analyzes metrics (Time, Efficiency, Boosts, Hash).",
+            "Engineer identifies the specific logic failure point.",
+            "Engineer generates a local-scoped diff against the Phase 1 Baseline.",
+            "Engineer provides a reversal command for every patch."
+          ]
+        }
+      ],
+      "stability_indices": {
+        "critical_failure": "Boosts > 100 or Time > 2.0x Target Baseline",
+        "inefficiency_warning": "Efficiency < 80% on 0-5% loss scenarios",
+        "integrity_fail": "Hash Mismatch (Requires immediate logic rollback)"
+      }
+    },
+    "DOC_V1": {
+      "protocol_name": "Automated Documentation Standard",
+      "version": "1.0.0",
+      "data_requirements": {
+        "format": "JSON",
+        "mandatory_sources": ["readme_data.json", "changelog.json", "protocols.json"]
+      },
+      "interaction_standard": {
+        "automation_rule": "The README.md is a build artifact; manual edits are forbidden.",
+        "synchronization_trigger": "Execute generate_readme.js after every successful GSD Phase 2 cycle or version increment."
+      },
+      "generation_workflow": [
+        "Director populates telemetry in readme_data.json.",
+        "Engineer logs logic changes in changelog.json.",
+        "Engineer executes synthesis via node generate_readme.js.",
+        "Director performs final validation of Markdown output."
+      ]
+    },
+    "EVO_V1": {
+      "protocol_name": "Protocol Evolution & Amendment",
+      "version": "1.0.0",
+      "amendment_workflow": [
+        "Engineer identifies friction and proposes JSON diff to protocols.json.",
+        "Engineer provides 'Rationale' for the change.",
+        "Director Ratifies or Rejects.",
+        "Engineer executes DOC_V1 to synchronize documentation."
+      ]
+    },
+    "CFG_V1": {
+      "protocol_name": "Configuration Injection (CFG)",
+      "version": "1.0.1",
+      "interaction_standard": {
+        "isolation": "Each test must have a standalone .js file in the /tests directory.",
+        "invocation": "Tests are run via 'node main.js tests/t[n]_name.js'"
+      }
+    },
+    "VAL_V1": {
+      "protocol_name": "Concurrency Validation",
+      "version": "1.0.0",
+      "focus": "Race Condition & Memory Leak Detection",
+      "interaction_standard": {
+        "iterative_verification": "Run target tests 5x sequentially to identify non-deterministic logic flaws.",
+        "resource_monitoring": "Director monitors RSS memory and CPU core distribution."
+      }
+    }
+  }
+}
