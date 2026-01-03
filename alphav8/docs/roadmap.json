@@ -1,0 +1,67 @@
+{
+  "version": "v7-roadmap",
+  "project": "Alpha-v7",
+  "status": "v7 Development Active",
+  "current_state_review": {
+    "architecture": "Hierarchical (v7 evolutionary baseline)",
+    "integrity": "Verified via audit_paths.js",
+    "functionality": "Stable RLNC with Pseudo-SIMD and multi-threaded simulation.",
+    "limitation": "I/O is still buffer-based; networking is simulated."
+  },
+  "core_intent": "To transition from a structural proof-of-concept to a high-performance, real-world network utility.",
+  "strategic_roadmap": [
+    {
+      "id": 1,
+      "title": "Congestion & Loss Simulation",
+      "status": "COMPLETED",
+      "domain": "network/",
+      "objective": "Simulate real-world degradation (jitter, latency spikes, and burst loss).",
+      "metric": "Redundancy Efficiency Ratio (RER)."
+    },
+    {
+      "id": 2,
+      "title": "Hardware-Aware Concurrency",
+      "status": "PARTIAL",
+      "domain": "threading/",
+      "objective": "Dynamic worker scaling based on logical CPU core detection.",
+      "metric": "CPU Saturation Percentage."
+    },
+    {
+      "id": 3,
+      "title": "SIMD / WASM Optimization",
+      "status": "PARTIAL",
+      "domain": "core/",
+      "objective": "Migrate GF(256) math to WASM (Pseudo-SIMD implemented).",
+      "metric": "Encoding/Decoding OPS."
+    },
+    {
+      "id": 4,
+      "title": "Streaming API Integration",
+      "status": "NOT STARTED",
+      "domain": "root/",
+      "objective": "Transition from fixed-block processing to continuous data stream buffer.",
+      "metric": "End-to-End Latency (ms)."
+    },
+    {
+      "id": 5,
+      "title": "Real Networking",
+      "status": "NOT STARTED",
+      "domain": "network/",
+      "objective": "Replace simulation with UDP/IP sockets.",
+      "metric": "Packet Recovery Rate."
+    },
+    {
+      "id": 6,
+      "title": "Advanced Testing & Verification",
+      "status": "COMPLETED",
+      "domain": "tests/",
+      "objective": "Implement property-based fuzzing and stress tests.",
+      "metric": "Edge-case Failure Rate / MTBF."
+    }
+  ],
+  "milestones": {
+    "phase_1": "Verified: Stress-test v7 baseline math and threading.",
+    "phase_2": "In-Progress: Hardware-aware worker scaling.",
+    "phase_3": "Next: UDP Socket transport implementation."
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "title": "Engineering Changelog - Threading & Zero-Copy",
+  "version": "v7-alpha-09",
+  "date": "2026-01-02",
+  "modules": [
+    {
+      "name": "threading",
+      "files": [
+        {
+          "name": "encoder_worker.js",
+          "changes": [
+            {
+              "type": "FIX",
+              "description": "Resolved 'target.boost is not a function' crash",
+              "details": "Implemented manual packet generation loop in BOOST handler since BlockEncoder is stateless."
+            },
+            {
+              "type": "FIX",
+              "description": "Prevented NaN errors in PacketSerializer",
+              "details": "Added fallback configuration for legacy/boost messages lacking protocol metadata."
+            },
+            {
+              "type": "OPTIMIZATION",
+              "description": "Zero-Copy Output (TransferList)",
+              "details": "Packets are now transferred (moved) to the main thread instead of cloned."
+            },
+            {
+              "type": "OPTIMIZATION",
+              "description": "Pool Detachment Safety",
+              "details": "Added logic to copy slices of the shared Node.js pool to dedicated buffers before transfer, preventing pool corruption."
+            },
+            {
+              "type": "OPTIMIZATION",
+              "description": "Zero-Copy Input",
+              "details": "Incoming data is wrapped in Buffer.from() for O(1) view creation."
+            }
+          ]
+        },
+        {
+          "name": "worker_pool.js",
+          "changes": [
+            {
+              "type": "OPTIMIZATION",
+              "description": "Zero-Copy Job Submission",
+              "details": "addJob() now detects full-buffer chunks and uses transferList to move ownership to the worker."
+            },
+            {
+              "type": "OPTIMIZATION",
+              "description": "Zero-Copy Packet Reception",
+              "details": "Message handler wraps detached ArrayBuffer payloads in Buffer views without cloning."
+            }
+          ]
+        },
+        {
+          "name": "generation_encoder.js",
+          "changes": [
+            {
+              "type": "OPTIMIZATION",
+              "description": "Dedicated Buffer Allocation",
+              "details": "Switched from .subarray() (View) to Buffer.allocUnsafe() + copy() to create distinct memory chunks eligible for Zero-Copy transfer."
+            }
+          ]
+        },
+        {
+          "name": "verify_threading.js",
+          "changes": [
+            {
+              "type": "NEW",
+              "description": "Verification Benchmark Suite",
+              "details": "Added dual-mode testing (Throughput/Resilience), SHA-256 integrity checks, and Flow Control tuning."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
