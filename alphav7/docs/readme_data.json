@@ -1,8 +1,8 @@
 {
-  "engine_name": "Alpha v7 RLNC Engine",
-  "version": "7.1.0",
-  "status": "STABLE / CHARACTERIZED",
-  "active_focus": "Parallelizing Decoder Math (Alpha v8)",
+  "engine_name": "Alpha v8 Velocity",
+  "version": "8.0.0-dev",
+  "status": "Active Development",
+  "active_focus": "M1: WASM Kernel & M3: UDP Transport",
   "benchmarks": [
     {
       "id": "T1",

@@ -1,0 +1,43 @@
+--- docs/protocols.json
++++ docs/protocols.json
+@@ -95,7 +95,7 @@
+-    "GSD_V2": {
+-      "protocol_name": "Gated Sequential Development v2",
+-      "version": "2.3.1",
++    "GSD_V3": {
++      "protocol_name": "Gated Sequential Development v3",
++      "version": "3.0.0",
+       "philosophy": "Integrity over Velocity: Verified implementation precedes execution.",
+       "operational_phases": [
+@@ -124,11 +124,11 @@
+           "id": "PHASE_3_EXECUTE",
+           "action": "Implementation & Audit",
+-          "description": "Engineer applies changes with high transparency and structural verification.",
++          "description": "Engineer applies changes with transparency, structural verification, and syntax validation.",
+           "steps": [
+             "Engineer displays Unified Diff of the proposed changes.",
+             "Engineer persists the diff to 'patches/[feature_id].patch' for safety.",
+             "GATE: Director Ratifies the Diff.",
+             "Engineer applies the changes (via 'replace' or 'write_file').",
+-            "Engineer performs Post-Patch Integrity Check (PPIC) via visual audit tools (grep/read) to prove injection success."
++            "Engineer performs PPIC: Visual Context (+ Syntax Check if applicable).",
++            "Engineer confirms 'Injection Successful' before Verification."
+           ]
+         },
+         {
+           "id": "PHASE_4_VERIFY",
+-          "action": "Functional Validation",
+-          "description": "Engineer validates behavioral correctness and awaits judgment.",
++          "action": "Verify & Refine",
++          "description": "Engineer validates behavior, handling minor bugs via Debug Loop or rejecting via Rollback.",
+           "steps": [
+-            "Engineer executes the relevant test suite (e.g., 'node main.js').",
+-            "Engineer captures and analyzes telemetry (Stability, Performance, Hash).",
+-            "Engineer provides a 'Pass/Fail Recommendation' based on metrics.",
++            "Engineer executes tests.",
++            "IF FAILURE (Syntax/Config): Enter DEBUG_LOOP (Analyze -> Patch -> Audit -> Retry). Limit 3.",
++            "IF FAILURE (Critical/Logic): IMMEDIATE ROLLBACK.",
++            "IF SUCCESS: Engineer provides Pass/Fail Recommendation.",
+             "GATE: Director reviews findings and issues 'Retain' or 'Rollback' command."
+           ]
+         },

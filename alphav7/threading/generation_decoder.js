@@ -1,12 +1,21 @@
-const BlockDecoder = require('../core/block_decoder');
 const EventEmitter = require('events');
+const WorkerPool = require('./worker_pool');
 
 class GenerationDecoder extends EventEmitter {
     constructor(config) {
         super();
         this.config = config;
-        this.decoders = new Map(); // GenID -> BlockDecoder
         this.completed = new Map(); // GenID -> Buffer
+
+        // v8 Velocity: Multi-Threaded Decoding
+        this.pool = new WorkerPool(this.config.SYSTEM.THREADS || 4, 'decoder_worker.js');
+
+        this.pool.on('solved', (genId, data) => {
+            if (!this.completed.has(genId)) {
+                this.completed.set(genId, data);
+                this.emit('generation_ready', genId);
+            }
+        });
     }
 
     static create(config) {
@@ -14,20 +23,14 @@ class GenerationDecoder extends EventEmitter {
     }
 
     addPiece(piece) {
-        if (this.completed.has(piece.genId)) return; // Already solved
-
-        if (!this.decoders.has(piece.genId)) {
-            this.decoders.set(piece.genId, new BlockDecoder(this.config));
-        }
-
-        const decoder = this.decoders.get(piece.genId);
-        const done = decoder.addPiece(piece);
-
-        if (done) {
-            this.completed.set(piece.genId, decoder.getData());
-            this.decoders.delete(piece.genId); // Free memory
-            this.emit('generation_ready', piece.genId);
-        }
+        if (this.completed.has(piece.genId)) return;
+        
+        // Sharded Dispatch: The Pool handles routing GenID to the correct worker
+        this.pool.dispatch(piece.genId, {
+            type: 'ADD_PIECE',
+            piece,
+            config: this.config.TRANSCODE
+        });
     }
 
     getReconstructedFile() {

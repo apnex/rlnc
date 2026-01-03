@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const os = require('os');
 
 // --- Configuration Injector ---
 let config;
@@ -44,10 +45,15 @@ async function main() {
 
     const sourceHash = crypto.createHash('sha256').update(data).digest('hex');
 
-    console.log("Initializing Worker Pool (4 Threads)...");
+    // v7 Hardware-Awareness: Dynamic Thread Scaling
+    if (!config.SYSTEM.THREADS || config.SYSTEM.THREADS === 0) {
+        config.SYSTEM.THREADS = os.cpus().length;
+    }
+    console.log(`Initializing Worker Pool (${config.SYSTEM.THREADS} Threads)...`);
+
     const enc = GenerationEncoder.create(data, config);
     config.TOTAL_GENS = enc.totalGenerations;
-    const dec = GenerationDecoder.create(config.TRANSCODE);
+    const dec = GenerationDecoder.create(config);
     const dash = new VisualDashboard(config, sourceHash, filename, data.length);
 
     const netOptions = {

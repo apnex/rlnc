@@ -22,7 +22,7 @@ class GenerationEncoder extends EventEmitter {
         this.ackedGenerations = new Set();
 
 	this.sentCounts = new Map();
-        this.pool = new WorkerPool(4);
+        this.pool = new WorkerPool(this.config.SYSTEM.THREADS, 'encoder_worker.js');
 
         this.pool.on('packet', (buffer) => {
             this.emit('packet', buffer);

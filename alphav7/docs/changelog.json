@@ -1,6 +1,70 @@
 {
   "changelog": [
     {
+      "version": "8.3.2",
+      "date": "2026-01-03",
+      "changes": [
+        "Cleaned up registry_index in protocols.json to directly map to protocol library keys.",
+        "Synchronized documentation artifacts."
+      ]
+    },
+    {
+      "version": "8.3.1",
+      "date": "2026-01-03",
+      "changes": [
+        "Created generate_protocols.js utility for automated manual synthesis.",
+        "Generated PROTOCOLS.md featuring a structured Registry Index and detailed Phase breakdowns.",
+        "Ensured protocol documentation is synchronized with JSON state."
+      ]
+    },
+    {
+      "version": "8.3.0",
+      "date": "2026-01-03",
+      "changes": [
+        "Upgraded operational loop to GSD_V3 (Verified Implementation & Debug Loop).",
+        "Implemented mandatory Syntax Check and Visual Audit (PPIC) in Execution phase.",
+        "Formalized 'Fix-Forward' Debug Loop in Verification phase.",
+        "Upgraded EVO_V1 to v1.1.0 with mandatory Protocol Post-Mortem requirement."
+      ]
+    },
+    {
+      "version": "8.2.0",
+      "date": "2026-01-03",
+      "changes": [
+        "Implemented Multi-Threaded Decoder via WorkerPool.",
+        "Created decoder_worker.js for sharded matrix computation.",
+        "Enabled Zero-Copy ArrayBuffer transfer for reconstructed data.",
+        "Generalized WorkerPool to support multiple worker scripts."
+      ]
+    },
+    {
+      "version": "8.1.1",
+      "date": "2026-01-03",
+      "changes": [
+        "Added mandatory Director approval gate to GSD_V2 Phase 1 (SURVEY).",
+        "Updated protocol version to v2.3.1."
+      ]
+    },
+    {
+      "version": "8.1.0",
+      "date": "2026-01-03",
+      "changes": [
+        "Upgraded operational loop to GSD_V2 (5-Phase Gated Development).",
+        "Implemented ONBOARD_V2 with Collaborative Stewardship philosophy.",
+        "Introduced Artifact Persistence (mandatory patch generation for logic changes).",
+        "Established Visual Audit (PPIC) as a requirement for code injection."
+      ]
+    },
+    {
+      "version": "7.2.0",
+      "date": "2026-01-03",
+      "changes": [
+        "Implemented Hardware-Aware Concurrency (os.cpus detection).",
+        "Added THREADS config parameter for manual override.",
+        "Refactored WorkerPool initialization to support dynamic sizing."
+      ]
+    },
+    {
       "version": "7.1.0",
       "date": "2026-01-03",
       "changes": [

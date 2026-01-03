@@ -1,0 +1,14 @@
+--- docs/generate_protocols.js
++++ docs/generate_protocols.js
+@@ -21,8 +21,9 @@
+ // Table of Contents
+ md += `## Registry Index\n`;
+-Object.keys(library).forEach(key => {
+-    md += `- [${key}](#${key.toLowerCase().replace(/_/g, '')})\n`;
+-});
++| ID | Protocol Name | Version |
++|:---|:---|:---|
++${Object.entries(library).map(([id, p]) => `| [**${id}**](#${id.toLowerCase().replace(/_/g, '')}) | ${p.protocol_name} | v${p.version} |`).join('\n')}
++
+ md += `\n---\n`;
+

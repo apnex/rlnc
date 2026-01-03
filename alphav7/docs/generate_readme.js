@@ -1,7 +1,12 @@
 const fs = require('fs');
+const path = require('path');
 
 // DOC_V1 Verification Check
-const requiredFiles = ['./readme_data.json', './protocols.json', './changelog.json'];
+const requiredFiles = [
+    path.join(__dirname, './readme_data.json'),
+    path.join(__dirname, './protocols.json'),
+    path.join(__dirname, './changelog.json')
+];
 const missingFiles = requiredFiles.filter(file => !fs.existsSync(file));
 
 if (missingFiles.length > 0) {
@@ -10,9 +15,9 @@ if (missingFiles.length > 0) {
 }
 
 // Load Data Sources
-const data = JSON.parse(fs.readFileSync('./readme_data.json', 'utf8'));
-const protocols = JSON.parse(fs.readFileSync('./protocols.json', 'utf8'));
-const history = JSON.parse(fs.readFileSync('./changelog.json', 'utf8'));
+const data = JSON.parse(fs.readFileSync(path.join(__dirname, './readme_data.json'), 'utf8'));
+const protocols = JSON.parse(fs.readFileSync(path.join(__dirname, './protocols.json'), 'utf8'));
+const history = JSON.parse(fs.readFileSync(path.join(__dirname, './changelog.json'), 'utf8'));
 
 const readmeContent = `
 # ${data.engine_name} - v${data.version}
@@ -23,7 +28,10 @@ const readmeContent = `
 
 ## 📜 Active Protocols
 Operated under the **DOC_V1** automated standard:
-${Object.values(protocols.protocol_library).map(p => `- **${p.protocol_name}**: v${p.version}`).join('\n')}
+
+| ID | Protocol Name | Version |
+|:---|:---|:---|
+${Object.entries(protocols.protocol_library).map(([id, p]) => `| **${id}** | ${p.protocol_name} | v${p.version} |`).join('\n')}
 
 ## 📊 Performance Baselines
 | ID | Test Name | Environment | Result | Status |
@@ -40,5 +48,5 @@ ${history.changelog.map(v => `### v${v.version} (${v.date})\n${v.changes.map(c =
 *Generated via DOC_V1 Protocol*
 `;
 
-fs.writeFileSync('./README.md', readmeContent.trim());
+fs.writeFileSync(path.join(__dirname, './README.md'), readmeContent.trim());
 console.log("[System] DOC_V1: README.md successfully synchronized with JSON sources.");

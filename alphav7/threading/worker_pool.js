@@ -3,15 +3,15 @@ const { Worker } = require('worker_threads');
 const EventEmitter = require('events');
 
 class WorkerPool extends EventEmitter {
-    constructor(numThreads = 4) {
+    constructor(numThreads = 4, scriptName = 'encoder_worker.js') {
         super();
         this.workers = [];
         this.nextWorkerIdx = 0;
 
-        console.log(`[WorkerPool] Spawning ${numThreads} v7 threads (Zero-Copy Enabled)...`);
+        console.log(`[WorkerPool] Spawning ${numThreads} ${scriptName} threads...`);
 
         for (let i = 0; i < numThreads; i++) {
-            const w = new Worker(path.join(__dirname, 'encoder_worker.js'));
+            const w = new Worker(path.join(__dirname, scriptName));
             w.on('message', (msg) => {
                 if (msg.type === 'PACKET') {
                     // v7 Optimization: ZERO-COPY RECEIVE
@@ -20,14 +20,22 @@ class WorkerPool extends EventEmitter {
                     // This is an O(1) operation.
                     const safeView = Buffer.from(msg.payload);
                     this.emit('packet', safeView);
+                } else if (msg.type === 'SOLVED') {
+                    this.emit('solved', msg.genId, Buffer.from(msg.data));
                 } else if (msg.type === 'STATS') {
                     this.emit('stats', msg.stats);
                 }
             });
 
-            w.on('error', (err) => console.error(`Worker ${i} error:`, err));
+            w.on('error', (err) => console.error(`Worker ${i} [${scriptName}] error:`, err));
             this.workers.push(w);
         }
+    }
+
+    // v8 Optimization: Sharded Dispatch for stateful workers (Decoders)
+    dispatch(genId, msg, transferList = []) {
+        const idx = genId % this.workers.length;
+        this.workers[idx].postMessage(msg, transferList);
     }
 
     addJob(genId, data, config) {
