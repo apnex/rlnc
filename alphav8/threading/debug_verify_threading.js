@@ -110,6 +110,14 @@ async function runTest(testName, data, expectedHash, netProfile) {
     return new Promise((resolve) => {
         metrics.startTime = performance.now();
 
+        const testTimeout = setTimeout(() => {
+            console.error(`\n[DEBUG] Test Timed Out after 10s!`);
+            console.log(`[DEBUG] Metrics:`, metrics);
+            console.log(`[DEBUG] Encoder Window:`, Array.from(encoder.window));
+            console.log(`[DEBUG] Acked Gens:`, encoder.ackedGenerations.size, "/", encoder.totalGenerations);
+            finish();
+        }, 10000);
+
         // --- Wiring ---
 
         // 1. Encoder -> Network
@@ -120,8 +128,9 @@ async function runTest(testName, data, expectedHash, netProfile) {
         });
 
         // 2. Encoder Watchdog (Boost Tracker)
-        encoder.on('watchdog_slide', () => {
+        encoder.on('watchdog_slide', (id) => {
             metrics.boosts++;
+            console.log(`[DEBUG] Watchdog Boost for Gen ${id}`);
         });
 
         // 3. Network -> Decoder
@@ -137,7 +146,9 @@ async function runTest(testName, data, expectedHash, netProfile) {
             metrics.generationsSolved++;
             encoder.acknowledge(genId);
             
-            process.stdout.write(`\r  Progress: ${(metrics.generationsSolved / encoder.totalGenerations * 100).toFixed(1)}% `);
+            if (metrics.generationsSolved % 10 === 0 || metrics.generationsSolved === encoder.totalGenerations) {
+                console.log(`[DEBUG] Solved Gen ${genId}. Progress: ${metrics.generationsSolved}/${encoder.totalGenerations}`);
+            }
             
             if (metrics.generationsSolved >= encoder.totalGenerations) {
                 finish();
@@ -153,6 +164,7 @@ async function runTest(testName, data, expectedHash, netProfile) {
         }, TICK_RATE);
 
         function finish() {
+            clearTimeout(testTimeout);
             clearInterval(loop);
             metrics.endTime = performance.now();
             
@@ -161,7 +173,6 @@ async function runTest(testName, data, expectedHash, netProfile) {
             const passed = (resultHash === expectedHash);
 
             encoder.terminate();
-            decoder.terminate();
             // Pass tuning params to report
             printReport(testName, metrics, CONFIG.FILE_SIZE, passed, resultHash, TICK_RATE, BATCH_SIZE);
             resolve();

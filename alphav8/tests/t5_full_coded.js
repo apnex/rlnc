@@ -24,8 +24,5 @@ module.exports = {
         SIZE: 4,             // Reduced window further; Decoder will be slow
         TIMEOUT: 2000        
     },
-    SYSTEM: { 
-        TARGET_THROUGHPUT_MB: 10, // Drastically lowered; Decoding will likely bottleneck
-        TICK_RATE: 20 
-    }
+    SYSTEM: { TARGET_THROUGHPUT_MB: 40, TICK_RATE: 20, GLOBAL_TIMEOUT: 60000 }
 }

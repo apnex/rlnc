@@ -1,0 +1,13 @@
+--- a/docs/protocols.json
++++ b/docs/protocols.json
+@@ -265,1 +265,1 @@
+-        "history_rule": "Update refactor-matrix.json via dedicated helper script."
++        "history_rule": "Update refactor_matrix.json via dedicated helper script."
+@@ -294,1 +294,1 @@
+-          "description": "Update docs/refactor-matrix.json and synchronize via DOC_V1.",
++          "description": "Update docs/refactor_matrix.json and synchronize via DOC_V1.",
+--- a/utils/update_matrix.js
++++ b/utils/update_matrix.js
+@@ -4,1 +4,1 @@
+-const matrixPath = path.join(__dirname, '../docs/refactor-matrix.json');
++const matrixPath = path.join(__dirname, '../docs/refactor_matrix.json');

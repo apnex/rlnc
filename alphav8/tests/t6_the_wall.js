@@ -24,8 +24,5 @@ module.exports = {
         SIZE: 2,             // Extremely narrow window to prevent total lockup
         TIMEOUT: 5000        
     },
-    SYSTEM: { 
-        TARGET_THROUGHPUT_MB: 5, // Very slow target to give CPU a chance
-        TICK_RATE: 20 
-    }
+    SYSTEM: { TARGET_THROUGHPUT_MB: 20, TICK_RATE: 20, GLOBAL_TIMEOUT: 60000 }
 }

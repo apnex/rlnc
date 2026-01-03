@@ -21,7 +21,7 @@
     {
       "id": 2,
       "title": "Hardware-Aware Concurrency",
-      "status": "PARTIAL",
+      "status": "COMPLETED",
       "domain": "threading/",
       "objective": "Dynamic worker scaling based on logical CPU core detection.",
       "metric": "CPU Saturation Percentage."

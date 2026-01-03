@@ -27,6 +27,7 @@ module.exports = {
     SYSTEM: {
         TARGET_THROUGHPUT_MB: 100, // Targeting 100MB/s simulated net
         TICK_RATE: 20,
-        THREADS: 4          // 0 = Dynamic (Hardware Aware), >0 = Fixed
+        THREADS: 4,          // 0 = Dynamic (Hardware Aware), >0 = Fixed
+        GLOBAL_TIMEOUT: 60000
     }
 };

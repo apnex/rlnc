@@ -24,8 +24,5 @@ module.exports = {
         SIZE: 6,             // Narrower window to focus CPU on fewer generations
         TIMEOUT: 1500        // Increased timeout for high-loss survival
     },
-    SYSTEM: { 
-        TARGET_THROUGHPUT_MB: 30, // Lowered target to accommodate heavy repair math
-        TICK_RATE: 20 
-    }
+    SYSTEM: { TARGET_THROUGHPUT_MB: 80, TICK_RATE: 20, GLOBAL_TIMEOUT: 120000 }
 };

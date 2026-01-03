@@ -20,4 +20,4 @@ const workerConfig = {
 };
 
 pool.addJob(1, data, workerConfig);
-pool.produce(1, config.PROTOCOL);
+pool.produce(1, config.PROTOCOL, { 1: 1 });

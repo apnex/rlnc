@@ -2,7 +2,7 @@ const EventEmitter = require('events');
 const WorkerPool = require('./worker_pool');
 
 class GenerationEncoder extends EventEmitter {
-    constructor(data, config) {
+    constructor(data, config, pool = null) {
         super();
         this.data = data;
         this.config = config;
@@ -21,8 +21,15 @@ class GenerationEncoder extends EventEmitter {
         this.window = new Set(); 
         this.ackedGenerations = new Set();
 
-	this.sentCounts = new Map();
-        this.pool = new WorkerPool(this.config.SYSTEM.THREADS, 'encoder_worker.js');
+        this.sentCounts = new Map();
+
+        // v8 Structural: Dependency Injection
+        if (pool) {
+            this.pool = pool;
+        } else {
+            const threads = (this.config.SYSTEM && this.config.SYSTEM.THREADS !== undefined) ? this.config.SYSTEM.THREADS : 0;
+            this.pool = new WorkerPool(threads, 'encoder_worker.js');
+        }
 
         this.pool.on('packet', (buffer) => {
             this.emit('packet', buffer);
@@ -40,8 +47,8 @@ class GenerationEncoder extends EventEmitter {
         this._fillWindow();
     }
 
-    static create(data, config) {
-        return new GenerationEncoder(data, config);
+    static create(data, config, pool = null) {
+        return new GenerationEncoder(data, config, pool);
     }
 
     produce(packetLimit) {
@@ -66,8 +73,8 @@ class GenerationEncoder extends EventEmitter {
         if (eligibleCount > 0) {
             // Forward the specific budgets to the pool
             this.pool.produce(packetLimit, this.protocolConfig, budgets);
-            this._checkWatchdog();
         }
+        this._checkWatchdog();
     }
 
     acknowledge(genId) {

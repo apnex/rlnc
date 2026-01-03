@@ -1,12 +1,18 @@
 const path = require('path');
 const { Worker } = require('worker_threads');
 const EventEmitter = require('events');
+const os = require('os');
 
 class WorkerPool extends EventEmitter {
-    constructor(numThreads = 4, scriptName = 'encoder_worker.js') {
+    constructor(numThreads = 0, scriptName = 'encoder_worker.js') {
         super();
         this.workers = [];
         this.nextWorkerIdx = 0;
+
+        // v8 Velocity: Adaptive Hardware Concurrency
+        if (numThreads === 0) {
+            numThreads = os.cpus().length;
+        }
 
         console.log(`[WorkerPool] Spawning ${numThreads} ${scriptName} threads...`);
 
@@ -66,7 +72,7 @@ class WorkerPool extends EventEmitter {
         this.nextWorkerIdx = (this.nextWorkerIdx + 1) % this.workers.length;
     }
 
-    produce(totalPackets, protocolConfig, budgets) {
+    produce(totalPackets, protocolConfig, budgets = {}) {
         const perWorker = Math.ceil(totalPackets / this.workers.length);
         const workerCount = this.workers.length;
 

@@ -1,33 +1,76 @@
-# Alpha v8 Velocity - v8.0.0-dev
-**Status:** Active Development  
+# Alpha-v8 Velocity - v8.3.2
+**Status:** In-Progress (Dirty)  
+**Active Baseline:** Alpha-v8.0.0-Velocity
 
 ## 🚀 One-Sentence Bootstrap
-> "You are the Engineer in this session. Your first task is to read protocols.json. Follow ONBOARD_V1 to bootstrap."
+> "You are the Engineer in this session. Your first task is to read protocols.json. Follow ONBOARD_V2 to bootstrap."
+
+## 🛠 Key Capabilities
+- **Pseudo-SIMD Vectorization:** Utilizes BigUint64Array for 64-bit XOR parallelization in JS.
+- **Asynchronous Sharding:** Multi-threaded matrix operations via sharded job dispatch.
+- **Zero-Copy Architecture:** Memory-efficient data mobility using ArrayBuffer transferables.
+- **Gated Development (GSD_V3):** Rigorous 5-phase operational loop for verified implementation.
 
 ## 📜 Active Protocols
 Operated under the **DOC_V1** automated standard:
 
 | ID | Protocol Name | Version |
 |:---|:---|:---|
-| **ONBOARD_V2** | System Onboarding & Philosophy v2 | v2.0.0 |
-| **GSD_V3** | Gated Sequential Development v3 | v3.0.0 |
+| **ONBOARD_V2** | System Onboarding & Philosophy | v2.0.0 |
+| **GSD_V3** | Gated Sequential Development | v3.0.0 |
 | **DOC_V1** | Automated Documentation Standard | v1.0.0 |
 | **EVO_V1** | Protocol Evolution & Amendment | v1.1.0 |
 | **CFG_V1** | Configuration Injection | v1.0.1 |
 | **VAL_V1** | Concurrency Validation | v1.0.0 |
-
-## 📊 Performance Baselines
-| ID | Test Name | Environment | Result | Status |
-|:---|:---|:---|:---|:---|
-| T1 | Throughput Baseline | 16MB / 0% Loss / 1KB Symbols | 4.5s | ✅ PASS |
-| T2 | Network Resilience | 16MB / 10% Loss / Jitter | 4.6s | ✅ PASS |
-| T3 | High-Bandwidth Pressure | 32MB / 5% Loss / 8KB Symbols | 4.7s | ✅ PASS |
-| T4 | Extreme Sustenance | 16MB / 30% Loss / High Redundancy | 6.7s | ✅ PASS |
-| T5 | Full-Coded Integrity | 16MB / 5% Loss / Non-Systematic | 7.5s | ⚠️ CPU HEAVY |
-| T6 | The Wall | 16MB / 8KB Symbols / Full-Coded | 8.8s | ⚠️ CPU LIMIT |
+| **STAT_V1** | Automated Status Reporting | v1.0.0 |
+| **OPTIMISE_V1** | Structural Evolution & Refactoring | v1.0.0 |
 
 ## 🏗 Roadmap
-- [ ] **Next Milestone:** M1: WASM Kernel & M3: UDP Transport
+| Milestone | Detail | Status |
+|:---|:---|:---|
+| Congestion & Loss Simulation | Simulate real-world degradation (jitter, latency spikes, and burst loss). | COMPLETED |
+| Hardware-Aware Concurrency | Dynamic worker scaling based on logical CPU core detection. | COMPLETED |
+| SIMD / WASM Optimization | Migrate GF(256) math to WASM (Pseudo-SIMD implemented). | PARTIAL |
+| Streaming API Integration | Transition from fixed-block processing to continuous data stream buffer. | NOT STARTED |
+| Real Networking | Replace simulation with UDP/IP sockets. | NOT STARTED |
+| Advanced Testing & Verification | Implement property-based fuzzing and stress tests. | COMPLETED |
+
+## 🧬 Structural Evolution (OPTIMISE)
+
+#### Orchestration Decoupling
+- **Trigger:** main.js was becoming a 'God Object' handling too many responsibilities.
+- **SQAs Targeted:** Maintainability, Readability
+- **Result:** Encapsulated orchestration in core/engine.js; reduced main.js complexity; logic is now reusable.
+
+#### Transport Abstraction
+- **Trigger:** Direct coupling to NetworkSimulator hindered future UDP support.
+- **SQAs Targeted:** Modularity, Extensibility
+- **Result:** Established Transport base class; engine is now network-agnostic and ready for real UDP transport.
+
+#### WorkerPool Dependency Injection
+- **Trigger:** Inability to test encoder/decoder logic without spawning real threads.
+- **SQAs Targeted:** Testability, Modularity
+- **Result:** Encoder and Decoder now accept injected pools; enables easier testing and resource sharing.
+
+#### Module Sampler (Library Index)
+- **Trigger:** Deep folder nesting made the project difficult to integrate as a library.
+- **SQAs Targeted:** Reusability, Readability
+- **Result:** Created index.js as a central registry; project can now be required as a single module.
+
+#### OPTIMISE Protocol Implementation
+- **Trigger:** Formalize refactoring workflow
+- **SQAs Targeted:** Maintainability, Testability
+- **Result:** Established OPTIMISE_V1 protocol and update helper script
+
+#### Refactor Matrix Standardization
+- **Trigger:** Renamed file to underscore notation
+- **SQAs Targeted:** Readability
+- **Result:** Successfully renamed and updated all references
+
+## ⚠️ Technical Debt
+- **Synchronous I/O:** Main thread blocked during initial file read; lacks streaming support.
+- **Pure JS GF Kernel:** Mathematical operations could be significantly faster in WASM.
+- **Manual Watchdog:** Timeout management is currently manual/external to the core logic.
 
 ## 🕒 Version History
 ### v8.3.2 (2026-01-03)
@@ -54,32 +97,6 @@ Operated under the **DOC_V1** automated standard:
 ### v8.1.1 (2026-01-03)
 - Added mandatory Director approval gate to GSD_V2 Phase 1 (SURVEY).
 - Updated protocol version to v2.3.1.
-
-### v8.1.0 (2026-01-03)
-- Upgraded operational loop to GSD_V2 (5-Phase Gated Development).
-- Implemented ONBOARD_V2 with Collaborative Stewardship philosophy.
-- Introduced Artifact Persistence (mandatory patch generation for logic changes).
-- Established Visual Audit (PPIC) as a requirement for code injection.
-
-### v7.2.0 (2026-01-03)
-- Implemented Hardware-Aware Concurrency (os.cpus detection).
-- Added THREADS config parameter for manual override.
-- Refactored WorkerPool initialization to support dynamic sizing.
-
-### v7.1.0 (2026-01-03)
-- Implemented ONBOARD_V1 protocol with self-bootstrapping handshake.
-- Created generate_readme.js utility for automated documentation.
-- Finalized Test Library (T1-T6) covering Systematic vs. Full-Coded modes.
-
-### v7.0.5 (2026-01-02)
-- Migrated to Configuration Injection (CFG_V1) via CLI arguments.
-- Decoupled engine logic from test parameters.
-- Renamed roles to Director and Engineer for clarity of authority.
-
-### v7.0.0 (2026-01-01)
-- Initialized GSD_V1 protocol for gated development.
-- Established Zero-Copy Buffer management in WorkerPool.
-- Implemented Systematic RLNC encoder with 4-thread concurrency.
 
 ---
 *Generated via DOC_V1 Protocol*

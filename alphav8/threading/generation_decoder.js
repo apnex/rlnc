@@ -2,13 +2,18 @@ const EventEmitter = require('events');
 const WorkerPool = require('./worker_pool');
 
 class GenerationDecoder extends EventEmitter {
-    constructor(config) {
+    constructor(config, pool = null) {
         super();
         this.config = config;
         this.completed = new Map(); // GenID -> Buffer
 
-        // v8 Velocity: Multi-Threaded Decoding
-        this.pool = new WorkerPool(this.config.SYSTEM.THREADS || 4, 'decoder_worker.js');
+        // v8 Structural: Dependency Injection
+        if (pool) {
+            this.pool = pool;
+        } else {
+            // v8 Velocity: Multi-Threaded Decoding (Adaptive Default)
+            this.pool = new WorkerPool(this.config.SYSTEM.THREADS || 0, 'decoder_worker.js');
+        }
 
         this.pool.on('solved', (genId, data) => {
             if (!this.completed.has(genId)) {
@@ -18,8 +23,12 @@ class GenerationDecoder extends EventEmitter {
         });
     }
 
-    static create(config) {
-        return new GenerationDecoder(config);
+    terminate() {
+        this.pool.terminate();
+    }
+
+    static create(config, pool = null) {
+        return new GenerationDecoder(config, pool);
     }
 
     addPiece(piece) {

@@ -1,0 +1,18 @@
+--- a/docs/generate_readme.js
++++ b/docs/generate_readme.js
+@@ -46,10 +46,11 @@
+ ${roadmap.strategic_roadmap.map(m => `| ${m.title} | ${m.objective} | ${m.status} |`).join('\n')}
+ 
+ ## 🧬 Structural Evolution (OPTIMISE)
+-| Refactor | Trigger | SQAs Targeted | Result |
+-|:---|:---|:---|:---|
+-${matrix.refactors.map(r => `| ${r.title} | ${r.trigger} | ${r.sqa_targeted.join(', ')} | ${r.result} |`).join('\n')}
++
++${matrix.refactors.map(r => `
++#### ${r.title}
++- **Trigger:** ${r.trigger}
++- **SQAs Targeted:** ${r.sqa_targeted.join(', ')}
++- **Result:** ${r.result}`).join('\n')}
++
+ ## ⚠️ Technical Debt
+

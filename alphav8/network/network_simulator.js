@@ -1,6 +1,6 @@
-const EventEmitter = require('events');
+const Transport = require('./transport');
 
-class NetworkSimulator extends EventEmitter {
+class NetworkSimulator extends Transport {
     constructor(options = {}) {
         super();
         this.lossRate = options.lossRate || 0.0;
@@ -25,6 +25,11 @@ class NetworkSimulator extends EventEmitter {
             this.stats.delivered++;
             this.emit('packet', packet);
         }, actualDelay);
+    }
+
+    close() {
+        // Simulator uses Timeouts which aren't easily canceled without tracking,
+        // but for now, we align with the interface.
     }
 }
 module.exports = NetworkSimulator;

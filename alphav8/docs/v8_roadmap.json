@@ -27,6 +27,7 @@
     {
       "id": "M2-THREADING",
       "title": "Adaptive Concurrency",
+      "status": "COMPLETED",
       "description": "Implement os.cpus() detection and dynamic WorkerPool resizing.",
       "target_metric": "100% Core Saturation on stress tests."
     },
