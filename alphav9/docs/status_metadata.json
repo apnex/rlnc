@@ -1,11 +1,5 @@
 {
-  "project": "Alpha-v8 Velocity",
-  "version": "8.5.4",
-  "environment": {
-    "git_state": "Dirty",
-    "active_baseline": "Alpha-v8.0.0-Velocity"
-  },
-  "capabilities": [
+  "key_capabilities": [
     {
       "feature": "Pseudo-SIMD Vectorization",
       "detail": "Utilizes BigUint64Array for 64-bit XOR parallelization in JS."
@@ -23,7 +17,7 @@
       "detail": "Rigorous 5-phase operational loop for verified implementation."
     }
   ],
-  "modules": [
+  "module_overview": [
     {
       "module": "Core",
       "purpose": "Galois Field arithmetic and Gaussian Elimination kernel."
@@ -54,6 +48,5 @@
       "issue": "Manual Watchdog",
       "impact": "Timeout management is currently manual/external to the core logic."
     }
-  ],
-  "last_updated": "2026-01-04T05:23:05.810Z"
+  ]
 }

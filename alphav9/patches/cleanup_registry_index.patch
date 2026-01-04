@@ -1,0 +1,17 @@
+--- docs/protocols.json
++++ docs/protocols.json
+@@ -6,10 +6,10 @@
+     "registry_index": [
+-      "ONBOARD_V2 (Auth/Handshake)",
+-      "GSD_V3 (Development Loop)",
+-      "DOC_V1 (Documentation)",
+-      "EVO_V1 (Amendments)",
+-      "CFG_V1 (Testing)",
+-      "VAL_V1 (Validation)"
++      "ONBOARD_V2",
++      "GSD_V3",
++      "DOC_V1",
++      "EVO_V1",
++      "CFG_V1",
++      "VAL_V1"
+     ],

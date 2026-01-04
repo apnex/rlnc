@@ -1,0 +1,140 @@
+{
+  "ONBOARD_V3": {
+    "hash": "090f1478ae776156d1001315bb13d0271917bf3c195d9c5bc122c0b1e644cd0b",
+    "version": "3.0.0",
+    "standard_keys": [
+      "data_standard",
+      "onboarding_standard",
+      "proficiency_standard",
+      "scope_standard"
+    ],
+    "workflow_steps": 4
+  },
+  "ENV_V1": {
+    "hash": "0fd47d6b7fa0d392971358be65c87081013181591b6160f3802d36f228852889",
+    "version": "1.0.0",
+    "standard_keys": [
+      "data_standard",
+      "environment_standard"
+    ],
+    "workflow_steps": 1
+  },
+  "MAP_V1": {
+    "hash": "d601df74edbea0b2ffed7080900da0cf86dad80d5bb5259f13b6169c83da5c4b",
+    "version": "1.0.0",
+    "standard_keys": [
+      "data_standard",
+      "mapping_standard"
+    ],
+    "workflow_steps": 3
+  },
+  "PRY_V1": {
+    "hash": "9b50afb52ee683b9bf66294351cc2812d3e1a71c7177458ab89ef7f38a9ad9b0",
+    "version": "1.0.0",
+    "standard_keys": [
+      "proficiency_standard",
+      "certification_standard"
+    ],
+    "workflow_steps": 3
+  },
+  "VFY_V1": {
+    "hash": "cbfe7d440bf6baa1f67721fd9320a5de35bf9ace12d2e59609d31ac0adf34a69",
+    "version": "1.1.0",
+    "standard_keys": [
+      "data_standard",
+      "verification_standard",
+      "confidence_standard"
+    ],
+    "workflow_steps": 2
+  },
+  "FIX_V1": {
+    "hash": "5107557628d5d34ba01c9eafa8c73c8b334f0ea0925a54985a2f8314577b7287",
+    "version": "1.0.0",
+    "standard_keys": [
+      "recovery_standard",
+      "guardrail_standard"
+    ],
+    "workflow_steps": 3
+  },
+  "GSD_V3": {
+    "hash": "f0ebc08a443cac408c2c809a0a5e3c3eab4573886f9795906e48ed31abeebd03",
+    "version": "3.0.0",
+    "standard_keys": [
+      "data_standard",
+      "operational_standard"
+    ],
+    "workflow_steps": 5
+  },
+  "PIR_V1": {
+    "hash": "868360d6b1254230ac1e6f0bfa5c94e56c87c9aa6c08285b0a3848d9054a643a",
+    "version": "1.1.0",
+    "standard_keys": [
+      "review_standard",
+      "evidence_standard",
+      "audit_standard"
+    ],
+    "workflow_steps": 2
+  },
+  "DOC_V1": {
+    "hash": "53e2edb55f946bfdd40993d57c7e73d8b8f1dae471ada4b01f83088a05356893",
+    "version": "1.0.0",
+    "standard_keys": [
+      "data_standard",
+      "synchronization_standard"
+    ],
+    "workflow_steps": 3
+  },
+  "EVO_V1": {
+    "hash": "7d769a71f599d290f423a9dac2b4bd1d3276185034da1410f5c0ebd289bcd500",
+    "version": "1.1.0",
+    "standard_keys": [
+      "data_standard",
+      "evolution_standard",
+      "approval_standard"
+    ],
+    "workflow_steps": 3
+  },
+  "CFG_V1": {
+    "hash": "143e18295edc891750d4e6a7229fd2c5d1660f0b4eed14061ea447017f077244",
+    "version": "1.0.1",
+    "standard_keys": [
+      "execution_standard"
+    ],
+    "workflow_steps": 1
+  },
+  "VAL_V1": {
+    "hash": "2544f986f8a6da2f29709fdbc8d1be17b4f7c3741dddb04a4d0a57cb58e75476",
+    "version": "1.0.0",
+    "standard_keys": [
+      "verification_standard"
+    ],
+    "workflow_steps": 1
+  },
+  "STAT_V1": {
+    "hash": "5700c4afe66e9a6af4d5b83e47834d00f31b18e4a3ad4bac8f86c0c5f37b51e5",
+    "version": "1.0.0",
+    "standard_keys": [
+      "data_standard",
+      "reporting_standard"
+    ],
+    "workflow_steps": 1
+  },
+  "OPTIMISE_V1": {
+    "hash": "27e151c804a1231b07aef791eba6dbbc4e029425255249e67aa0bb3d04ab598b",
+    "version": "1.0.0",
+    "standard_keys": [
+      "data_standard",
+      "regression_standard"
+    ],
+    "workflow_steps": 5
+  },
+  "ROADMAP_V1": {
+    "hash": "cb776fe99b9a332270c051b4b9426e65064fd69cc7554d36a685ad575d3114d8",
+    "version": "1.0.0",
+    "standard_keys": [
+      "data_standard",
+      "governance_standard"
+    ],
+    "workflow_steps": 5
+  }
+}

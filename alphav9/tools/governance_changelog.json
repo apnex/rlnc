@@ -1,11 +1,121 @@
 {
-  "changelog": [
+  "governance_changelog": [
+    {
+      "version": "9.0.7",
+      "date": "2026-01-04",
+      "changes": [
+        "Standardized nomenclature by replacing 'Ratification' with 'Approval' across all protocols and documentation.",
+        "Renamed EVO_V1 key 'ratification_standard' to 'approval_standard' for schema consistency.",
+        "Synchronized all governance gates and historical records with the new approval standard."
+      ]
+    },
+    {
+      "version": "9.0.6",
+      "date": "2026-01-04",
+      "changes": [
+        "Removed redundant Bootstrap section from README.md.",
+        "Centralized session initialization instructions in the System Protocol Library."
+      ]
+    },
+    {
+      "version": "9.0.5",
+      "date": "2026-01-04",
+      "changes": [
+        "Codified the Compliance Registry (CMP_ identifiers) to formalize development constraints.",
+        "Updated PIR_V1 to mandate auditing against the codified compliance framework.",
+        "Enhanced verify_integrity.js and generate_protocols.js to support the new registry."
+      ]
+    },
+    {
+      "version": "9.0.4",
+      "date": "2026-01-04",
+      "changes": [
+        "Integrated Friction Disclosure into PIR_V1 compliance audit.",
+        "Codified 'High Friction Signal' as a trigger for EVO_V1 evolution.",
+        "Updated deliverable_registry and onboarding to reflect dual-purpose auditing."
+      ]
+    },
+    {
+      "version": "9.0.2",
+      "date": "2026-01-04",
+      "changes": [
+        "Added total protocol count to the verify_integrity.js audit output.",
+        "Improved audit summary visibility for governance verification turns."
+      ]
+    },
+    {
+      "version": "9.0.1",
+      "date": "2026-01-04",
+      "changes": [
+        "Optimized Deliverable Registry UI in PROTOCOLS.md using vertical detail blocks.",
+        "Improved readability for CLI and standard displays without detail loss.",
+        "Maintained cross-protocol anchor links for DLR_ identifiers."
+      ]
+    },
+    {
+      "version": "9.0.0",
+      "date": "2026-01-04",
+      "changes": [
+        "Implemented Evidence-Based Verification and Confidence Scoring in VFY_V1 and PIR_V1.",
+        "Upgraded deliverable_registry with confidence weighting for high-value artifacts.",
+        "Implemented automated hyperlinking for DLR_ identifiers in PROTOCOLS.md.",
+        "Bridged the gap between mechanical verification and cognitive integrity."
+      ]
+    },
+    {
+      "version": "8.5.9",
+      "date": "2026-01-04",
+      "changes": [
+        "Implemented centralized Deliverable Registry in protocols.json.",
+        "Updated all protocols to reference codified DLR_ IDs.",
+        "Enhanced tools/verify_integrity.js with automated referential integrity auditing.",
+        "Updated tools/generate_protocols.js to render the high-verbosity deliverable glossary."
+      ]
+    },
+    {
+      "version": "8.5.8",
+      "date": "2026-01-04",
+      "changes": [
+        "Codified mandatory Protocol Compliance Audit in PIR_V1.",
+        "Added self-audit step to PIR operational workflow to ensure procedural adherence.",
+        "Synchronized governance documentation with the new review standard."
+      ]
+    },
+    {
+      "version": "8.5.7",
+      "date": "2026-01-04",
+      "changes": [
+        "Renamed REV_V1 to PIR_V1 (Post-Implementation Review) for improved descriptive clarity.",
+        "Implemented FIX_V1 (Emergency Recovery Standard) to codify hotfix procedures.",
+        "Synchronized governance history and documentation with new nomenclature."
+      ]
+    },
+    {
+      "version": "8.5.6",
+      "date": "2026-01-04",
+      "changes": [
+        "Recovered tools/onboard.js from syntax regressions introduced during schema evolution.",
+        "Hardened template literal handling in the Knowledge Pulse briefing.",
+        "Restored full functional parity for the Actionable Onboarding entry point."
+      ]
+    },
+    {
+      "version": "8.5.5",
+      "date": "2026-01-04",
+      "changes": [
+        "Implemented Active Knowledge Refresh mechanism via onboard.js --refresh.",
+        "Codified mandatory Knowledge Pulse in GSD_V3 Phase 1 Survey.",
+        "Updated EVO_V1 to mandate re-synchronization after protocol amendments."
+      ]
+    },
     {
       "version": "8.5.4",
       "date": "2026-01-04",
       "changes": [
-        "Removed redundant Active Protocols section from README.md.",
-        "Decoupled project documentation from the System Protocol Library for improved modularity."
+        "Decoupled governance history from the application baseline.",
+        "Established tools/governance_changelog.json as the authoritative governance record.",
+        "Updated tools/generate_protocols.js to render the Governance Evolution history.",
+        "Refactored tools/finalizer.js to support the --gov routing flag."
       ]
     },
     {
@@ -32,7 +142,7 @@
       "changes": [
         "Implemented dynamic semantic versioning in tools/finalizer.js.",
         "Added support for --major, --minor, and --patch CLI flags.",
-        "Codified version justification in REV_V1 review standard."
+        "Codified version justification in PIR_V1 review standard."
       ]
     },
     {
@@ -48,8 +158,8 @@
       "version": "8.4.2",
       "date": "2026-01-04",
       "changes": [
-        "Implemented REV_V1 (Post-Implementation Review Standard) to formalize development cycle closure.",
-        "Integrated REV_V1 as a mandatory step in GSD_V3 Phase 5 finalization.",
+        "Implemented PIR_V1 (Post-Implementation Review Standard) to formalize development cycle closure.",
+        "Integrated PIR_V1 as a mandatory step in GSD_V3 Phase 5 finalization.",
         "Ensured debug history and process transparency are codified in system reviews."
       ]
     },
@@ -198,24 +308,6 @@
       ]
     },
     {
-      "version": "8.2.0",
-      "date": "2026-01-03",
-      "changes": [
-        "Implemented Multi-Threaded Decoder via WorkerPool.",
-        "Created decoder_worker.js for sharded matrix computation.",
-        "Enabled Zero-Copy ArrayBuffer transfer for reconstructed data.",
-        "Generalized WorkerPool to support multiple worker scripts."
-      ]
-    },
-    {
-      "version": "8.1.1",
-      "date": "2026-01-03",
-      "changes": [
-        "Added mandatory Director approval gate to GSD_V2 Phase 1 (SURVEY).",
-        "Updated protocol version to v2.3.1."
-      ]
-    },
-    {
       "version": "8.1.0",
       "date": "2026-01-03",
       "changes": [
@@ -223,15 +315,6 @@
         "Implemented ONBOARD_V2 with Collaborative Stewardship philosophy.",
         "Introduced Artifact Persistence (mandatory patch generation for logic changes).",
         "Established Visual Audit (PPIC) as a requirement for code injection."
-      ]
-    },
-    {
-      "version": "7.2.0",
-      "date": "2026-01-03",
-      "changes": [
-        "Implemented Hardware-Aware Concurrency (os.cpus detection).",
-        "Added THREADS config parameter for manual override.",
-        "Refactored WorkerPool initialization to support dynamic sizing."
       ]
     },
     {
@@ -244,21 +327,10 @@
       ]
     },
     {
-      "version": "7.0.5",
-      "date": "2026-01-02",
-      "changes": [
-        "Migrated to Configuration Injection (CFG_V1) via CLI arguments.",
-        "Decoupled engine logic from test parameters.",
-        "Renamed roles to Director and Engineer for clarity of authority."
-      ]
-    },
-    {
       "version": "7.0.0",
       "date": "2026-01-01",
       "changes": [
-        "Initialized GSD_V1 protocol for gated development.",
-        "Established Zero-Copy Buffer management in WorkerPool.",
-        "Implemented Systematic RLNC encoder with 4-thread concurrency."
+        "Initialized GSD_V1 protocol for gated development."
       ]
     }
   ]

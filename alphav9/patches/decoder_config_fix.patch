@@ -1,0 +1,10 @@
+--- threading/generation_decoder.js
++++ threading/generation_decoder.js
+@@ -31,5 +31,5 @@
+         this.pool.dispatch(piece.genId, {
+             type: 'ADD_PIECE',
+             piece,
+-            config: this.config
++            config: this.config.TRANSCODE
+         });
+     }
