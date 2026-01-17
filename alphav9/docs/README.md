@@ -1,6 +1,6 @@
-# Alpha-v8 Velocity - v8.5.4
+# System Protocol Library - v8.5.5
 **Status:** In-Progress (Dirty)  
-**Active Baseline:** Alpha-v8.0.0-Velocity
+**Active Baseline:** System Protocol Library (v2.0.0)
 
 ## 🛠 Key Capabilities
 - **Pseudo-SIMD Vectorization:** Utilizes BigUint64Array for 64-bit XOR parallelization in JS.
@@ -83,12 +83,21 @@
 - **SQAs Targeted:** Maintainability, Readability
 - **Result:** Unified all roadmap assets into modular docs/roadmap.json and updated documentation compiler
 
+#### Warden Modularization
+- **Trigger:** Tight coupling of handlers and redundant protocol loading across tools.
+- **SQAs Targeted:** Modularity, Maintainability
+- **Result:** Decoupled engine logic into shared lib/handlers and lib/loader; improved architectural scalability.
+
 ## ⚠️ Technical Debt
 - **Synchronous I/O:** Main thread blocked during initial file read; lacks streaming support.
 - **Pure JS GF Kernel:** Mathematical operations could be significantly faster in WASM.
 - **Manual Watchdog:** Timeout management is currently manual/external to the core logic.
 
 ## 🕒 Version History
+### v8.5.5 (2026-01-04)
+- Codified WorkerPool Dependency Injection lesson
+- Expanded Knowledge Base via PRY assignment
+
 ### v8.5.4 (2026-01-04)
 - Removed redundant Active Protocols section from README.md.
 - Decoupled project documentation from the System Protocol Library for improved modularity.
@@ -107,11 +116,6 @@
 - Implemented dynamic semantic versioning in tools/finalizer.js.
 - Added support for --major, --minor, and --patch CLI flags.
 - Codified version justification in REV_V1 review standard.
-
-### v8.5.0 (2026-01-04)
-- Upgraded ONBOARD_V3 to include the PRY_V1 proficiency exit gate.
-- Implemented PRY_V1 (Engineer Proficiency Standard) to formalize procedural demonstration.
-- Updated tools/onboard.js to reflect the pending Engineer status during onboarding.
 
 ---
 *Generated via DOC_V1 Protocol*

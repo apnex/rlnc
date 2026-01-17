@@ -1,6 +1,14 @@
 {
   "changelog": [
     {
+      "version": "8.5.5",
+      "date": "2026-01-04",
+      "changes": [
+        "Codified WorkerPool Dependency Injection lesson",
+        "Expanded Knowledge Base via PRY assignment"
+      ]
+    },
+    {
       "version": "8.5.4",
       "date": "2026-01-04",
       "changes": [

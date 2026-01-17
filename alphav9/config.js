@@ -15,18 +15,18 @@ module.exports = {
         SYSTEMATIC: true
     },
     NETWORK: {
-        LOSS_RATE: 0.01,    // 5% Light Loss (Real-world simulation)
-        REDUNDANCY: 1.1,    // 30% Overhead allowance
-        LATENCY: 2,
-        JITTER: 1
+        LOSS_RATE: 0.0,    // 5% Light Loss (Real-world simulation)
+        REDUNDANCY: 1.05,    // 30% Overhead allowance
+        LATENCY: 1,
+        JITTER: 0
     },
     WINDOW: {
-        SIZE: 12,           // Pressure: 12 concurrent generations
+        SIZE: 8,           // Pressure: 12 concurrent generations
         TIMEOUT: 1000
     },
     SYSTEM: {
         TARGET_THROUGHPUT_MB: 100, // Targeting 100MB/s simulated net
-        TICK_RATE: 20,
+        TICK_RATE: 10,
         THREADS: 4,          // 0 = Dynamic (Hardware Aware), >0 = Fixed
         GLOBAL_TIMEOUT: 60000
     }

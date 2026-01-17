@@ -1,10 +1,5 @@
 {
-  "project": "System Protocol Library",
-  "version": "8.5.5",
-  "environment": {
-    "active_baseline": "System Protocol Library (v2.0.0)"
-  },
-  "capabilities": [
+  "key_capabilities": [
     {
       "feature": "Pseudo-SIMD Vectorization",
       "detail": "Utilizes BigUint64Array for 64-bit XOR parallelization in JS."
@@ -22,7 +17,7 @@
       "detail": "Rigorous 5-phase operational loop for verified implementation."
     }
   ],
-  "modules": [
+  "module_overview": [
     {
       "module": "Core",
       "purpose": "Galois Field arithmetic and Gaussian Elimination kernel."
@@ -53,6 +48,5 @@
       "issue": "Manual Watchdog",
       "impact": "Timeout management is currently manual/external to the core logic."
     }
-  ],
-  "last_updated": "2026-01-04T20:58:34.458Z"
+  ]
 }
