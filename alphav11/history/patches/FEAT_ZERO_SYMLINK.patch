@@ -1,0 +1,235 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--- a/engine/warden.js	2026-01-19 09:44:51.991347605 +1100
++++ b/engine/warden.js	2026-01-19 09:46:10.924440415 +1100
+@@ -319,6 +319,22 @@
+         console.log(`\n[DLR_AUD_INTERJECTION] Justification: ${justification}`);
+     }
+ 
++    // 2.5 Path Fallback (FEAT_ZERO_SYMLINK)
++    // If the command references engine/, docs/, or validation/ but they don't exist in CWD,
++    // we rewrite the command to point to the internal Warden root.
++    let resolvedCommand = command;
++    const internalTools = ['engine', 'docs', 'validation'];
++    internalTools.forEach(tool => {
++        const localToolPath = path.join(process.cwd(), tool);
++        if (!fs.existsSync(localToolPath)) {
++            // Rewrite "node engine/..." to "node <INTERNAL_ROOT>/engine/..."
++            const regex = new RegExp(`node ${tool}/`, 'g');
++            const { ROOT: internalRoot } = require('./path_resolver');
++            const internalPath = path.join(internalRoot, tool);
++            resolvedCommand = resolvedCommand.replace(regex, `node ${internalPath}/`);
++        }
++    });
++
+     // 3. Execution
+     const source = intent ? 'agent_exec' : 'shadow_action';
+     logInteraction(command, source, protocolId, "", intent);
+@@ -326,11 +342,11 @@
+         logInteraction(`JUSTIFY: ${command}`, 'manual_echo', protocolId, `[DLR_AUD_INTERJECTION] ${justification}`);
+     }
+ 
+-    console.log(`🚀 [WARDEN] Executing Proxy: ${command}`);
++    console.log(`🚀 [WARDEN] Executing Proxy: ${resolvedCommand}`);
+ 
+     let output = "";
+     try {
+-        output = execSync(command, { 
++        output = execSync(resolvedCommand, { 
+             encoding: 'utf8',
+             env: { ...process.env, WARDEN_PROXY_ACTIVE: 'true' }
+         });
+
+--- a/registry/intent_patterns.json	2026-01-19 09:44:51.991347605 +1100
++++ b/registry/intent_patterns.json	2026-01-19 09:45:11.016611006 +1100
+@@ -7,42 +7,42 @@
+   "patterns": [
+     {
+       "id": "INT-GOV-INIT",
+-      "regex": "^node engine/warden.js init ([A-Z0-9_]+) \"(.*)\"",
++      "regex": "^node (warden/)?engine/warden.js init ([A-Z0-9_]+) \"(.*)\"",
+       "intent": { "tool": "warden", "action": "init", "protocol": "$1", "objective": "$2" }
+     },
+     {
+       "id": "INT-GOV-NEXT",
+-      "regex": "^node engine/warden.js next\\s?([a-z_]+)?",
++      "regex": "^node (warden/)?engine/warden.js next\\s?([a-z_]+)?",
+       "intent": { "tool": "warden", "action": "next", "trigger": "$1" }
+     },
+     {
+       "id": "INT-GOV-CLOSE",
+-      "regex": "^node engine/warden.js close",
++      "regex": "^node (warden/)?engine/warden.js close",
+       "intent": { "tool": "warden", "action": "close" }
+     },
+     {
+       "id": "INT-GOV-EXEC",
+-      "regex": "^node engine/warden.js exec \"(.*)\"",
++      "regex": "^node (warden/)?engine/warden.js exec \"(.*)\"",
+       "intent": { "tool": "warden", "action": "exec", "command": "$1" }
+     },
+     {
+       "id": "INT-KNO-LIST",
+-      "regex": "^node engine/oracle.js list",
++      "regex": "^node (warden/)?engine/oracle.js list",
+       "intent": { "tool": "oracle", "action": "list_index" }
+     },
+     {
+       "id": "INT-KNO-EXPLAIN",
+-      "regex": "^node engine/oracle.js explain (.*)",
++      "regex": "^node (warden/)?engine/oracle.js explain (.*)",
+       "intent": { "tool": "oracle", "action": "explain", "topic": "$1" }
+     },
+     {
+       "id": "INT-KNO-QUIZ",
+-      "regex": "^node engine/oracle.js quiz ([a-z]+) .*",
++      "regex": "^node (warden/)?engine/oracle.js quiz ([a-z]+) .*",
+       "intent": { "tool": "oracle", "action": "quiz", "type": "$1" }
+     },
+     {
+       "id": "INT-KNO-BLUEPRINT",
+-      "regex": "^node engine/oracle.js blueprint (.*)",
++      "regex": "^node (warden/)?engine/oracle.js blueprint (.*)",
+       "intent": { "tool": "oracle", "action": "generate_blueprint", "target": "$1" }
+     },
+     {
+@@ -52,102 +52,102 @@
+     },
+     {
+       "id": "INT-SYS-RESOLVE",
+-      "regex": "^node engine/path_resolver.js",
++      "regex": "^node (warden/)?engine/path_resolver.js",
+       "intent": { "tool": "path_resolver", "action": "path_resolution" }
+     },
+     {
+       "id": "INT-REP-BASE",
+-      "regex": "^node engine/report.js$",
++      "regex": "^node (warden/)?engine/report.js$",
+       "intent": { "tool": "report", "action": "interaction_report" }
+     },
+     {
+       "id": "INT-REP-COMP",
+-      "regex": "^node engine/report.js --compliance",
++      "regex": "^node (warden/)?engine/report.js --compliance",
+       "intent": { "tool": "report", "action": "compliance" }
+     },
+     {
+       "id": "INT-REP-PIR",
+-      "regex": "^node engine/report.js --pir",
++      "regex": "^node (warden/)?engine/report.js --pir",
+       "intent": { "tool": "report", "action": "pir" }
+     },
+     {
+       "id": "INT-REP-DRAFT",
+-      "regex": "^node engine/report.js --draft",
++      "regex": "^node (warden/)?engine/report.js --draft",
+       "intent": { "tool": "report", "action": "draft" }
+     },
+     {
+       "id": "INT-REP-JSON",
+-      "regex": "^node engine/report.js --json",
++      "regex": "^node (warden/)?engine/report.js --json",
+       "intent": { "tool": "report", "action": "json_report" }
+     },
+     {
+       "id": "INT-VFY-SNAP",
+-      "regex": "^node validation/verify_integrity.js --snapshot\\s?(.*)?",
++      "regex": "^node (warden/)?validation/verify_integrity.js --snapshot\\s?(.*)?",
+       "intent": { "tool": "verify_integrity", "action": "snapshot", "target": "$1" }
+     },
+     {
+       "id": "INT-VFY-AUDIT",
+-      "regex": "^node validation/verify_integrity.js --verify\\s?(.*)?",
++      "regex": "^node (warden/)?validation/verify_integrity.js --verify\\s?(.*)?",
+       "intent": { "tool": "verify_integrity", "action": "verify", "target": "$1" }
+     },
+     {
+       "id": "INT-VFY-SQA",
+-      "regex": "^node validation/audit_standards.js --sqa",
++      "regex": "^node (warden/)?validation/audit_standards.js --sqa",
+       "intent": { "tool": "audit_standards", "action": "sqa_anchoring" }
+     },
+     {
+       "id": "INT-PAT-SAVE",
+-      "regex": "^node engine/patch.js --save ([A-Z0-9_]+)",
++      "regex": "^node (warden/)?engine/patch.js --save ([A-Z0-9_]+)",
+       "intent": { "tool": "patch", "action": "save", "name": "$1" }
+     },
+     {
+       "id": "INT-GOV-FINALIZE",
+-      "regex": "^node docs/finalizer.js --gov (.*)",
++      "regex": "^node (warden/)?docs/finalizer.js --gov (.*)",
+       "intent": { "tool": "finalizer", "action": "gov_finalize", "args": "$1" }
+     },
+     {
+       "id": "INT-GOV-MISSION",
+-      "regex": "^node engine/mission.js (.*)",
++      "regex": "^node (warden/)?engine/mission.js (.*)",
+       "intent": { "tool": "mission", "action": "generate_brief", "args": "$1" }
+     },
+     {
+       "id": "INT-ONB-HAND",
+-      "regex": "^node engine/onboard.js$",
++      "regex": "^node (warden/)?engine/onboard.js$",
+       "intent": { "tool": "onboard", "action": "handshake" }
+     },
+     {
+       "id": "INT-ONB-REFR",
+-      "regex": "^node engine/onboard.js --refresh",
++      "regex": "^node (warden/)?engine/onboard.js --refresh",
+       "intent": { "tool": "onboard", "action": "refresh_pulse" }
+     },
+     {
+       "id": "INT-ONB-PROJ",
+-      "regex": "^node engine/onboard.js --project",
++      "regex": "^node (warden/)?engine/onboard.js --project",
+       "intent": { "tool": "onboard", "action": "project_orientation" }
+     },
+     {
+       "id": "INT-ONB-ALIGN",
+-      "regex": "^node engine/onboard.js --align (.*)",
++      "regex": "^node (warden/)?engine/onboard.js --align (.*)",
+       "intent": { "tool": "onboard", "action": "align", "token": "$1" }
+     },
+     {
+       "id": "INT-MAP-SYSTEM",
+-      "regex": "^node engine/map.js system",
++      "regex": "^node (warden/)?engine/map.js system",
+       "intent": { "tool": "map", "action": "system_topology" }
+     },
+     {
+       "id": "INT-MAP-PROTO",
+-      "regex": "^node engine/map.js protocol (.*)",
++      "regex": "^node (warden/)?engine/map.js protocol (.*)",
+       "intent": { "tool": "map", "action": "protocol_visualization", "id": "$1" }
+     },
+     {
+       "id": "INT-MAP-DEPS",
+-      "regex": "^node engine/map.js deps",
++      "regex": "^node (warden/)?engine/map.js deps",
+       "intent": { "tool": "map", "action": "dependency_graph" }
+     },
+     {
+       "id": "INT-ORA-PLEDGE",
+-      "regex": "^node engine/oracle.js quiz pledge.*",
++      "regex": "^node (warden/)?engine/oracle.js quiz pledge.*",
+       "intent": { "tool": "oracle", "action": "behavioral_pledge" }
+     },
+     {
+

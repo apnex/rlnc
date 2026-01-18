@@ -1,0 +1,8 @@
+{
+  "id": "CON-004",
+  "source_idea": "IDEA-038",
+  "title": "Zero-Copy UDP Transport",
+  "status": "RATIFIED",
+  "spec": "A performance-first transport layer that anchors UDP sockets directly to shared memory, ensuring that bits move from the wire to the math engine without a single user-space copy.",
+  "created_at": "2026-01-18T08:26:05.830Z"
+}

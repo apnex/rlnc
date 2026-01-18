@@ -1,0 +1,92 @@
+-- work out AES cpu instruction hacking and native crypto module (nodejs)
+-- plan out (IDEA) Architecture Map (current) concept for full hueristics / context of function
+-- functional domains - could be independantly useful.
+--- strict json spec structure? manifest, methods, api, hashes
+--- qualitative (metadata)goal, purpose, description, scope, methods, functions, features, style?
+
+-- Do this before meta-concept? Probably
+-- scope out meta-concept for full client-server separation, clean duty separation, portable
+
+Installation Instructions.
+
+# clone rlnc
+git clone https://github.com/apnex/rlnc
+
+# go to project directory
+cd rlnc/alphav10
+
+# clone warden
+git clone https://github.com/apnex/warden
+
+# start gemini-cli in project directory (alphav10)
+gemini
+
+# initiate warden onboard
+You are the Engineer in this session.
+To initialize the environment and protocols, execute:
+node engine/onboard.js
+
+## still an issue with the "Echo commands" running to shell
+
+## initial governance questions
+What is your current working directory?
+You have onboarded into the warden governance system, can you explain what this is?
+Your pledge interpretation was terse, can you confirm you have internalised the prime directives and explain them to me in detail?
+There is another key principle, regarding "Understanding" - can you explain this?
+What is the IDEA protocol, and where does it fit into this process?
+Will you obey all Director approval gates, and show your work and STOP?
+
+## initial project questions
+The /warden directory, all of its code and tooling encompasses the warden governance system, however that is not our working target - what is it?
+Can you provide me a bit more detail about the architecture and function of this system?
+What tests are available to verify the individual components of the system?
+I'd like to run a full sequence of tests, to perform a baseline of the system. Can you please execute each one, in turn, then STOP/HALT and provide an in-depth technical analysis of the result to the Director. One acknowledged / approved by the Director - move onto the next test. Do you understand?
+#### TESTING to become its own formal protocol?
+
+
+
+"S-Box optimization for the Decoder"
+-- Didnt we do this? Can we very current state?
+-- Generate a FEAT document explaining implementation.
+
+IDEA in current state context
+
+
+TARGET override!
+I'd l
+
+Why are you creating symlinks? Whats the deal?
+-- Revisit all pathing logic for warden versus target.
+
+
+CPU is still bound by something else in the matrix solver.
+
+
+Reinstate add / sub - completeness
+Why did you add empty lines between code in GaloisMatrix?
+Also, can we re-instate the add() and sub() for completeness?
+
+If we were to implement math-heavy hardware cpu offload, where do threads fit in to this architecture? Do they still help?
+What about DPDK? Can this assist us in any way?
+Where do eBPF programs factor in - is there any benefit to an approach leveraging this?
+
+I think its because we are setting an ENV each time (WARDEN_TARGET=/home/apnex/rlnc/alphav10)
+I'd like to avoid having to pass the current working project dir as an ENV for every single command (WARDEN_TARGET=/home/apnex/rlnc/alphav10). What options are there to inject this as a persisten configuration item? Perhaps as part of project onboard?
+
+
+#### so many things
+
+I noticed the watchdogTimer was removed from a number of components. Can you explain to me who is now reponsible for, and has implemented, the watchdog function?
+
+What is this?
+v10 Optimization: Use bifurcated TX pointer
+
+Slot Locking?
+
+block_decoder Incremental Gaussian Elimination?? Explain regressions.
+
+Blocking Slot Acquisition
+
+Please list ever file you modified or added, along with every method you modified or refactored within that file.
+
+

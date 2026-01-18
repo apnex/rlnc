@@ -1,0 +1,24 @@
+{
+  "concepts": [
+    {
+      "id": "CON-001",
+      "title": "Vectorized S-Box Multiplication Engine",
+      "source_idea": "IDEA-002"
+    },
+    {
+      "id": "CON-002",
+      "title": "Native Addon Hardware Acceleration",
+      "source_idea": "IDEA-036"
+    },
+    {
+      "id": "CON-003",
+      "title": "Unified XDP-SIMD Stack",
+      "source_idea": "IDEA-037"
+    },
+    {
+      "id": "CON-004",
+      "title": "Zero-Copy UDP Transport",
+      "source_idea": "IDEA-038"
+    }
+  ]
+}

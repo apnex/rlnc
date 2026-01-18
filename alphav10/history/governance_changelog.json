@@ -1,0 +1,1311 @@
+{
+  "governance_changelog": [
+    {
+      "version": "9.19.8",
+      "date": "2026-01-18",
+      "changes": [
+        "Auto_Context_Completion"
+      ]
+    },
+    {
+      "version": "9.19.7",
+      "date": "2026-01-18",
+      "changes": [
+        "Cleanup_Completion"
+      ]
+    },
+    {
+      "version": "9.19.6",
+      "date": "2026-01-18",
+      "changes": [
+        "cleanup_refine"
+      ]
+    },
+    {
+      "version": "9.19.5",
+      "date": "2026-01-18",
+      "changes": [
+        "Phase3_Completion"
+      ]
+    },
+    {
+      "version": "9.19.4",
+      "date": "2026-01-18",
+      "changes": [
+        "portable_pathing"
+      ]
+    },
+    {
+      "version": "9.19.3",
+      "date": "2026-01-18",
+      "changes": [
+        "baseline"
+      ]
+    },
+    {
+      "version": "9.19.2",
+      "date": "2026-01-15",
+      "changes": [
+        "FEAT_LivingMaps"
+      ]
+    },
+    {
+      "version": "9.19.1",
+      "date": "2026-01-15",
+      "changes": [
+        "Add Version and Generated headers to README and BACKLOG generators"
+      ]
+    },
+    {
+      "version": "9.19.0",
+      "date": "2026-01-15",
+      "changes": [
+        "Codify STD_COGNITIVE_FIDELITY standard",
+        "Update Onboarding Pledge with Understanding vs Velocity scenario",
+        "Standardize meta.principles across all 17 protocols"
+      ]
+    },
+    {
+      "version": "9.18.0",
+      "date": "2026-01-15",
+      "changes": [
+        "Upgrade GSD_V5 to v5.9.0 with mandatory Feature Spec artifact",
+        "Refactor engine/idea.js to support full IDEA_V1 lifecycle",
+        "Register DLR_DOC_FEAT and STD_FEAT_STRUCT in registry"
+      ]
+    },
+    {
+      "version": "9.17.0",
+      "date": "2026-01-15",
+      "changes": [
+        "Implement CON-008: Structured Idea-to-Concept Taxonomy",
+        "Upgrade IDEA_V1 to v1.1.0 with Gated Incubation Loop",
+        "Register DLR_IDE_ACK in deliverables registry"
+      ]
+    },
+    {
+      "version": "9.16.11",
+      "date": "2026-01-14",
+      "changes": [
+        "Synchronized docs/BACKLOG.md with latest implementation status",
+        "Verified bit-perfect parity between registry and documentation"
+      ]
+    },
+    {
+      "version": "9.16.10",
+      "date": "2026-01-14",
+      "changes": [
+        "Completed implementation review of FEAT_STREAMLINED_ONBOARDING",
+        "Verified Proxy Guard and Stale State Guard logic",
+        "Confirmed action-oriented UI prompts in warden.js"
+      ]
+    },
+    {
+      "version": "9.16.9",
+      "date": "2026-01-14",
+      "changes": [
+        "Finalizing streamlined onboarding mission"
+      ]
+    },
+    {
+      "version": "9.16.8",
+      "date": "2026-01-14",
+      "changes": [
+        "Updated FEAT_STRUCTURED_AUDIT.md to LIVE status",
+        "Documented deep-stack scoping and ID-First matching",
+        "Synchronized terminology with registry (DLR_ASM_COMPLIANCE)"
+      ]
+    },
+    {
+      "version": "9.16.7",
+      "date": "2026-01-14",
+      "changes": [
+        "Implemented ID-First matching logic in matchClaim",
+        "Added sanitizeCommand helper for fuzzy normalization",
+        "Reduced false-negative OMISSIONs during ratification"
+      ]
+    },
+    {
+      "version": "9.16.6",
+      "date": "2026-01-14",
+      "changes": [
+        "Synchronized backlog with FEAT implementation status",
+        "Patched backlog.js with close command and path resolution",
+        "Codified technical debt for Latching and Streamlining"
+      ]
+    },
+    {
+      "version": "9.16.5",
+      "date": "2026-01-14",
+      "changes": [
+        "Implemented metadata-driven audit scoping",
+        "Fixed tool-matching regression in normalizeCommand",
+        "Enabled parent-cycle visibility for CAP_V1"
+      ]
+    },
+    {
+      "version": "9.16.4",
+      "date": "2026-01-14",
+      "changes": [
+        "Implemented resolve.shadow helper",
+        "Registered SOURCES.ENGINEER_REPORT",
+        "Refactored patch.js and report.js",
+        "Eliminated legacy fallbacks in loader.js and audit_standards.js",
+        "Fixed bug in generate_protocols.js"
+      ]
+    },
+    {
+      "version": "9.16.3",
+      "date": "2026-01-14",
+      "changes": [
+        "Implemented resolve.shadow helper",
+        "Registered SOURCES.ENGINEER_REPORT",
+        "Refactored patch.js and report.js",
+        "Eliminated legacy fallbacks in loader.js and audit_standards.js"
+      ]
+    },
+    {
+      "version": "9.16.2",
+      "date": "2026-01-13",
+      "changes": [
+        "Purge legacy reporting scripts"
+      ]
+    },
+    {
+      "version": "9.16.1",
+      "date": "2026-01-13",
+      "changes": [
+        "Harden behavioral pledge with qualitative analysis"
+      ]
+    },
+    {
+      "version": "9.16.0",
+      "date": "2026-01-13",
+      "changes": [
+        "Implement Cognitive Interjection Presentation Layer (FEAT_COGNITIVE_INTERJECTION)",
+        "Implement Double-Lock Delivery Handshake"
+      ]
+    },
+    {
+      "version": "9.15.1",
+      "date": "2026-01-13",
+      "changes": [
+        "Finalize Universal Oracle"
+      ]
+    },
+    {
+      "version": "9.15.0",
+      "date": "2026-01-13",
+      "changes": [
+        "Implement Universal Oracle Uplift (FEAT_UNIVERSAL_ORACLE)",
+        "Implement Recursive Schema Engine for Blueprints"
+      ]
+    },
+    {
+      "version": "9.14.2",
+      "date": "2026-01-13",
+      "changes": [
+        "Ratify read-only intent expansion and runtime hardening"
+      ]
+    },
+    {
+      "version": "9.14.1",
+      "date": "2026-01-13",
+      "changes": [
+        "Finalize Portable Resolver"
+      ]
+    },
+    {
+      "version": "9.14.0",
+      "date": "2026-01-13",
+      "changes": [
+        "Implement Deterministic Portable Path Resolver (FEAT_PORTABLE_RESOLVER)",
+        "Refactor core tools to use absolute pathing",
+        "Codify STD_PORTABLE_PATHS"
+      ]
+    },
+    {
+      "version": "9.13.3",
+      "date": "2026-01-13",
+      "changes": [
+        "Ratify high-fidelity feature documentation"
+      ]
+    },
+    {
+      "version": "9.13.2",
+      "date": "2026-01-13",
+      "changes": [
+        "Rename and consolidate design documents to FEAT identifiers"
+      ]
+    },
+    {
+      "version": "9.13.1",
+      "date": "2026-01-13",
+      "changes": [
+        "Ratify System Stability post-Implementation Analysis"
+      ]
+    },
+    {
+      "version": "9.13.0",
+      "date": "2026-01-13",
+      "changes": [
+        "Implement Canonical Command Model (FEAT_STRUCTURED_AUDIT)",
+        "Implement Socratic Brake interjection logic",
+        "Consolidate reporting tools into unified engine/report.js"
+      ]
+    },
+    {
+      "version": "9.12.0",
+      "date": "2026-01-13",
+      "changes": [
+        "Implement Canonical Command Model (FEAT_STRUCTURED_AUDIT)",
+        "Implement Socratic Brake interjection logic",
+        "Consolidate reporting tools into unified engine/report.js"
+      ]
+    },
+    {
+      "version": "9.11.0",
+      "date": "2026-01-13",
+      "changes": [
+        "Implement Modular Protocol Registry (FEAT_MODULAR_REGISTRY)",
+        "Implement Virtual Join logic in GovernanceAPI and Loader",
+        "Create Library Auditor for manifest-driven integrity hashing"
+      ]
+    },
+    {
+      "version": "9.10.0",
+      "date": "2026-01-13",
+      "changes": [
+        "Refactor ONBOARD_V4 to metadata-driven state machine",
+        "Remove hard-coded induction logic from onboard.js",
+        "Migrate induction state files to consolidated directory"
+      ]
+    },
+    {
+      "version": "9.9.51",
+      "date": "2026-01-13",
+      "changes": [
+        "Codified STD_METADATA_PRIMACY standard."
+      ]
+    },
+    {
+      "version": "9.9.50",
+      "date": "2026-01-13",
+      "changes": [
+        "Refactored Nested Protocol Enforcement to Metadata-Driven Architecture"
+      ]
+    },
+    {
+      "version": "9.9.49",
+      "date": "2026-01-12",
+      "changes": [
+        "Hardened GSD_V5 Finalize Gate with 3-Way Compliance integration."
+      ]
+    },
+    {
+      "version": "9.9.48",
+      "date": "2026-01-12",
+      "changes": [
+        "Hardened GSD_V5 Finalize Gate with 3-Way Compliance integration."
+      ]
+    },
+    {
+      "version": "9.9.47",
+      "date": "2026-01-11",
+      "changes": [
+        "Refine provenance workflow to trust auto-signed echoes",
+        "Suppress Protocol Breach warning for verified tokens",
+        "Implement post-execution provenance check in warden.js"
+      ]
+    },
+    {
+      "version": "9.9.46",
+      "date": "2026-01-11",
+      "changes": [
+        "Implement automated hash signatures for Acknowledgements in warden.js",
+        "Add automated telemetry and session ID calculation in report.js",
+        "Verified bit-perfect auto-population of Phase A schemas"
+      ]
+    },
+    {
+      "version": "9.9.45",
+      "date": "2026-01-11",
+      "changes": [
+        "Upgrade all Core Audit Loop deliverables (ACK, AUD, RPT) to High-Fidelity schemas",
+        "Implement SHA-256 hash_ref and telemetry property definitions",
+        "Verified bit-perfect blueprint generation for all uplifted items"
+      ]
+    },
+    {
+      "version": "9.9.44",
+      "date": "2026-01-11",
+      "changes": [
+        "Perform deep semantic analysis of all 25 system deliverables",
+        "Generate SCHEMA_ANALYSIS.md with proposed JSON Schema upgrades",
+        "Group deliverables by Kind for shared schema traits"
+      ]
+    },
+    {
+      "version": "9.9.43",
+      "date": "2026-01-11",
+      "changes": [
+        "Rename all deliverables to DLR_<KIND>_<SUBKIND> format",
+        "Update protocol references to match new taxonomy",
+        "Implement validation/audit_taxonomy.js"
+      ]
+    },
+    {
+      "version": "9.9.42",
+      "date": "2026-01-11",
+      "changes": [
+        "Implement recursive JSON Schema parsing in oracle.js",
+        "Upgrade DLR_MSN_BRIEF and DLR_GSD_PLAN to High-Fidelity format",
+        "Update validation suite for schema compatibility"
+      ]
+    },
+    {
+      "version": "9.9.41",
+      "date": "2026-01-11",
+      "changes": [
+        "Transition Interaction Report to structured JSON model",
+        "Implement deterministic claim matching in compliance.js",
+        "Add --json flag to report.js"
+      ]
+    },
+    {
+      "version": "9.9.40",
+      "date": "2026-01-11",
+      "changes": [
+        "Implement dynamic JSON blueprint generation in oracle.js",
+        "Add smart initialization for plural schema keys",
+        "Implement automated blueprint audit script"
+      ]
+    },
+    {
+      "version": "9.9.39",
+      "date": "2026-01-11",
+      "changes": [
+        "Clarify Onboarding Hold Protocol in engine/onboard.js"
+      ]
+    },
+    {
+      "version": "9.9.38",
+      "date": "2026-01-10",
+      "changes": [
+        "--auto-close",
+        "Implemented Oracle Blueprints (FEAT_ORACLE_BLUEPRINTS)",
+        "Added blueprint command and Concept Registry guidance"
+      ]
+    },
+    {
+      "version": "9.9.37",
+      "date": "2026-01-10",
+      "changes": [
+        "--auto-close",
+        "Groomed Governance Backlog",
+        "Closed 6 items and restored onboarding visibility"
+      ]
+    },
+    {
+      "version": "9.9.36",
+      "date": "2026-01-10",
+      "changes": [
+        "--auto-close",
+        "Codified CON-002 (Universal Guidance Engine)",
+        "Added verbose technical specification and Oracle fallback logic"
+      ]
+    },
+    {
+      "version": "9.9.35",
+      "date": "2026-01-10",
+      "changes": [
+        "--auto-close",
+        "Implemented Universal Registry & Guidance Engine",
+        "Decoupled deliverables and implemented multi-source synthesis"
+      ]
+    },
+    {
+      "version": "9.9.34",
+      "date": "2026-01-10",
+      "changes": [
+        "--auto-close",
+        "Formalized Concept Registry",
+        "Added registry/concepts and engine/concept.js tool"
+      ]
+    },
+    {
+      "version": "9.9.33",
+      "date": "2026-01-10",
+      "changes": [
+        "--auto-close",
+        "Expanded GSD Tutorial to Full Lifecycle",
+        "Implemented Director Proxy and remediated registry structural fidelity"
+      ]
+    },
+    {
+      "version": "9.9.32",
+      "date": "2026-01-10",
+      "changes": [
+        "--auto-close",
+        "Implemented Oracle Tutorial (Mode A)",
+        "Hardened warden.js logging and added tutorial engine"
+      ]
+    },
+    {
+      "version": "9.9.31",
+      "date": "2026-01-10",
+      "changes": [
+        "--auto-close",
+        "Implemented Oracle Sandbox (Mode B)",
+        "Decoupled engine paths and added sandbox command"
+      ]
+    },
+    {
+      "version": "9.9.30",
+      "date": "2026-01-10",
+      "changes": [
+        "--auto-close",
+        "Expanded Oracle Guidance Registry",
+        "Added 4 new complex audit topics to registry/guidance.json"
+      ]
+    },
+    {
+      "version": "9.9.29",
+      "date": "2026-01-10",
+      "changes": [
+        "--auto-close",
+        "Remediated role schema inconsistency",
+        "Fixed generator crash by adding responsibilities array"
+      ]
+    },
+    {
+      "version": "9.9.28",
+      "date": "2026-01-10",
+      "changes": [
+        "--auto-close",
+        "Integrated Warden Oracle into Onboarding",
+        "Updated role model and induction scope"
+      ]
+    },
+    {
+      "version": "9.9.27",
+      "date": "2026-01-10",
+      "changes": [
+        "--auto-close",
+        "Implemented Warden Oracle (FEAT_WARDEN_ORACLE)",
+        "Added engine/oracle.js and registry/guidance.json"
+      ]
+    },
+    {
+      "version": "9.9.26",
+      "date": "2026-01-10",
+      "changes": [
+        "--auto-close",
+        "Finalized Idea Management System",
+        "Corrected finalization sequence"
+      ]
+    },
+    {
+      "version": "9.9.25",
+      "date": "2026-01-10",
+      "changes": [
+        "--auto-close",
+        "Implemented Idea Management System",
+        "Added IDEA_V1 protocol and engine/idea.js tool"
+      ]
+    },
+    {
+      "version": "9.9.24",
+      "date": "2026-01-10",
+      "changes": [
+        "--auto-close",
+        "Finalized automated closure",
+        "Fixed recursive logging deadlock and syntax errors"
+      ]
+    },
+    {
+      "version": "9.9.23",
+      "date": "2026-01-10",
+      "changes": [
+        "--auto-close",
+        "Remediated recursive closure deadlock",
+        "Refactored warden.js to log before execution"
+      ]
+    },
+    {
+      "version": "9.9.22",
+      "date": "2026-01-10",
+      "changes": [
+        "--auto-close",
+        "Implemented Automated Cycle Closure",
+        "Added --auto-close to finalizer.js"
+      ]
+    },
+    {
+      "version": "9.9.21",
+      "date": "2026-01-10",
+      "changes": [
+        "Implemented Automated Patch Management",
+        "Hardened GSD with transactional snapshot/save instructions"
+      ]
+    },
+    {
+      "version": "9.9.20",
+      "date": "2026-01-10",
+      "changes": [
+        "Restored Exit Gate visibility",
+        "Updated onboarding handshake with PRY and PIR refs"
+      ]
+    },
+    {
+      "version": "9.9.19",
+      "date": "2026-01-10",
+      "changes": [
+        "Decoupled Onboarding into Governance and Project phases",
+        "Refactored onboard.js for modularity"
+      ]
+    },
+    {
+      "version": "9.9.18",
+      "date": "2026-01-10",
+      "changes": [
+        "Remediated Registry Centralization",
+        "Fixed documentation generator hardcoded paths"
+      ]
+    },
+    {
+      "version": "9.9.17",
+      "date": "2026-01-10",
+      "changes": [
+        "Centralized state files into /registry",
+        "Updated path_resolver.js and protocols.json"
+      ]
+    },
+    {
+      "version": "9.9.16",
+      "date": "2026-01-10",
+      "changes": [
+        "Implemented Validated SQA Anchoring",
+        "Added --sqa validation to audit_standards.js"
+      ]
+    },
+    {
+      "version": "9.9.15",
+      "date": "2026-01-10",
+      "changes": [
+        "Refined Journaling DX",
+        "Fixed onboarding syntax error"
+      ]
+    },
+    {
+      "version": "9.9.14",
+      "date": "2026-01-10",
+      "changes": [
+        "Implemented Explicit CLI Documentation",
+        "Enforced JIT Guidance with Example syntax"
+      ]
+    },
+    {
+      "version": "9.9.13",
+      "date": "2026-01-10",
+      "changes": [
+        "Implemented proactive gate instructions",
+        "Hardened registry with explicit STOP commands"
+      ]
+    },
+    {
+      "version": "9.9.12",
+      "date": "2026-01-10",
+      "changes": [
+        "Analyzed impact of splitting protocols.json",
+        "Rejected split proposal"
+      ]
+    },
+    {
+      "version": "9.9.11",
+      "date": "2026-01-06",
+      "changes": [
+        "Codified Engineer Audit",
+        "Relaxed approval gates to support Approved/Ratified language"
+      ]
+    },
+    {
+      "version": "9.9.10",
+      "date": "2026-01-06",
+      "changes": [
+        "Refactored Governance Engine for Nested Stacks",
+        "Enabled modular protocol recursion"
+      ]
+    },
+    {
+      "version": "9.9.9",
+      "date": "2026-01-06",
+      "changes": [
+        "Refactored GSD Phase 5",
+        "Removed redundant legacy gates",
+        "Delegated compliance to CAP ratification seal"
+      ]
+    },
+    {
+      "version": "9.9.8",
+      "date": "2026-01-06",
+      "changes": [
+        "Implemented CAP_V1",
+        "Updated GSD_V5 Phase 5 requirements"
+      ]
+    },
+    {
+      "version": "9.9.7",
+      "date": "2026-01-06",
+      "changes": [
+        "Implemented Three-Way Compliance Verification",
+        "Updated compliance.js",
+        "Updated protocols.json"
+      ]
+    },
+    {
+      "version": "9.9.6",
+      "date": "2026-01-06",
+      "changes": [
+        "Hardened GSD_V5 with mandatory Director Verification Approval gate."
+      ]
+    },
+    {
+      "version": "9.9.5",
+      "date": "2026-01-06",
+      "changes": [
+        "Hardened GSD_V5 with mandatory Director Plan Approval gate."
+      ]
+    },
+    {
+      "version": "9.9.4",
+      "date": "2026-01-05",
+      "changes": [
+        "Remediated legacy gsd.js reference in PRY_V2 protocol",
+        "Normalized Warden branding references in knowledge base"
+      ]
+    },
+    {
+      "version": "9.9.3",
+      "date": "2026-01-04",
+      "changes": [
+        "Normalized Warden for independent operation; remediated separation inconsistencies"
+      ]
+    },
+    {
+      "version": "9.9.2",
+      "date": "2026-01-04",
+      "changes": [
+        "Unified gsd.js references into Warden framework"
+      ]
+    },
+    {
+      "version": "9.9.1",
+      "date": "2026-01-04",
+      "changes": [
+        "Remediated Autonomous Phase Leap violation",
+        "Reinforced Role Boundaries in Knowledge Base"
+      ]
+    },
+    {
+      "version": "9.9.0",
+      "date": "2026-01-04",
+      "changes": [
+        "Implemented Warden Session Logger and Governance Proxy for automated evidence verification."
+      ]
+    },
+    {
+      "version": "9.8.1",
+      "date": "2026-01-04",
+      "changes": [
+        "Operationalized Knowledge Base with automated onboarding pulse and documentation."
+      ]
+    },
+    {
+      "version": "9.8.0",
+      "date": "2026-01-04",
+      "changes": [
+        "Integrated Governance API into Warden and implemented safe protocol lookup for resilience.",
+        "Mandated gov.js usage in GSD_V5 instructions."
+      ]
+    },
+    {
+      "version": "9.7.0",
+      "date": "2026-01-04",
+      "changes": [
+        "Implemented Governance API and gov.js CLI for robust protocol transactions.",
+        "Modernized Warden suite to v1.4.0."
+      ]
+    },
+    {
+      "version": "9.6.0",
+      "date": "2026-01-04",
+      "changes": [
+        "Evolved PIR to V4 with Actionable post-mortems and Knowledge Base persistence."
+      ]
+    },
+    {
+      "version": "9.5.0",
+      "date": "2026-01-04",
+      "changes": [
+        "Implemented GSD_V5 (Quality Engine) and PIR_V3 with SQA anchoring."
+      ]
+    },
+    {
+      "version": "9.4.0",
+      "date": "2026-01-04",
+      "changes": [
+        "Implemented GSD_V5 (Quality Engine) with SQA anchoring and weighted evidence.",
+        "Upgraded PIR to V3 with SQA Impact Reporting."
+      ]
+    },
+    {
+      "version": "9.3.12",
+      "date": "2026-01-04",
+      "changes": [
+        "Performed PIR on Turn Boundary violation in Rename cycle."
+      ]
+    },
+    {
+      "version": "9.3.11",
+      "date": "2026-01-04",
+      "changes": [
+        "Modernized governance testing infrastructure and implemented Warden unit tests."
+      ]
+    },
+    {
+      "version": "9.3.10",
+      "date": "2026-01-04",
+      "changes": [
+        "Implemented dynamic column alignment in verify_integrity.js table output."
+      ]
+    },
+    {
+      "version": "9.3.9",
+      "date": "2026-01-04",
+      "changes": [
+        "Renamed all protocols_v2 artifacts to protocols."
+      ]
+    },
+    {
+      "version": "9.3.8",
+      "date": "2026-01-04",
+      "changes": [
+        "Promoted GSD_V4 to production status by removing the Pilot tag."
+      ]
+    },
+    {
+      "version": "9.3.7",
+      "date": "2026-01-04",
+      "changes": [
+        "Standardized transition triggers to 'next' across the protocol library and enhanced Warden error guidance."
+      ]
+    },
+    {
+      "version": "9.3.6",
+      "date": "2026-01-04",
+      "changes": [
+        "Modularized Warden Governance Engine and decoupled requirement handlers."
+      ]
+    },
+    {
+      "version": "9.3.5",
+      "date": "2026-01-04",
+      "changes": [
+        "Renamed initial transition triggers from 'init' to 'start' across all v2 protocols."
+      ]
+    },
+    {
+      "version": "9.3.4",
+      "date": "2026-01-04",
+      "changes": [
+        "Fully deprecated Protocol v1 and refactored verify_integrity.js."
+      ]
+    },
+    {
+      "version": "9.3.3",
+      "date": "2026-01-04",
+      "changes": [
+        "Deprecated and removed redundant gsd.js wrapper.",
+        "Established warden.js as the single authoritative governance entry point."
+      ]
+    },
+    {
+      "version": "9.3.2",
+      "date": "2026-01-04",
+      "changes": [
+        "Established technical documentation infrastructure for Warden suite in tools/docs/.",
+        "Implemented dynamic README generation for Warden technical artifacts."
+      ]
+    },
+    {
+      "version": "9.3.1",
+      "date": "2026-01-04",
+      "changes": [
+        "Implemented automated JSON repair in validator and grace windows in Warden to reduce protocol friction."
+      ]
+    },
+    {
+      "version": "9.3.0",
+      "date": "2026-01-04",
+      "changes": [
+        "Unified session authority under Protocol v2 and Warden framework.",
+        "Refactored toolchain for state-machine governance."
+      ]
+    },
+    {
+      "version": "9.2.0",
+      "date": "2026-01-04",
+      "changes": [
+        "Implemented Warden Governance Engine for dynamic Protocol v2 enforcement.",
+        "Refactored gsd.js as a wrapper for Warden."
+      ]
+    },
+    {
+      "version": "9.1.12",
+      "date": "2026-01-04",
+      "changes": [
+        "Refined DLR_ONB_HANDSHAKE with mandatory schema and enhanced ONBOARD_V4 enforcement."
+      ]
+    },
+    {
+      "version": "9.1.11",
+      "date": "2026-01-04",
+      "changes": [
+        "Enhanced verify_integrity.js to support multi-library auditing and Protocol v2 enforcement."
+      ]
+    },
+    {
+      "version": "9.1.10",
+      "date": "2026-01-04",
+      "changes": [
+        "Aligned Protocol v2 title and bootstrap formatting with v1."
+      ]
+    },
+    {
+      "version": "9.1.9",
+      "date": "2026-01-04",
+      "changes": [
+        "Achieved 100% detail parity between Protocol v1 and v2 documentation."
+      ]
+    },
+    {
+      "version": "9.1.8",
+      "date": "2026-01-04",
+      "changes": [
+        "Migrated all remaining protocols to Protocol v2 Library."
+      ]
+    },
+    {
+      "version": "9.1.7",
+      "date": "2026-01-04",
+      "changes": [
+        "Refactored Protocol v2 to Library structure and migrated VFY Protocol."
+      ]
+    },
+    {
+      "version": "9.1.6",
+      "date": "2026-01-04",
+      "changes": [
+        "Migrated GSD metadata and detailed specifications from Protocol v1 to v2."
+      ]
+    },
+    {
+      "version": "9.1.5",
+      "date": "2026-01-04",
+      "changes": [
+        "Implemented Protocol v2 documentation generator and generated PROTOCOLS_v2.md."
+      ]
+    },
+    {
+      "version": "9.1.4",
+      "date": "2026-01-04",
+      "changes": [
+        "Implemented Protocol v2 Schema and Validator for Integrity Enforcement."
+      ]
+    },
+    {
+      "version": "9.1.3",
+      "date": "2026-01-04",
+      "changes": [
+        "Designed and implemented Protocol v2.0 Schema pilot (GSD_V4)."
+      ]
+    },
+    {
+      "version": "9.1.2",
+      "date": "2026-01-04",
+      "changes": [
+        "Codified Atomic Turn Enforcement in GSD_V3 to prevent unauthorized phase transitions."
+      ]
+    },
+    {
+      "version": "9.1.1",
+      "date": "2026-01-04",
+      "changes": [
+        "Removed git status dependency from STAT_V1 reporting."
+      ]
+    },
+    {
+      "version": "9.1.0",
+      "date": "2026-01-04",
+      "changes": [
+        "Implemented tools/gsd.js for active GSD state tracking and gate enforcement.",
+        "Updated GSD_V3 protocol to mandate tools/gsd.js usage."
+      ]
+    },
+    {
+      "version": "9.0.10",
+      "date": "2026-01-04",
+      "changes": [
+        "Expanded VFY_V1 coverage to include deliverable_registry and compliance_registry via _GLOBAL_REGISTRIES."
+      ]
+    },
+    {
+      "version": "9.0.9",
+      "date": "2026-01-04",
+      "changes": [
+        "Clarified PRY_V1 transition in onboard.js output."
+      ]
+    },
+    {
+      "version": "9.0.8",
+      "date": "2026-01-04",
+      "changes": [
+        "Clarified DLR_VFY_SNAPSHOT persistence file path."
+      ]
+    },
+    {
+      "version": "9.0.7",
+      "date": "2026-01-04",
+      "changes": [
+        "Standardized nomenclature by replacing 'Ratification' with 'Approval' across all protocols and documentation.",
+        "Renamed EVO_V1 key 'ratification_standard' to 'approval_standard' for schema consistency.",
+        "Synchronized all governance gates and historical records with the new approval standard."
+      ]
+    },
+    {
+      "version": "9.0.6",
+      "date": "2026-01-04",
+      "changes": [
+        "Removed redundant Bootstrap section from README.md.",
+        "Centralized session initialization instructions in the System Protocol Library."
+      ]
+    },
+    {
+      "version": "9.0.5",
+      "date": "2026-01-04",
+      "changes": [
+        "Codified the Compliance Registry (CMP_ identifiers) to formalize development constraints.",
+        "Updated PIR_V1 to mandate auditing against the codified compliance framework.",
+        "Enhanced verify_integrity.js and generate_protocols.js to support the new registry."
+      ]
+    },
+    {
+      "version": "9.0.4",
+      "date": "2026-01-04",
+      "changes": [
+        "Integrated Friction Disclosure into PIR_V1 compliance audit.",
+        "Codified 'High Friction Signal' as a trigger for EVO_V1 evolution.",
+        "Updated deliverable_registry and onboarding to reflect dual-purpose auditing."
+      ]
+    },
+    {
+      "version": "9.0.2",
+      "date": "2026-01-04",
+      "changes": [
+        "Added total protocol count to the verify_integrity.js audit output.",
+        "Improved audit summary visibility for governance verification turns."
+      ]
+    },
+    {
+      "version": "9.0.1",
+      "date": "2026-01-04",
+      "changes": [
+        "Optimized Deliverable Registry UI in PROTOCOLS.md using vertical detail blocks.",
+        "Improved readability for CLI and standard displays without detail loss.",
+        "Maintained cross-protocol anchor links for DLR_ identifiers."
+      ]
+    },
+    {
+      "version": "9.0.0",
+      "date": "2026-01-04",
+      "changes": [
+        "Implemented Evidence-Based Verification and Confidence Scoring in VFY_V1 and PIR_V1.",
+        "Upgraded deliverable_registry with confidence weighting for high-value artifacts.",
+        "Implemented automated hyperlinking for DLR_ identifiers in PROTOCOLS.md.",
+        "Bridged the gap between mechanical verification and cognitive integrity."
+      ]
+    },
+    {
+      "version": "8.5.9",
+      "date": "2026-01-04",
+      "changes": [
+        "Implemented centralized Deliverable Registry in protocols.json.",
+        "Updated all protocols to reference codified DLR_ IDs.",
+        "Enhanced tools/verify_integrity.js with automated referential integrity auditing.",
+        "Updated tools/generate_protocols.js to render the high-verbosity deliverable glossary."
+      ]
+    },
+    {
+      "version": "8.5.8",
+      "date": "2026-01-04",
+      "changes": [
+        "Codified mandatory Protocol Compliance Audit in PIR_V1.",
+        "Added self-audit step to PIR operational workflow to ensure procedural adherence.",
+        "Synchronized governance documentation with the new review standard."
+      ]
+    },
+    {
+      "version": "8.5.7",
+      "date": "2026-01-04",
+      "changes": [
+        "Renamed REV_V1 to PIR_V1 (Post-Implementation Review) for improved descriptive clarity.",
+        "Implemented FIX_V1 (Emergency Recovery Standard) to codify hotfix procedures.",
+        "Synchronized governance history and documentation with new nomenclature."
+      ]
+    },
+    {
+      "version": "8.5.6",
+      "date": "2026-01-04",
+      "changes": [
+        "Recovered tools/onboard.js from syntax regressions introduced during schema evolution.",
+        "Hardened template literal handling in the Knowledge Pulse briefing.",
+        "Restored full functional parity for the Actionable Onboarding entry point."
+      ]
+    },
+    {
+      "version": "8.5.5",
+      "date": "2026-01-04",
+      "changes": [
+        "Implemented Active Knowledge Refresh mechanism via onboard.js --refresh.",
+        "Codified mandatory Knowledge Pulse in GSD_V3 Phase 1 Survey.",
+        "Updated EVO_V1 to mandate re-synchronization after protocol amendments."
+      ]
+    },
+    {
+      "version": "8.5.4",
+      "date": "2026-01-04",
+      "changes": [
+        "Decoupled governance history from the application baseline.",
+        "Established tools/governance_changelog.json as the authoritative governance record.",
+        "Updated tools/generate_protocols.js to render the Governance Evolution history.",
+        "Refactored tools/finalizer.js to support the --gov routing flag."
+      ]
+    },
+    {
+      "version": "8.5.3",
+      "date": "2026-01-04",
+      "changes": [
+        "Implemented high-verbosity side-by-side fidelity comparison in VFY_V1.",
+        "Hardened integrity diff logic to resiliently handle and report schema regressions.",
+        "Improved visibility into granular protocol changes during the verification phase."
+      ]
+    },
+    {
+      "version": "8.5.2",
+      "date": "2026-01-04",
+      "changes": [
+        "Integrated VFY and REV protocols directly into GSD_V3 operational phases.",
+        "Hardened tools/finalizer.js to enforce integrity checks before committing.",
+        "Eliminated 'Phantom Gate' risk by synchronizing governance documentation with automation machinery."
+      ]
+    },
+    {
+      "version": "8.5.1",
+      "date": "2026-01-04",
+      "changes": [
+        "Implemented dynamic semantic versioning in tools/finalizer.js.",
+        "Added support for --major, --minor, and --patch CLI flags.",
+        "Codified version justification in PIR_V1 review standard."
+      ]
+    },
+    {
+      "version": "8.5.0",
+      "date": "2026-01-04",
+      "changes": [
+        "Upgraded ONBOARD_V3 to include the PRY_V1 proficiency exit gate.",
+        "Implemented PRY_V1 (Engineer Proficiency Standard) to formalize procedural demonstration.",
+        "Updated tools/onboard.js to reflect the pending Engineer status during onboarding."
+      ]
+    },
+    {
+      "version": "8.4.2",
+      "date": "2026-01-04",
+      "changes": [
+        "Implemented PIR_V1 (Post-Implementation Review Standard) to formalize development cycle closure.",
+        "Integrated PIR_V1 as a mandatory step in GSD_V3 Phase 5 finalization.",
+        "Ensured debug history and process transparency are codified in system reviews."
+      ]
+    },
+    {
+      "version": "8.4.1",
+      "date": "2026-01-04",
+      "changes": [
+        "Implemented ENV_V1 (Environment Standard) and VFY_V1 (Protocol Integrity Verification).",
+        "Created tools/verify_integrity.js to perform protocol snapshotting and fidelity audits.",
+        "Standardized pre-flight and post-flight integrity checks for governance changes."
+      ]
+    },
+    {
+      "version": "8.4.0",
+      "date": "2026-01-04",
+      "changes": [
+        "Implemented MAP_V1 (System Mapping & Contextualization) protocol to bridge the zero-knowledge gap.",
+        "Standardized the 'Discovery & Mapping' process to maintain protocol modularity.",
+        "Updated tools/onboard.js to automate the MAP_V1 discovery phase.",
+        "Incremented system version to v8.4.0 reflecting the major structural addition."
+      ]
+    },
+    {
+      "version": "8.3.13",
+      "date": "2026-01-03",
+      "changes": [
+        "Implemented actionable onboarding via tools/onboard.js.",
+        "Updated Bootstrap instructions to prioritize execution over passive reading.",
+        "Codified environmental validation in ONBOARD_V2 and DOC_V1 standards."
+      ]
+    },
+    {
+      "version": "8.3.12",
+      "date": "2026-01-03",
+      "changes": [
+        "Restored Bootstrap instruction formatting in PROTOCOLS.md (regression fix).",
+        "Ensured multi-line code block parity between documentation generators."
+      ]
+    },
+    {
+      "version": "8.3.11",
+      "date": "2026-01-03",
+      "changes": [
+        "Unified all protocol interaction standards into a consistent trigger-based tabular schema.",
+        "Refactored tools/generate_protocols.js with dynamic table rendering for *_standard keys.",
+        "Eliminated orphan strings and descriptive prose from the protocol library interaction rules."
+      ]
+    },
+    {
+      "version": "8.3.10",
+      "date": "2026-01-03",
+      "changes": [
+        "Renamed documentation heading to 'System Protocol Library' for improved descriptive accuracy."
+      ]
+    },
+    {
+      "version": "8.3.9",
+      "date": "2026-01-03",
+      "changes": [
+        "Standardized interaction standards across ONBOARD_V2, GSD_V3, and VAL_V1 using codified tables.",
+        "Updated tools/generate_protocols.js to support new tabular rendering keys.",
+        "Maintained operational workflow integrity across all protocol amendments."
+      ]
+    },
+    {
+      "version": "8.3.8",
+      "date": "2026-01-03",
+      "changes": [
+        "Codified EVO_V1 Post-Mortem Standard as a structured interaction rule.",
+        "Updated tools/generate_protocols.js to support Post-Mortem Standard tabular rendering.",
+        "Improved cross-protocol consistency by standardizing trigger points."
+      ]
+    },
+    {
+      "version": "8.3.7",
+      "date": "2026-01-03",
+      "changes": [
+        "Implemented tools/finalizer.js to automate versioning and documentation synchronization.",
+        "Updated GSD_V3, STAT_V1, and DOC_V1 to mandate automated finalization.",
+        "Centralized Phase 5 logic to prevent JSON syntax regressions."
+      ]
+    },
+    {
+      "version": "8.3.6",
+      "date": "2026-01-04",
+      "changes": [
+        "Formalized structured data_requirements across all active protocols in the library.",
+        "Standardized interaction_standard schema for auditability and dependency transparency.",
+        "Synchronized PROTOCOLS.md with updated cross-protocol requirement tables."
+      ]
+    },
+    {
+      "version": "8.3.5",
+      "date": "2026-01-04",
+      "changes": [
+        "Restored Bootstrap instruction formatting in PROTOCOLS.md (regression fix).",
+        "Ensured multi-line code block parity between documentation generators."
+      ]
+    },
+    {
+      "version": "8.3.4",
+      "date": "2026-01-04",
+      "changes": [
+        "Evolved data_requirements schema to structured objects (Name/Description).",
+        "Updated tools/generate_protocols.js to render Data Requirements as Markdown tables.",
+        "Refined PROTOCOLS.md layout for improved descriptive clarity."
+      ]
+    },
+    {
+      "version": "8.3.3",
+      "date": "2026-01-04",
+      "changes": [
+        "Amended ONBOARD_V2 and GSD_V3 protocols to remove redundant 'git status' checks in baseline phases.",
+        "Streamlined onboarding and survey workflows for improved velocity.",
+        "Synchronized, renamed, and multi-line code-blocked the Bootstrap section in documentation generators.",
+        "Created tools/ directory and relocated PROTOCOLS.md, generate_protocols.js, and protocols.json.",
+        "Removed redundant active_protocols from status.json; README.md now derives protocols directly from authority source.",
+        "Implemented centralized tools/path_resolver.js to eliminate fragile relative pathing in documentation scripts."
+      ]
+    },
+    {
+      "version": "8.3.2",
+      "date": "2026-01-03",
+      "changes": [
+        "Cleaned up registry_index in protocols.json to directly map to protocol library keys.",
+        "Synchronized documentation artifacts."
+      ]
+    },
+    {
+      "version": "8.3.1",
+      "date": "2026-01-03",
+      "changes": [
+        "Created generate_protocols.js utility for automated manual synthesis.",
+        "Generated PROTOCOLS.md featuring a structured Registry Index and detailed Phase breakdowns.",
+        "Ensured protocol documentation is synchronized with JSON state."
+      ]
+    },
+    {
+      "version": "8.3.0",
+      "date": "2026-01-03",
+      "changes": [
+        "Upgraded operational loop to GSD_V3 (Verified Implementation & Debug Loop).",
+        "Implemented mandatory Syntax Check and Visual Audit (PPIC) in Execution phase.",
+        "Formalized 'Fix-Forward' Debug Loop in Verification phase.",
+        "Upgraded EVO_V1 to v1.1.0 with mandatory Protocol Post-Mortem requirement."
+      ]
+    },
+    {
+      "version": "8.1.0",
+      "date": "2026-01-03",
+      "changes": [
+        "Upgraded operational loop to GSD_V2 (5-Phase Gated Development).",
+        "Implemented ONBOARD_V2 with Collaborative Stewardship philosophy.",
+        "Introduced Artifact Persistence (mandatory patch generation for logic changes).",
+        "Established Visual Audit (PPIC) as a requirement for code injection."
+      ]
+    },
+    {
+      "version": "7.1.0",
+      "date": "2026-01-03",
+      "changes": [
+        "Implemented ONBOARD_V1 protocol with self-bootstrapping handshake.",
+        "Created generate_readme.js utility for automated documentation.",
+        "Finalized Test Library (T1-T6) covering Systematic vs. Full-Coded modes."
+      ]
+    },
+    {
+      "version": "7.0.0",
+      "date": "2026-01-01",
+      "changes": [
+        "Initialized GSD_V1 protocol for gated development."
+      ]
+    }
+  ]
+}

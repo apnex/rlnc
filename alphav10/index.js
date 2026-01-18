@@ -1,0 +1,24 @@
+/**
+ * ALPHAv8 Velocity - Modular RLNC Library
+ * Central entry point for core engine and threading components.
+ */
+
+const Engine = require('./core/engine');
+const GenerationEncoder = require('./threading/generation_encoder');
+const GenerationDecoder = require('./threading/generation_decoder');
+const PacketSerializer = require('./network/packet_serializer');
+const Transport = require('./network/transport');
+const NetworkSimulator = require('./network/network_simulator');
+const WorkerPool = require('./threading/worker_pool');
+const VisualDashboard = require('./utils/visual_dashboard');
+
+module.exports = {
+    Engine,
+    GenerationEncoder,
+    GenerationDecoder,
+    PacketSerializer,
+    Transport,
+    NetworkSimulator,
+    WorkerPool,
+    VisualDashboard
+};

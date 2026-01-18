@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "title": "RLNC Governance Backlog",
+    "version": "1.0.0",
+    "description": "Registry of open items for the RLNC project."
+  },
+  "items": [
+    {
+      "id": "FEAT_V11_PROJECT_PROMOTION",
+      "source": "GSD_V5",
+      "description": "Formal project promotion from v10 to v11. Updated all code and documentation references.",
+      "priority": "P0",
+      "status": "OPEN",
+      "created_at": "2026-01-19"
+    }
+  ]
+}

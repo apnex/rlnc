@@ -1,0 +1,79 @@
+{
+  "refactors": [
+    {
+      "title": "Orchestration Decoupling",
+      "trigger": "main.js was becoming a 'God Object' handling too many responsibilities.",
+      "sqa_targeted": [
+        "Maintainability",
+        "Readability"
+      ],
+      "result": "Encapsulated orchestration in core/engine.js; reduced main.js complexity; logic is now reusable."
+    },
+    {
+      "title": "Transport Abstraction",
+      "trigger": "Direct coupling to NetworkSimulator hindered future UDP support.",
+      "sqa_targeted": [
+        "Modularity",
+        "Extensibility"
+      ],
+      "result": "Established Transport base class; engine is now network-agnostic and ready for real UDP transport."
+    },
+    {
+      "title": "WorkerPool Dependency Injection",
+      "trigger": "Inability to test encoder/decoder logic without spawning real threads.",
+      "sqa_targeted": [
+        "Testability",
+        "Modularity"
+      ],
+      "result": "Encoder and Decoder now accept injected pools; enables easier testing and resource sharing."
+    },
+    {
+      "title": "Module Sampler (Library Index)",
+      "trigger": "Deep folder nesting made the project difficult to integrate as a library.",
+      "sqa_targeted": [
+        "Reusability",
+        "Readability"
+      ],
+      "result": "Created index.js as a central registry; project can now be required as a single module."
+    },
+    {
+      "title": "OPTIMISE Protocol Implementation",
+      "trigger": "Formalize refactoring workflow",
+      "sqa_targeted": [
+        "Maintainability",
+        "Testability"
+      ],
+      "result": "Established OPTIMISE_V1 protocol and update helper script",
+      "timestamp": "2026-01-03T11:41:40.429Z"
+    },
+    {
+      "title": "Refactor Matrix Standardization",
+      "trigger": "Renamed file to underscore notation",
+      "sqa_targeted": [
+        "Readability"
+      ],
+      "result": "Successfully renamed and updated all references",
+      "timestamp": "2026-01-03T12:06:33.191Z"
+    },
+    {
+      "title": "Roadmap Consolidation",
+      "trigger": "Asset fragmentation and schema inconsistency in planning documents",
+      "sqa_targeted": [
+        "Maintainability",
+        "Readability"
+      ],
+      "result": "Unified all roadmap assets into modular docs/roadmap.json and updated documentation compiler",
+      "timestamp": "2026-01-03T12:44:15.600Z"
+    },
+    {
+      "title": "Warden Modularization",
+      "trigger": "Tight coupling of handlers and redundant protocol loading across tools.",
+      "sqa_targeted": [
+        "Modularity",
+        "Maintainability"
+      ],
+      "result": "Decoupled engine logic into shared lib/handlers and lib/loader; improved architectural scalability.",
+      "timestamp": "2026-01-04T11:37:14.764Z"
+    }
+  ]
+}
