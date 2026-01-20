@@ -1,4 +1,9 @@
 /**
+ * RLNC Math Core
+ * @warden-purpose High-performance Galois Field arithmetic (GF256).
+ * @warden-scope Mathematical Logic
+ */
+/**
  * ALPHAv6 Galois Field (GF2^8) - v7 Optimized Edition
  * Improvements: Local scope caching, Modulo elimination, and Branchless logic.
  */

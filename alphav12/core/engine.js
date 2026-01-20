@@ -1,3 +1,8 @@
+/**
+ * RLNC Orchestration Engine
+ * @warden-purpose Primary engine managing encoder/decoder lifecycles.
+ * @warden-scope Core Implementation
+ */
 const EventEmitter = require('events');
 const crypto = require('crypto');
 const fs = require('fs');
@@ -166,6 +171,18 @@ class Engine extends EventEmitter {
                 }
             }
             this.dash.registerTraffic(buf.length, 'rx');
+        });
+
+        this.encoderPool.on('packet_shared', (slotIdx, length) => {
+            const slotView = this.ioPool.getSlotView(slotIdx);
+            const header = PacketSerializer.deserialize(slotView.subarray(0, length), this.config.PROTOCOL);
+            if (header) {
+                this.dash.initGen(header.genId, this.config.TRANSCODE.PIECE_COUNT);
+                const gen = this.dash.generations.get(header.genId);
+                if (gen) this.dash.updateGen(header.genId, { sent: gen.sent + 1 });
+            }
+            this.transport.send(slotIdx, length);
+            this.dash.registerTraffic(length, 'tx');
         });
 
         this.encoderPool.on('packet', (buf) => {

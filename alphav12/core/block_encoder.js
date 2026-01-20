@@ -3,7 +3,8 @@ const CodedPiece = require('../network/coded_piece');
 
 /**
  * ALPHAv10 Block Encoder
- * Pure atomic math primitive focused on linear combinations.
+ * @warden-purpose Pure atomic math primitive focused on linear combinations.
+ * @warden-scope Core Mathematical Logic
  */
 class BlockEncoder {
     constructor(data, config) {

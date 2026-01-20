@@ -1,3 +1,8 @@
+/**
+ * RLNC Block Decoder
+ * @warden-purpose Reconstructs original data blocks from linear combinations.
+ * @warden-scope Core Implementation
+ */
 const GaloisMatrix = require('./galois_matrix');
 
 /**

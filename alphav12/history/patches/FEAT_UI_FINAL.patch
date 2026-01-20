@@ -1,0 +1,62 @@
+render() {
+        // 1. Atomic Clear: Remove the entire previous frame (Header + Ribbons + Footer)
+        if (this.lastFrameHeight > 0) {
+            process.stdout.write(`[${this.lastFrameHeight}A[0J`);
+        }
+
+        // 2. Build current frame: Static Header -> Active Ribbons (Fixed Height) -> Footer
+        const frame = [];
+        const header = new HeaderWidget(this.config, this.sourceHash, this.dataName, this.dataSize, this.mode, this.width);
+        frame.push(header.render());
+
+        const windowSize = (this.config.WINDOW && this.config.WINDOW.SIZE) || 4;
+        let renderedCount = 0;
+
+        // Render active (not yet acked) generations
+        for (const id of this.allIds) {
+            const gen = this.generations.get(id);
+            if (!gen.acked) {
+                const ribbon = new RibbonWidget(gen, this.mode);
+                frame.push(padBox(ribbon.render(), this.width));
+                renderedCount++;
+                if (renderedCount >= windowSize) break;
+            }
+        }
+
+        // Fill remaining slots with IDLE placeholders to maintain FIXED body height
+        while (renderedCount < windowSize) {
+            const slotId = renderedCount + 1;
+            frame.push(padBox(`[90m[Slot ${String(slotId).padStart(2, '0')}] <....................>  IDLE[0m`, this.width));
+            renderedCount++;
+        }
+
+        const footer = new FooterWidget(
+            { ...this.stats, startTime: this.startTime, total: this.config.TOTAL_GENS },
+            this.receivedHash,
+            this.receivedHash === this.sourceHash,
+            this.mode,
+            this.width
+        );
+        frame.push(footer.render());
+
+        // 3. Atomic Print
+        const output = frame.join('\n');
+        process.stdout.write(output + '\n');
+        this.lastFrameHeight = output.split('\n').length;
+    }
+
+    render() {
+        let hashColor = "\u001B[33m"; // Pending (Yellow)
+        if (this.receivedHash !== "Pending...") {
+            if (this.mode === 'source') {
+                hashColor = "\u001B[32m"; // Source is definitive (Green)
+            } else {
+                // Sink mode: Match if sourceHash available, else Green for success
+                if (this.sourceHash !== "Pending...") {
+                    hashColor = this.isMatch ? "\u001B[32m" : "\u001B[31m";
+                } else {
+                    hashColor = "\u001B[32m"; // Successful reconstruction (Green)
+                }
+            }
+        }
+        const hashLine = `HASH    | ${hashColor}${this.receivedHash}[0m`;

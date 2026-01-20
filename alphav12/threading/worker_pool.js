@@ -1,3 +1,8 @@
+/**
+ * Threaded Worker Management
+ * @warden-purpose Dynamic management of parallel math operations.
+ * @warden-scope Threading
+ */
 const path = require('path');
 const { Worker } = require('worker_threads');
 const EventEmitter = require('events');
@@ -39,13 +44,8 @@ class WorkerPool extends EventEmitter {
                     this.emit('packet', safeView);
                 } else if (msg.type === 'PACKET_SHARED') {
                     // v10: Packet is in the Shared Pool. 
-                    // Main thread can send it directly from the SAB view.
-                    const slotView = this.pool.getSlotView(msg.slotIdx);
-                    const packetView = slotView.subarray(0, msg.length);
-                    this.emit('packet', packetView);
-                    
-                    // Release slot after emission (optional, or wait for TX)
-                    Atomics.store(this.pool.control, 3 + msg.slotIdx, 0);
+                    // Propagate slot info for zero-copy transport
+                    this.emit('packet_shared', msg.slotIdx, msg.length);
                 } else if (msg.type === 'SOLVED') {
                     this.emit('solved', msg.genId, Buffer.from(msg.data));
                 } else if (msg.type === 'STATS') {

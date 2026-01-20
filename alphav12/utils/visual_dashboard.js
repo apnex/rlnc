@@ -1,33 +1,164 @@
 /**
- * ALPHAv6 Visual Dashboard (Static Header / Sticky Footer)
+ * MODULAR TUI DASHBOARD (CON-016) - ROBUST ASCII EDITION
+ * @warden-purpose Assembles decoupled UI widgets into a strategic dashboard with perfect alignment.
+ * @warden-scope Utilities
  */
-class VisualDashboard {
-    constructor(config, sourceHash, dataName, dataSize) {
+
+function stripAnsi(str) {
+    return str.replace(/\x1B\[[0-9;]*[mGJK]/g, "");
+}
+
+/**
+ * Standard width calculation for ASCII-safe strings.
+ */
+function visualWidth(str) {
+    return stripAnsi(str).length;
+}
+
+function padBox(content, width) {
+    const vWidth = visualWidth(content);
+    const spaceCount = width - vWidth - 4;
+    const space = " ".repeat(Math.max(0, spaceCount));
+    return "| " + content + space + " |";
+}
+
+class HeaderWidget {
+    constructor(config, sourceHash, dataName, dataSize, mode, width) {
         this.config = config;
         this.sourceHash = sourceHash;
-        this.dataName = dataName || "RandomBytes";
-        this.dataSize = dataSize || 0;
-        this.receivedHash = "Pending...";
-        
+        this.dataName = dataName;
+        this.dataSize = dataSize;
+        this.mode = mode;
+        this.width = width;
+    }
+
+    render() {
+        const c = this.config;
+        const top = "+" + "-".repeat(this.width - 2) + "+";
+        const title = this.mode.toUpperCase() + " NODE | RLNC DECOUPLED FRAMEWORK (v12)";
+        const conf = `CONFIG  | Transcode: ${String(c.TRANSCODE.PIECE_SIZE).padEnd(4)}B x ${String(c.TRANSCODE.PIECE_COUNT).padEnd(2)} | Window: ${String(c.WINDOW.SIZE).padEnd(2)}`;
+        const source = `SOURCE  | Data: ${String(this.dataName).padEnd(15)}`;
+
+        return [
+            top,
+            padBox(`\x1B[1m${title}\x1B[0m`, this.width),
+            top,
+            padBox(conf, this.width),
+            padBox(source, this.width),
+            top
+        ].join('\n');
+    }
+}
+
+class RibbonWidget {
+    constructor(gen, mode) {
+        this.gen = gen;
+        this.mode = mode;
+    }
+
+    render() {
+        const g = this.gen;
+        const width = 20;
+        const rank = g.rank || 0;
+        const pct = g.acked ? 100 : Math.floor((rank / g.total) * 100);
+
+        let barColor = "\x1B[32m";
+        let statusIcon = "[R]"; // Receiving
+
+        if (g.stalled) {
+            barColor = "\x1B[31m"; 
+            statusIcon = "[S]"; // Stalled
+        } else if (g.acked) {
+            statusIcon = "[OK]";
+        }
+
+        const filled = Math.floor((pct / 100) * width);
+        const bar = barColor + "#".repeat(filled) + "\x1B[90m" + ".".repeat(width - filled) + "\x1B[0m";
+
+        const idStr = `Gen ${String(g.id).padStart(3, '0')}`;
+        const pctStr = String(pct).padStart(3) + "%" ;
+
+        const rateVal = Math.min(999.9, Math.abs(g.rate || 0)).toFixed(1).padStart(5);
+        const rateStr = `${rateVal}M`;
+
+        const lossStr = `L: ${(g.loss || 0).toFixed(1).padStart(4)}%`;
+        const sentStr = `Sent: ${String(g.sent || 0).padStart(4)}`;
+
+        if (this.mode === 'source') {
+            return `[${idStr}] <${bar}> ${pctStr} | ${sentStr} | ${statusIcon.padEnd(4)}`;
+        } else {
+            return `[${idStr}] <${bar}> ${pctStr} | ${rateStr} | ${lossStr} | ${statusIcon.padEnd(4)}`;
+        }
+    }
+}
+
+class FooterWidget {
+    constructor(stats, receivedHash, isMatch, mode, width) {
+        this.stats = stats;
+        this.receivedHash = receivedHash;
+        this.isMatch = isMatch;
+        this.mode = mode;
+        this.width = width;
+    }
+
+    render() {
+        const s = this.stats;
+        const elapsed = ((Date.now() - s.startTime) / 1000).toFixed(1);
+        const rx = (s.rxBytes / (1024 * 1024)).toFixed(2).padStart(5);
+        const tx = (s.txBytes / (1024 * 1024)).toFixed(2).padStart(5);
+        const sep = "+" + "-".repeat(this.width - 2) + "+";
+
+        const status = `STATUS  | Progress: ${String(s.solved).padStart(2)}/${String(s.total || 0).padEnd(2)} | Time: ${elapsed.padStart(5)}s | Boosts: ${s.boosts || 0}`;
+        const traffic = this.mode === 'source' ? `TRAFFIC | Tx: ${tx} MB` : `TRAFFIC | Rx: ${rx} MB`;
+
+        let hashColor = "\x1B[33m"; // Pending (Yellow)
+        if (this.receivedHash !== "Pending...") {
+            if (this.mode === 'source') {
+                hashColor = "\x1B[32m"; // Source is definitive (Green)
+            } else {
+                // Sink mode: Match if sourceHash available, else Green for success
+                if (this.sourceHash !== "Pending...") {
+                    hashColor = this.isMatch ? "\x1B[32m" : "\x1B[31m";
+                } else {
+                    hashColor = "\x1B[32m"; // Successful reconstruction (Green)
+                }
+            }
+        }
+        const hashLine = `HASH    | ${hashColor}${this.receivedHash}\x1B[0m`;
+
+        return [
+            sep,
+            padBox(status, this.width),
+            padBox(traffic, this.width),
+            sep,
+            padBox(hashLine, this.width),
+            sep
+        ].join('\n');
+    }
+}
+
+class VisualDashboard {
+    constructor(config, sourceHash, dataName, dataSize, mode = 'unified') {
+        this.config = config;
+        this.sourceHash = sourceHash;
+        this.dataName = dataName;
+        this.dataSize = dataSize;
+        this.mode = mode;
+        this.receivedHash = (mode === 'source') ? sourceHash : "Pending...";
         this.startTime = Date.now();
         this.generations = new Map();
-        this.allIds = []; 
-        this.headerPrinted = false;
-        this.lastDynamicHeight = 0; 
-        
-        this.stats = { totalPackets: 0, boosts: 0, txBytes: 0, rxBytes: 0 };
-        this.contentWidth = 70; 
+        this.allIds = [];
+        this.lastFrameHeight = 0;
+        this.stats = { boosts: 0, txBytes: 0, rxBytes: 0, solved: 0 };
+        this.width = 80;
     }
 
     initGen(genId, totalPieces) {
         if (this.generations.has(genId)) return;
         this.generations.set(genId, {
-            id: genId,
-            total: totalPieces,
-            sent: 0, recv: 0,
-            rank: 0,
-            acked: false, boosted: false, boostCount: 0,
-            logged: false 
+            id: genId, total: totalPieces,
+            sent: 0, recv: 0, rank: 0, rate: 0, loss: 0,
+            acked: false, stalled: false, logged: false
         });
         this.allIds.push(genId);
         this.allIds.sort((a, b) => a - b);
@@ -36,13 +167,12 @@ class VisualDashboard {
     updateGen(genId, changes) {
         const gen = this.generations.get(genId);
         if (gen) {
-            if (changes.sent) this.stats.totalPackets += (changes.sent - gen.sent);
+            const alreadyAcked = gen.acked;
             Object.assign(gen, changes);
+            if (changes.acked && !alreadyAcked) {
+                this.stats.solved++;
+            }
         }
-    }
-
-    addGlobalStat(key, value = 1) {
-        if (this.stats[key] !== undefined) this.stats[key] += value;
     }
 
     registerTraffic(bytes, direction) {
@@ -50,133 +180,62 @@ class VisualDashboard {
         if (direction === 'rx') this.stats.rxBytes += bytes;
     }
 
+    addGlobalStat(key, value) {
+        if (this.stats[key] !== undefined) {
+            this.stats[key] += value;
+        } else {
+            this.stats[key] = value;
+        }
+    }
+
     setFinalHash(hash) { this.receivedHash = hash; }
 
     render() {
-        if (!this.headerPrinted) {
-            console.log(this._generateHeaderString());
-            this.headerPrinted = true;
+        // 1. Atomic Clear: Remove the entire previous frame (Header + Ribbons + Footer)
+        if (this.lastFrameHeight > 0) {
+            process.stdout.write(`\x1B[${this.lastFrameHeight}A\x1B[0J`);
         }
 
-        const termWidth = process.stdout.columns || 80;
+        // 2. Build current frame: Static Header -> Active Ribbons (Fixed Height) -> Footer
+        const frame = [];
+        const header = new HeaderWidget(this.config, this.sourceHash, this.dataName, this.dataSize, this.mode, this.width);
+        frame.push(header.render());
 
-        if (this.lastDynamicHeight > 0) {
-            process.stdout.write(`\x1B[${this.lastDynamicHeight}A`);
-        }
-        process.stdout.write(`\x1B[0J`);
+        const windowSize = (this.config.WINDOW && this.config.WINDOW.SIZE) || 4;
+        let renderedCount = 0;
 
+        // Render active (not yet acked) generations
         for (const id of this.allIds) {
             const gen = this.generations.get(id);
-            if (gen.acked && !gen.logged) {
-                const line = this._drawRow(gen);
-                console.log(this._truncate(line, termWidth));
-                gen.logged = true; 
+            if (!gen.acked) {
+                const ribbon = new RibbonWidget(gen, this.mode);
+                frame.push(padBox(ribbon.render(), this.width));
+                renderedCount++;
+                if (renderedCount >= windowSize) break;
             }
         }
 
-        const frameLines = [];
-        for (const id of this.allIds) {
-            const gen = this.generations.get(id);
-            if (!gen.logged) {
-                const line = this._drawRow(gen);
-                frameLines.push(this._truncate(line, termWidth));
-            }
-        }
-        frameLines.push(...this._getFooterLines());
-
-        if (frameLines.length > 0) {
-            process.stdout.write(frameLines.join('\n') + '\n');
+        // Fill remaining slots with IDLE placeholders to maintain FIXED body height
+        while (renderedCount < windowSize) {
+            const slotId = renderedCount + 1;
+            frame.push(padBox(`\x1B[90m[Slot ${String(slotId).padStart(2, '0')}] <....................>  IDLE\x1B[0m`, this.width));
+            renderedCount++;
         }
 
-        this.lastDynamicHeight = frameLines.length; 
-    }
+        const footer = new FooterWidget(
+            { ...this.stats, startTime: this.startTime, total: this.config.TOTAL_GENS },
+            this.receivedHash,
+            this.receivedHash === this.sourceHash,
+            this.mode,
+            this.width
+        );
+        frame.push(footer.render());
 
-    _truncate(str, width) {
-        if (!str) return "";
-        return str.length > width ? str.substring(0, width - 1) : str;
-    }
-
-    _formatBytes(bytes) {
-        if (bytes < 1024) return bytes + " B";
-        if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
-        return (bytes / 1048576).toFixed(1) + " MB";
-    }
-
-    _generateHeaderString() {
-        const c = this.config;
-        const separator = "-".repeat(this.contentWidth);
-        const name = this.config.DATA?.INPUT_PATH || this.dataName; 
-
-        let lines = [
-            `=== ALPHAv6 CONCURRENCY VISUALIZER ===`,
-            ``,
-            `CONFIG`,
-            `  Transcode: ${c.TRANSCODE.PIECE_SIZE}B x ${c.TRANSCODE.PIECE_COUNT} (${c.TRANSCODE.SYSTEMATIC ? 'Systematic' : 'Coded'})`,
-            `  Network:   Loss ${(c.NETWORK.LOSS_RATE * 100).toFixed(0)}% | Redundancy ${c.NETWORK.REDUNDANCY}x`,
-            `  Window:    Size ${c.WINDOW.SIZE} | Timeout ${c.WINDOW.TIMEOUT}ms`,
-            ``,
-            `TARGET`,
-            `  Generations: ${c.TOTAL_GENS || 'Calculating...'}`,
-            ``,
-            `SOURCE`,
-            `  Data: ${name}`,
-            `  Size: ${this._formatBytes(this.dataSize)}`,
-            `  Hash: \x1B[32m${this.sourceHash}\x1B[0m`,
-            separator
-        ];
-        return lines.join('\n');
-    }
-
-    _getFooterLines() {
-        let solved = 0;
-        for (const gen of this.generations.values()) {
-            if (gen.acked) solved++;
-        }
-        const total = this.config.TOTAL_GENS;
-        const elapsed = ((Date.now() - this.startTime) / 1000).toFixed(1);
-        const efficiency = ((solved * this.config.TRANSCODE.PIECE_COUNT) / (this.stats.totalPackets || 1) * 100).toFixed(1);
-        
-        const tx = this._formatBytes(this.stats.txBytes);
-        const rx = this._formatBytes(this.stats.rxBytes);
-        const separator = "-".repeat(this.contentWidth);
-
-        let lines = [
-            separator,
-            `STATUS`,
-            `  Progress:   ${solved}/${total} Solved`,
-            `  Time:       ${elapsed}s`,
-            `  Efficiency: ${efficiency}%`,
-            `  Boosts:     ${this.stats.boosts}`,
-            `  Traffic:    Tx: ${tx} | Rx: ${rx}`,
-            ``,
-            `RECV`
-        ];
-        
-        let hashColor = "\x1B[33m"; 
-        if (this.receivedHash !== "Pending...") {
-            hashColor = (this.receivedHash === this.sourceHash) ? "\x1B[32m" : "\x1B[31m";
-        }
-        lines.push(`  Hash: ${hashColor}${this.receivedHash}\x1B[0m`);
-        return lines;
-    }
-
-    _drawRow(gen) {
-        const width = 15;
-        const rank = gen.rank || 0;
-        const pct = gen.acked ? 100 : Math.floor((rank / gen.total) * 100);
-        const filled = Math.floor((pct / 100) * width);
-        const bar = "█".repeat(filled) + ".".repeat(width - filled);
-        
-        let statusIcon = "🔄";
-        let color = "\x1B[36m"; 
-
-        if (gen.acked) { statusIcon = "✅"; color = "\x1B[32m"; }
-        else if (gen.boosted) { statusIcon = "⚠️ "; color = "\x1B[33m"; }
-        else if (gen.recv > 0) { statusIcon = "⚡"; }
-
-        const reset = "\x1B[0m";
-        const idStr = `Gen ${String(gen.id).padStart(2, '0')}`;
-        return `${color}[${idStr}] [${bar}] ${String(pct).padStart(3)}% | Sent: ${String(gen.sent).padEnd(3)} | Recv: ${String(gen.recv).padEnd(3)} | Bsts: ${String(gen.boostCount).padEnd(3)} | ${statusIcon}${reset}`;
+        // 3. Atomic Print
+        const output = frame.join('\n');
+        process.stdout.write(output + '\n');
+        this.lastFrameHeight = output.split('\n').length;
     }
 }
+
 module.exports = VisualDashboard;

@@ -2,6 +2,7 @@ const ITransport = require('./transport');
 
 /**
  * Network Simulator Middleware (CON-004 Wrapper Pattern)
+ * Hardened for Symmetric Zero-Copy Operation.
  */
 class NetworkSimulator extends ITransport {
     constructor(options = {}, innerTransport = null) {
@@ -10,6 +11,7 @@ class NetworkSimulator extends ITransport {
         this.delay = options.delay || 10; 
         this.jitter = options.jitter || 0;
         this.innerTransport = innerTransport;
+        this.pool = innerTransport ? innerTransport.pool : null;
         
         this.stats = { sent: 0, dropped: 0, delivered: 0 };
 
@@ -33,17 +35,22 @@ class NetworkSimulator extends ITransport {
         if (this.innerTransport) return this.innerTransport.connect(address, port);
     }
 
-    send(packet, length) {
+    /**
+     * Hardened Send: Supports both legacy Buffer and shared slot indices.
+     */
+    send(packetOrOffset, length) {
         this.stats.sent++;
-        this._injectImpairment(packet, 'tx', length);
+        const mode = typeof packetOrOffset === 'number' ? 'tx_shared' : 'tx';
+        this._injectImpairment(packetOrOffset, mode, length);
     }
 
     _injectImpairment(data, mode, length) {
         if (Math.random() < this.lossRate) {
             this.stats.dropped++;
-            // If it's a shared packet, we must release the slot immediately on drop
-            if (mode === 'rx_shared' && this.innerTransport.pool) {
-                Atomics.store(this.innerTransport.pool.control, 3 + data.slotIdx, 0);
+            // CRITICAL: Immediate atomic release for shared slots on drop
+            if ((mode === 'rx_shared' || mode === 'tx_shared') && this.pool) {
+                const slotIdx = mode === 'tx_shared' ? data : data.slotIdx;
+                Atomics.store(this.pool.control, 3 + slotIdx, 0);
             }
             return; 
         }
@@ -56,6 +63,10 @@ class NetworkSimulator extends ITransport {
             if (mode === 'tx') {
                 if (this.innerTransport) this.innerTransport.send(data, length);
                 else this.emit('packet', data);
+            } else if (mode === 'tx_shared') {
+                // Forward the slot index without copying
+                if (this.innerTransport) this.innerTransport.send(data, length);
+                else this.emit('packet_shared', data, length);
             } else if (mode === 'rx_shared') {
                 this.emit('packet_shared', data.slotIdx, data.length);
             } else {

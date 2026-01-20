@@ -1,3 +1,8 @@
+/**
+ * Off-Main-Thread Networking
+ * @warden-purpose Non-blocking UDP processing via worker threads.
+ * @warden-scope Networking
+ */
 const { parentPort, workerData } = require('worker_threads');
 const dgram = require('dgram');
 
@@ -46,7 +51,21 @@ parentPort.on('message', (msg) => {
             parentPort.postMessage({ type: 'BOUND', address: socket.address() });
         });
     } else if (msg.type === 'SEND') {
-        socket.send(msg.packet, msg.port, msg.address);
+        if (typeof msg.packet === 'number') {
+            // ZERO-COPY SEND
+            const offset = msg.packet * slotSize;
+            const view = data.subarray(offset, offset + msg.length);
+            // DEBUG: Trace Packet Send
+            // process.stdout.write(`[UDP_WORKER] Sending ${msg.length} bytes to ${msg.address}:${msg.port}\n`);
+            socket.send(view, msg.port, msg.address, (err) => {
+                if (err) parentPort.postMessage({ type: 'ERROR', error: err.message });
+                // Release the slot back to the pool after kernel dispatch
+                Atomics.store(control, 3 + msg.packet, 0);
+            });
+        } else {
+            // Legacy Buffer Send
+            socket.send(msg.packet, msg.port, msg.address);
+        }
     }
 });
 

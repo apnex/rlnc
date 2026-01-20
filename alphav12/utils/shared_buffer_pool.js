@@ -1,4 +1,9 @@
 /**
+ * Shared Memory Pool
+ * @warden-purpose Zero-copy shared data sharing between threads.
+ * @warden-scope Utilities
+ */
+/**
  * HIGH-PERFORMANCE SHARED BUFFER POOL (CON-004)
  * Bifurcated for TX and RX to prevent memory collisions.
  */

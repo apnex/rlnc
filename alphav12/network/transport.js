@@ -1,3 +1,8 @@
+/**
+ * Abstract Transport Layer
+ * @warden-purpose Orchestrates data movement between network worker threads.
+ * @warden-scope Networking
+ */
 const EventEmitter = require('events');
 
 /**

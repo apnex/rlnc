@@ -1,3 +1,8 @@
+/**
+ * UDP Data Transport
+ * @warden-purpose High-throughput UDP-based data transit using dgram.
+ * @warden-scope Networking
+ */
 const { Worker } = require('worker_threads');
 const path = require('path');
 const ITransport = require('./transport');
@@ -54,15 +59,14 @@ class UdpTransport extends ITransport {
 
     /**
      * Sends a packet.
+     * Supports legacy Buffer or Shared Slot Index.
      */
-    send(packet) {
+    send(packet, length) {
         if (!this.peer) return;
-        // For TX, we currently send via main thread or can offload to worker
-        // Using main thread for small control packets is fine, 
-        // but high-speed data should use the worker.
         this.worker.postMessage({ 
             type: 'SEND', 
             packet, 
+            length,
             port: this.peer.port, 
             address: this.peer.address 
         });

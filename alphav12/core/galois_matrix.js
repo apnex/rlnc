@@ -1,3 +1,8 @@
+/**
+ * Finite Field Matrix Primitives
+ * @warden-purpose Matrix operations for linear independence verification.
+ * @warden-scope Mathematical Logic
+ */
 const GF = require('./gf256');
 
 /**

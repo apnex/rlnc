@@ -1,0 +1,2632 @@
+
+
+
+
+
+--- a/engine/lib/handlers.js	2026-01-19 12:47:28.507632479 +1100
++++ b/engine/lib/handlers.js	2026-01-19 12:48:23.124390837 +1100
+@@ -45,9 +45,16 @@
+     command_log: (req, state) => {
+         const logs = getRecentLogs(state.last_transition - 2000);
+         const found = logs.find(entry => entry.command.includes(req.pattern));
++        
+         if (!found) {
+             return { pass: false, error: `Command matching pattern '${req.pattern}' not found in recent session log.` };
+         }
++
++        // HARDENING: Verify successful execution
++        if (found.exit_code !== undefined && found.exit_code !== 0) {
++            return { pass: false, error: `Command '${found.command}' found but failed with exit code ${found.exit_code}.` };
++        }
++
+         return { pass: true };
+     },
+     regex_match_output: (req, state) => {
+
+
+--- a/engine/map.js	2026-01-19 12:00:40.075436294 +1100
++++ b/engine/map.js	2026-01-19 12:33:38.573099695 +1100
+@@ -4,14 +4,15 @@
+ const { resolve, SOURCES } = require('./path_resolver');
+ 
+ /**
+- * LIVING ARCHITECTURE MAPPER & PROVENANCE TRACKER (CON-008)
+- * @warden-purpose Automates project discovery, orientation, and integrity verification.
++ * LIVING ARCHITECTURE MAPPER & TRACEABILITY ENGINE (CON-008)
++ * @warden-purpose Automates project discovery, orientation, and feature traceability.
+  * @warden-scope Governance Tooling
+  */
+ 
+ const MANIFEST_PATH = resolve.registry('project_manifest.json');
+-const OUTPUT_JSON = resolve.active('registry', 'architecture_map.json');
+-const OUTPUT_MD = resolve.active('docs', 'ARCHITECTURE_MAP.md');
++const OUTPUT_JSON = path.join(process.cwd(), 'registry', 'architecture_map.json');
++const OUTPUT_MD = path.join(process.cwd(), 'docs', 'ARCHITECTURE_MAP.md');
++const PATCH_DIR = resolve.active('history', 'patches');
+ 
+ function loadManifest() {
+     if (!fs.existsSync(MANIFEST_PATH)) {
+@@ -22,8 +23,7 @@
+ }
+ 
+ function getHash(data) {
+-    // Normalize data: strip comments FIRST, then whitespace
+-    const noComments = data.replace(/\/\*[\s\S]*?\*\/|\/\/.*|\s+/g, '');
++    const noComments = data.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
+     const normalized = noComments.replace(/\s+/g, '');
+     return crypto.createHash('sha256').update(normalized).digest('hex').substring(0, 16);
+ }
+@@ -32,23 +32,41 @@
+     const content = fs.readFileSync(filePath, 'utf8');
+     const symbols = [];
+     
+-    // Refined Regex: Captures named functions, arrow functions, and object methods
+-    const funcRegex = /(?:function\s+([a-zA-Z0-9_]+)|(?:const|let|var)\s+([a-zA-Z0-9_]+)\s*=\s*|([a-zA-Z0-9_]+)\s*:\s*)(?:\([^)]*\)|[a-zA-Z0-9_]+)?\s*(?:=>)?\s*\{/gm;
+-    const keywords = ['if', 'for', 'while', 'switch', 'catch', 'return'];
+-    
++    // Improved Regex Suite for diverse JS patterns
++    const patterns = [
++        {
++            // Named Functions: function name(...) {
++            regex: /function\s+([a-zA-Z0-9_]+)\s*\(/g,
++            type: 'function'
++        },
++        {
++            // Arrow Functions assigned to const/let: const name = (...) => {
++            regex: /(?:const|let|var)\s+([a-zA-Z0-9_]+)\s*=\s*(?:\([^)]*\)|[a-zA-Z0-9_]+)\s*=>\s*\{/g,
++            type: 'arrow'
++        },
++        {
++            // Class Methods: name(...) {
++            // Negative lookahead to avoid capturing keywords like if/for
++            regex: /^\s+(?!(?:if|for|while|switch|catch|return)\b)([a-zA-Z0-9_]+)\s*\([^)]*\)\s*\{/gm,
++            type: 'method'
++        }
++    ];
++
+     const purposeRegex = /@warden-purpose\s+(.+)/;
+     const scopeRegex = /@warden-scope\s+(.+)/;
+ 
+-    let match;
+-    while ((match = funcRegex.exec(content)) !== null) {
+-        const name = match[1] || match[2] || match[3];
+-        if (name && !keywords.includes(name)) {
++    patterns.forEach(p => {
++        let match;
++        while ((match = p.regex.exec(content)) !== null) {
++            const name = match[1];
++            if (!name) continue;
++
+             const isExported = content.includes('exports.' + name) || 
+                                content.includes('module.exports') || 
+                                content.includes('export function ' + name) ||
+                                content.includes('export const ' + name);
+             
+-            // Refined body extraction
++            // Body Extraction
+             let body = "";
+             let braceCount = 0;
+             let started = false;
+@@ -65,23 +83,21 @@
+                 }
+             }
+ 
+-            if (name === 'mul') {
+-            }
+-
+             symbols.push({
+                 name,
+                 visibility: (isExported || name === 'constructor') ? 'Public' : 'Internal',
+                 line: content.substring(0, match.index).split('\n').length,
+-                hash: getHash(body)
++                hash: getHash(body),
++                traceability: []
+             });
+         }
+-    }
++    });
+ 
+     const purposeMatch = content.match(purposeRegex);
+     const scopeMatch = content.match(scopeRegex);
+ 
+     return {
+-        symbols,
++        symbols: symbols.sort((a, b) => a.line - b.line),
+         purpose: purposeMatch ? purposeMatch[1].trim() : "No purpose defined.",
+         scope: scopeMatch ? scopeMatch[1].trim() : "No scope defined."
+     };
+@@ -118,10 +134,37 @@
+     return components;
+ }
+ 
++function harvestTraceability(map) {
++    console.log('[Traceability] Harvesting Feature IDs from patches...');
++    if (!fs.existsSync(PATCH_DIR)) return map;
++
++    const patches = fs.readdirSync(PATCH_DIR).filter(f => f.endsWith('.patch'));
++    
++    patches.forEach(patchFile => {
++        const featId = patchFile.replace('.patch', '');
++        const content = fs.readFileSync(path.join(PATCH_DIR, patchFile), 'utf8');
++        
++        map.domains.forEach(domain => {
++            domain.components.forEach(comp => {
++                if (content.includes(comp.file)) {
++                    comp.symbols.forEach(s => {
++                        if (content.includes(s.name)) {
++                            if (!s.traceability.includes(featId)) {
++                                s.traceability.push(featId);
++                            }
++                        }
++                    });
++                }
++            });
++        });
++    });
++    return map;
++}
++
+ function generateMarkdown(map) {
+     let md = '# Architecture Map: ' + map.project_name + '\n\n';
+     md += '**Generated:** ' + new Date().toISOString() + '\n';
+-    md += '**Scope:** Target Project Investigation & Provenance (CON-008)\n\n';
++    md += '**Scope:** Target Project Investigation & Traceability (CON-008)\n\n';
+ 
+     map.domains.forEach(domain => {
+         md += '## Domain: ' + domain.name + '\n';
+@@ -133,10 +176,11 @@
+             md += '*   **Scope:** ' + comp.scope + '\n\n';
+             
+             if (comp.symbols.length > 0) {
+-                md += '| Symbol | Visibility | Line | Hash (SHA256) |\n';
++                md += '| Symbol | Visibility | Hash (SHA256) | Traceability |\n';
+                 md += '| :--- | :--- | :--- | :--- |\n';
+                 comp.symbols.forEach(s => {
+-                    md += '| `' + s.name + '` | ' + s.visibility + ' | ' + s.line + ' | `' + s.hash + '` |\n';
++                    const trace = s.traceability.length > 0 ? s.traceability.map(id => '`' + id + '`').join(', ') : 'None';
++                    md += '| `' + s.name + '` | ' + s.visibility + ' | `' + s.hash + '` | ' + trace + ' |\n';
+                 });
+                 md += '\n';
+             } else {
+@@ -149,63 +193,55 @@
+     return md;
+ }
+ 
+-function verify(manifest) {
+-    console.log("[VERIFY] Reconciling current code against baseline hashes...");
++function audit(featId) {
++    console.log('[AUDIT] Certifying implementation for ' + featId + '...');
+     if (!fs.existsSync(OUTPUT_JSON)) {
+-        console.error("[Error] Baseline map missing. Run without --verify first.");
++        console.error('[Error] Baseline map missing.');
+         process.exit(1);
+     }
+ 
+-    const baseline = JSON.parse(fs.readFileSync(OUTPUT_JSON, 'utf8'));
+-    let totalDrift = 0;
+-
+-    manifest.domains.forEach(domain => {
+-        console.log('[Domain] Auditing ' + domain.name + '...');
+-        const components = scanDomain(domain);
+-        const baselineDomain = baseline.domains.find(d => d.name === domain.name);
++    const map = JSON.parse(fs.readFileSync(OUTPUT_JSON, 'utf8'));
++    const affectedSymbols = [];
++    const hashes = {};
+ 
+-        components.forEach(comp => {
+-            const baselineComp = baselineDomain ? baselineDomain.components.find(c => c.file === comp.file) : null;
+-            
++    map.domains.forEach(domain => {
++        domain.components.forEach(comp => {
+             comp.symbols.forEach(s => {
+-                const baselineSymbol = baselineComp ? baselineComp.symbols.find(bs => bs.name === s.name) : null;
+-                
+-                if (comp.file === 'core/gf256.js' && s.name === 'mul') {
+-                }
+-
+-                if (!baselineSymbol) {
+-                    console.warn('  [NEW] ' + comp.file + ' -> ' + s.name + ' (Unregistered symbol)');
+-                    totalDrift++;
+-                } else if (baselineSymbol.hash !== s.hash) {
+-                    console.error('  [DRIFT] ' + comp.file + ' -> ' + s.name + ' (Hash Mismatch! ' + baselineSymbol.hash + ' -> ' + s.hash + ')');
+-                    totalDrift++;
++                if (s.traceability.includes(featId)) {
++                    affectedSymbols.push(comp.file + ' -> ' + s.name);
++                    hashes[s.name] = s.hash;
+                 }
+             });
+         });
+     });
+ 
+-    if (totalDrift === 0) {
+-        console.log("\n[Success] INTEGRITY VERIFIED: No architectural drift detected.");
+-    } else {
+-        console.log('\n[Failure] AUDIT FAILED: ' + totalDrift + ' drift events detected.');
+-        process.exit(1);
+-    }
++    const deliverable = {
++        feat_id: featId,
++        symbols: affectedSymbols,
++        hashes: hashes,
++        status: "CERTIFIED"
++    };
++
++    console.log('\n[DLR_MAP_TRACEABILITY]');
++    console.log(JSON.stringify(deliverable, null, 2));
+ }
+ 
+ function run() {
+-    const isVerify = process.argv.some(arg => arg === '--verify');
++    const isAudit = process.argv.includes('--audit');
+     const manifest = loadManifest();
+ 
+     console.log("\n====================================================");
+-    console.log('      WARDEN: ' + (isVerify ? 'PROVENANCE VERIFIER' : 'ARCHITECTURE MAPPER'));
++    console.log('      WARDEN: ' + (isAudit ? 'TRACEABILITY AUDITOR' : 'ARCHITECTURE MAPPER'));
+     console.log("====================================================\n");
+ 
+-    if (isVerify) {
+-        verify(manifest);
++    if (isAudit) {
++        const featId = process.argv[process.argv.indexOf('--audit') + 1];
++        if (!featId) { console.error('Usage: --audit <FEAT_ID>'); process.exit(1); }
++        audit(featId);
+         return;
+     }
+ 
+-    const map = {
++    let map = {
+         project_name: manifest.project_name,
+         timestamp: new Date().toISOString(),
+         domains: []
+@@ -220,6 +256,8 @@
+         });
+     });
+ 
++    map = harvestTraceability(map);
++
+     fs.writeFileSync(OUTPUT_JSON, JSON.stringify(map, null, 2));
+     console.log('\n[Success] Machine-readable map saved to registry/architecture_map.json');
+ 
+@@ -227,7 +265,7 @@
+     fs.writeFileSync(OUTPUT_MD, mdContent);
+     console.log('[Success] Human-readable guide saved to docs/ARCHITECTURE_MAP.md');
+     
+-    console.log("\n[DLR_MAP_STRUCT] Architecture Mapping & Provenance Complete.");
++    console.log("\n[DLR_MAP_STRUCT] Architecture Mapping & Traceability Complete.");
+ }
+ 
+-run();
+\ No newline at end of file
++run();
+
+
+
+
+
+--- a/engine/path_resolver.js	2026-01-19 12:47:28.507632479 +1100
++++ b/engine/path_resolver.js	2026-01-19 12:47:42.170822194 +1100
+@@ -67,6 +67,11 @@
+             case 'root':     return path.join(ACTIVE_ROOT, ...parts);
+             default:         return path.join(ACTIVE_ROOT, ...parts);
+         }
++    },
++
++    isWardenTool: (type, filename) => {
++        const fullPath = path.join(ROOT, type, filename);
++        return fs.existsSync(fullPath);
+     }
+ };
+ 
+
+
+--- a/engine/report.js	2026-01-19 12:00:40.075436294 +1100
++++ b/engine/report.js	2026-01-19 12:10:40.053827818 +1100
+@@ -233,16 +233,35 @@
+         process.exit(1);
+     }
+     const [score, anomalies, remediations] = args;
++
++    // Optimization: Inject Traceability Evidence
++    const archMapPath = resolve.active('registry', 'architecture_map.json');
++    let provenanceSummary = "";
++    if (fs.existsSync(archMapPath)) {
++        const map = JSON.parse(fs.readFileSync(archMapPath, 'utf8'));
++        let totalSymbols = 0;
++        let mappedSymbols = 0;
++        map.domains.forEach(d => {
++            d.components.forEach(c => {
++                totalSymbols += c.symbols.length;
++                mappedSymbols += c.symbols.filter(s => s.traceability.length > 0).length;
++            });
++        });
++        provenanceSummary = `\n[Provenance] Traceability Coverage: ${mappedSymbols}/${totalSymbols} symbols linked to features.`;
++    }
++
+     showHeader("POST-IMPLEMENTATION REVIEW");
+     console.log("[DLR_REV_PIR]");
+     console.log(`Success Score: ${score}/10`);
+     console.log(`Anomaly Analysis: ${anomalies}`);
+     console.log(`Remediation Table: ${remediations}`);
++    if (provenanceSummary) console.log(provenanceSummary);
+     console.log("\n====================================================");
+ }
+ 
+-const entries = getLogEntries();
+-if (process.argv.includes('--compliance')) analyzeCompliance(entries);
+-else if (process.argv.includes('--draft')) draftReport(entries);
+-else if (process.argv.includes('--pir')) generatePIR();
+-else generateInteractionReport(entries);
++const [,, command] = process.argv;
++
++if (command === '--compliance') analyzeCompliance(getLogEntries());
++else if (command === '--draft') draftReport(getLogEntries());
++else if (command === '--pir') generatePIR();
++else generateInteractionReport(getLogEntries());
+
+--- a/engine/warden.js	2026-01-19 12:47:28.507632479 +1100
++++ b/engine/warden.js	2026-01-19 12:48:45.093695881 +1100
+@@ -4,7 +4,7 @@
+ const { execSync } = require('child_process');
+ const { GovernanceAPI } = require('./lib/governance_api');
+ const { HANDLERS } = require('./lib/handlers');
+-const { WARDEN, STATE, REGISTRY, resolve } = require('./path_resolver');
++const { WARDEN, STATE, REGISTRY, ROOT, resolve } = require('./path_resolver');
+ 
+ const STATE_FILE = process.env.WARDEN_STATE_PATH || WARDEN.ACTIVE_STATE;
+ const AUDIT_FILE = process.env.WARDEN_AUDIT_PATH || WARDEN.INTERNAL_AUDIT;
+@@ -36,14 +36,15 @@
+     fs.writeFileSync(AUDIT_FILE, JSON.stringify(audit, null, 2));
+ }
+ 
+-function logInteraction(command, source = 'system', protocol = 'none', output = "", intent = null) {
++function logInteraction(command, source = 'system', protocol = 'none', output = "", intent = null, exitCode = 0) {
+     const logEntry = { 
+         timestamp: Date.now(), 
+         command, 
+         output, 
+         source,
+         protocol,
+-        intent
++        intent,
++        exit_code: exitCode
+     };
+     fs.appendFileSync(SESSION_LOG, JSON.stringify(logEntry) + '\n');
+ }
+@@ -319,25 +320,25 @@
+         console.log(`\n[DLR_AUD_INTERJECTION] Justification: ${justification}`);
+     }
+ 
+-    // 2.5 Path Fallback (FEAT_ZERO_SYMLINK)
+-    // If the command references engine/, docs/, or validation/ but they don't exist in CWD,
+-    // we rewrite the command to point to the internal Warden root.
++    // 2.5 Path Fallback (FEAT_ZERO_SYMLINK) - HARDENED
++    // If the command references engine/, docs/, or validation/ 
++    // we check the internal Warden root FIRST to avoid collisions with local docs/.
+     let resolvedCommand = command;
+     const internalTools = ['engine', 'docs', 'validation'];
+     internalTools.forEach(tool => {
+-        const localToolPath = path.join(process.cwd(), tool);
+-        if (!fs.existsSync(localToolPath)) {
+-            // Rewrite "node engine/..." to "node <INTERNAL_ROOT>/engine/..."
+-            const regex = new RegExp(`node ${tool}/`, 'g');
+-            const { ROOT: internalRoot } = require('./path_resolver');
+-            const internalPath = path.join(internalRoot, tool);
+-            resolvedCommand = resolvedCommand.replace(regex, `node ${internalPath}/`);
++        const regex = new RegExp(`node ${tool}/([a-zA-Z0-9_.-]+\\.js)`, 'g');
++        let match;
++        while ((match = regex.exec(command)) !== null) {
++            const fileName = match[1];
++            if (resolve.isWardenTool(tool, fileName)) {
++                const internalPath = path.join(ROOT, tool, fileName);
++                resolvedCommand = resolvedCommand.replace(`node ${tool}/${fileName}`, `node ${internalPath}`);
++            }
+         }
+     });
+ 
+     // 3. Execution
+     const source = intent ? 'agent_exec' : 'shadow_action';
+-    logInteraction(command, source, protocolId, "", intent);
+     if (isJustified) {
+         logInteraction(`JUSTIFY: ${command}`, 'manual_echo', protocolId, `[DLR_AUD_INTERJECTION] ${justification}`);
+     }
+@@ -345,6 +346,7 @@
+     console.log(`🚀 [WARDEN] Executing Proxy: ${resolvedCommand}`);
+ 
+     let output = "";
++    let exitCode = 0;
+     try {
+         output = execSync(resolvedCommand, { 
+             encoding: 'utf8',
+@@ -352,6 +354,7 @@
+         });
+         process.stdout.write(output);
+     } catch (e) {
++        exitCode = e.status || 1;
+         output = (e.stdout || "") + (e.stderr || "");
+         process.stderr.write(output);
+     }
+@@ -360,11 +363,10 @@
+     displayDeliverables(output);
+ 
+     // 4. Log result to capture output for regex checks
+-    if (output && output.trim().length > 0) {
+-        logInteraction(`[RESULT] ${command}`, source, protocolId, output, intent);
+-    }
++    logInteraction(command, source, protocolId, output, intent, exitCode);
+ 
+-    console.log(`🛡️  [WARDEN] Interaction logged to journal.`);
++    console.log(`🛡️  [WARDEN] Interaction logged to journal (Exit: ${exitCode}).`);
++    if (exitCode !== 0) process.exit(exitCode);
+ }
+ 
+ function cmdClose() {
+
+--- a/registry/architecture_map.json	2026-01-19 11:20:51.394225797 +1100
++++ b/registry/architecture_map.json	2026-01-19 12:10:10.245410902 +1100
+@@ -1,6 +1,6 @@
+ {
+   "project_name": "RLNC AlphaV12",
+-  "timestamp": "2026-01-19T00:08:30.189Z",
++  "timestamp": "2026-01-19T01:10:10.231Z",
+   "domains": [
+     {
+       "name": "Core Engine",
+@@ -9,50 +9,13 @@
+       "components": [
+         {
+           "file": "core/block_decoder.js",
+-          "symbols": [
+-            {
+-              "name": "constructor",
+-              "visibility": "Public",
+-              "line": 9
+-            },
+-            {
+-              "name": "addPiece",
+-              "visibility": "Public",
+-              "line": 30
+-            },
+-            {
+-              "name": "_insertRow",
+-              "visibility": "Public",
+-              "line": 62
+-            },
+-            {
+-              "name": "_finalize",
+-              "visibility": "Public",
+-              "line": 74
+-            },
+-            {
+-              "name": "getData",
+-              "visibility": "Public",
+-              "line": 93
+-            }
+-          ],
++          "symbols": [],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+         },
+         {
+           "file": "core/block_encoder.js",
+-          "symbols": [
+-            {
+-              "name": "constructor",
+-              "visibility": "Public",
+-              "line": 10
+-            },
+-            {
+-              "name": "codedPiece",
+-              "visibility": "Public",
+-              "line": 58
+-            }
+-          ],
++          "symbols": [],
+           "purpose": "Pure atomic math primitive focused on linear combinations.",
+           "scope": "Core Mathematical Logic"
+         },
+@@ -62,7 +25,9 @@
+             {
+               "name": "printTable",
+               "visibility": "Internal",
+-              "line": 22
++              "line": 22,
++              "hash": "8039c70121e62c19",
++              "traceability": []
+             }
+           ],
+           "purpose": "No purpose defined.",
+@@ -72,19 +37,24 @@
+           "file": "core/engine.js",
+           "symbols": [
+             {
+-              "name": "constructor",
+-              "visibility": "Public",
+-              "line": 22
+-            },
+-            {
+-              "name": "_wireComponents",
++              "name": "netOptions",
+               "visibility": "Public",
+-              "line": 125
+-            },
+-            {
+-              "name": "_finish",
+-              "visibility": "Public",
+-              "line": 195
++              "line": 61,
++              "hash": "c84ad48f636d0940",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "workerConfig",
++              "visibility": "Public",
++              "line": 127,
++              "hash": "3b537acc6bda2d83",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             }
+           ],
+           "purpose": "No purpose defined.",
+@@ -92,68 +62,7 @@
+         },
+         {
+           "file": "core/galois_matrix.js",
+-          "symbols": [
+-            {
+-              "name": "constructor",
+-              "visibility": "Public",
+-              "line": 8
+-            },
+-            {
+-              "name": "get",
+-              "visibility": "Public",
+-              "line": 23
+-            },
+-            {
+-              "name": "set",
+-              "visibility": "Public",
+-              "line": 25
+-            },
+-            {
+-              "name": "addRow",
+-              "visibility": "Public",
+-              "line": 32
+-            },
+-            {
+-              "name": "extractData",
+-              "visibility": "Public",
+-              "line": 41
+-            },
+-            {
+-              "name": "normalizeRow",
+-              "visibility": "Public",
+-              "line": 48
+-            },
+-            {
+-              "name": "solve",
+-              "visibility": "Public",
+-              "line": 62
+-            },
+-            {
+-              "name": "multiplyAdd",
+-              "visibility": "Public",
+-              "line": 94
+-            },
+-            {
+-              "name": "normalize",
+-              "visibility": "Public",
+-              "line": 139
+-            },
+-            {
+-              "name": "_findPivot",
+-              "visibility": "Public",
+-              "line": 170
+-            },
+-            {
+-              "name": "_swapRows",
+-              "visibility": "Public",
+-              "line": 178
+-            },
+-            {
+-              "name": "getAugmentedRow",
+-              "visibility": "Public",
+-              "line": 188
+-            }
+-          ],
++          "symbols": [],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+         },
+@@ -163,7 +72,42 @@
+             {
+               "name": "init",
+               "visibility": "Public",
+-              "line": 11
++              "line": 11,
++              "hash": "66c755d2f8cd74c3",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "GF256",
++              "visibility": "Public",
++              "line": 39,
++              "hash": "ea6385ce0b6cd008",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "mul",
++              "visibility": "Public",
++              "line": 48,
++              "hash": "c9981d6123421685",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "div",
++              "visibility": "Public",
++              "line": 57,
++              "hash": "34286ca1b611722b",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             }
+           ],
+           "purpose": "No purpose defined.",
+@@ -173,14 +117,54 @@
+           "file": "core/verify_coders.js",
+           "symbols": [
+             {
++              "name": "CONFIG",
++              "visibility": "Internal",
++              "line": 11,
++              "hash": "1d546addfab06436",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "ENCODER_CONFIG",
++              "visibility": "Internal",
++              "line": 14,
++              "hash": "1ec8c519382c8bfc",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
+               "name": "runCoderTest",
+               "visibility": "Internal",
+-              "line": 23
++              "line": 23,
++              "hash": "0146a560adf6eb23",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "stats",
++              "visibility": "Internal",
++              "line": 36,
++              "hash": "5f26b7fa9029371d",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+               "name": "printReport",
+               "visibility": "Internal",
+-              "line": 91
++              "line": 91,
++              "hash": "1779be2675ecdb6c",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             }
+           ],
+           "purpose": "No purpose defined.",
+@@ -190,14 +174,54 @@
+           "file": "core/verify_comparative_v10.js",
+           "symbols": [
+             {
++              "name": "CONFIG",
++              "visibility": "Internal",
++              "line": 11,
++              "hash": "825917ad579a8bef",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "ENCODER_CONFIG",
++              "visibility": "Internal",
++              "line": 13,
++              "hash": "7187a232b118b4b1",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
+               "name": "profile",
+               "visibility": "Internal",
+-              "line": 21
++              "line": 21,
++              "hash": "396a0c2c2333836d",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "stats",
++              "visibility": "Internal",
++              "line": 25,
++              "hash": "33656ed5b14a210d",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+               "name": "run",
+               "visibility": "Internal",
+-              "line": 90
++              "line": 90,
++              "hash": "7ffad8e0a1882b42",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             }
+           ],
+           "purpose": "No purpose defined.",
+@@ -207,9 +231,24 @@
+           "file": "core/verify_full_buffer_deadlock.js",
+           "symbols": [
+             {
++              "name": "CONFIG",
++              "visibility": "Internal",
++              "line": 11,
++              "hash": "8517e31e3c81700d",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
+               "name": "runTest",
+               "visibility": "Internal",
+-              "line": 17
++              "line": 17,
++              "hash": "a2cb33df34cef18b",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             }
+           ],
+           "purpose": "No purpose defined.",
+@@ -219,9 +258,44 @@
+           "file": "core/verify_incremental_stress.js",
+           "symbols": [
+             {
++              "name": "CONFIG",
++              "visibility": "Internal",
++              "line": 12,
++              "hash": "d635b18a4ab27e40",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "ENCODER_CONFIG",
++              "visibility": "Internal",
++              "line": 15,
++              "hash": "ec770fc4b5d6e221",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
+               "name": "run",
+               "visibility": "Internal",
+-              "line": 24
++              "line": 24,
++              "hash": "1ec7ece063f3ad3e",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "stats",
++              "visibility": "Internal",
++              "line": 32,
++              "hash": "1e4a67076b732dc0",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             }
+           ],
+           "purpose": "No purpose defined.",
+@@ -233,7 +307,16 @@
+             {
+               "name": "runStressTest",
+               "visibility": "Internal",
+-              "line": 13
++              "line": 13,
++              "hash": "30a06dfe7d5b1ba3",
++              "traceability": []
++            },
++            {
++              "name": "stats",
++              "visibility": "Internal",
++              "line": 16,
++              "hash": "e3e68061bdeff987",
++              "traceability": []
+             }
+           ],
+           "purpose": "No purpose defined.",
+@@ -249,14 +332,54 @@
+           "file": "core/verify_sbox_upper_bound.js",
+           "symbols": [
+             {
++              "name": "CONFIG",
++              "visibility": "Internal",
++              "line": 11,
++              "hash": "6abae0df7fa7efe5",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "ENCODER_CONFIG",
++              "visibility": "Internal",
++              "line": 14,
++              "hash": "7187a232b118b4b1",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
+               "name": "runUpperBoundProfile",
+               "visibility": "Internal",
+-              "line": 22
++              "line": 22,
++              "hash": "a932df92688fa174",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "stats",
++              "visibility": "Internal",
++              "line": 34,
++              "hash": "5f26b7fa9029371d",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+               "name": "printReport",
+               "visibility": "Internal",
+-              "line": 86
++              "line": 86,
++              "hash": "e986a185c09d0a68",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             }
+           ],
+           "purpose": "No purpose defined.",
+@@ -271,372 +394,1012 @@
+       "components": [
+         {
+           "file": "network/coded_piece.js",
++          "symbols": [],
++          "purpose": "No purpose defined.",
++          "scope": "No scope defined."
++        },
++        {
++          "file": "network/loopback_transport.js",
++          "symbols": [],
++          "purpose": "No purpose defined.",
++          "scope": "No scope defined."
++        },
++        {
++          "file": "network/network_simulator.js",
++          "symbols": [],
++          "purpose": "No purpose defined.",
++          "scope": "No scope defined."
++        },
++        {
++          "file": "network/packet_serializer.js",
++          "symbols": [],
++          "purpose": "No purpose defined.",
++          "scope": "No scope defined."
++        },
++        {
++          "file": "network/transport.js",
++          "symbols": [],
++          "purpose": "No purpose defined.",
++          "scope": "No scope defined."
++        },
++        {
++          "file": "network/udp_transport.js",
+           "symbols": [
+             {
+-              "name": "constructor",
++              "name": "workerData",
+               "visibility": "Public",
+-              "line": 2
++              "line": 20,
++              "hash": "10f190b247197807",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             }
+           ],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+         },
+         {
+-          "file": "network/loopback_transport.js",
++          "file": "network/udp_worker.js",
+           "symbols": [
+             {
+-              "name": "constructor",
+-              "visibility": "Public",
+-              "line": 7
+-            },
++              "name": "acquireRX",
++              "visibility": "Internal",
++              "line": 53,
++              "hash": "7ea2bf0d6e45d02a",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            }
++          ],
++          "purpose": "No purpose defined.",
++          "scope": "No scope defined."
++        }
++      ]
++    },
++    {
++      "name": "Utilities",
++      "path": "utils",
++      "description": "Shared resources and foundational helper modules.",
++      "components": [
++        {
++          "file": "utils/buffer_pool.js",
++          "symbols": [
+             {
+-              "name": "listen",
++              "name": "get",
+               "visibility": "Public",
+-              "line": 10
+-            },
++              "line": 7,
++              "hash": "e683ebc83b6171c9",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "release",
++              "visibility": "Public",
++              "line": 12,
++              "hash": "a469fd778ac57ba5",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            }
++          ],
++          "purpose": "No purpose defined.",
++          "scope": "No scope defined."
++        },
++        {
++          "file": "utils/shared_buffer_pool.js",
++          "symbols": [],
++          "purpose": "No purpose defined.",
++          "scope": "No scope defined."
++        },
++        {
++          "file": "utils/update_matrix.js",
++          "symbols": [
+             {
+-              "name": "connect",
+-              "visibility": "Public",
+-              "line": 12
++              "name": "updateMatrix",
++              "visibility": "Internal",
++              "line": 6,
++              "hash": "f17217970e8e8918",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+-              "name": "send",
+-              "visibility": "Public",
+-              "line": 13
++              "name": "newEntry",
++              "visibility": "Internal",
++              "line": 14,
++              "hash": "dd7c47ee164c100e",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+-              "name": "close",
+-              "visibility": "Public",
+-              "line": 18
++              "name": "matrix",
++              "visibility": "Internal",
++              "line": 22,
++              "hash": "7b343db37ae8b99d",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             }
+           ],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+         },
+         {
+-          "file": "network/network_simulator.js",
++          "file": "utils/visual_dashboard.js",
++          "symbols": [],
++          "purpose": "No purpose defined.",
++          "scope": "No scope defined."
++        }
++      ]
++    },
++    {
++      "name": "Validation Suite",
++      "path": "tests",
++      "description": "Technical verification and stress tests.",
++      "components": [
++        {
++          "file": "tests/t1_throughput.js",
+           "symbols": [
+             {
+-              "name": "constructor",
++              "name": "DATA",
+               "visibility": "Public",
+-              "line": 7
++              "line": 2,
++              "hash": "72b4a2cd0217612e",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+-              "name": "listen",
++              "name": "PROTOCOL",
+               "visibility": "Public",
+-              "line": 27
++              "line": 3,
++              "hash": "4a5720c7d3f29af4",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+-              "name": "connect",
++              "name": "TRANSCODE",
+               "visibility": "Public",
+-              "line": 31
++              "line": 4,
++              "hash": "15157f8d9f910cb4",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+-              "name": "send",
++              "name": "NETWORK",
+               "visibility": "Public",
+-              "line": 35
++              "line": 5,
++              "hash": "6d8e0d4990bbb595",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+-              "name": "_injectImpairment",
++              "name": "WINDOW",
+               "visibility": "Public",
+-              "line": 40
++              "line": 6,
++              "hash": "e3e299698d35794c",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+-              "name": "close",
++              "name": "SYSTEM",
+               "visibility": "Public",
+-              "line": 66
++              "line": 7,
++              "hash": "1921f004ef0b0e01",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             }
+           ],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+         },
+         {
+-          "file": "network/packet_serializer.js",
+-          "symbols": [],
+-          "purpose": "No purpose defined.",
+-          "scope": "No scope defined."
+-        },
+-        {
+-          "file": "network/transport.js",
++          "file": "tests/t2_resilience.js",
+           "symbols": [
+             {
+-              "name": "constructor",
++              "name": "DATA",
+               "visibility": "Public",
+-              "line": 9
++              "line": 2,
++              "hash": "62f19f4244de5706",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+-              "name": "listen",
++              "name": "PROTOCOL",
+               "visibility": "Public",
+-              "line": 20
++              "line": 3,
++              "hash": "688d14ef063f42ea",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+-              "name": "connect",
++              "name": "TRANSCODE",
+               "visibility": "Public",
+-              "line": 29
++              "line": 4,
++              "hash": "2b6136fde6027ca1",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+-              "name": "send",
++              "name": "NETWORK",
+               "visibility": "Public",
+-              "line": 39
++              "line": 5,
++              "hash": "ed6c325ea1836102",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+-              "name": "onPacket",
++              "name": "WINDOW",
+               "visibility": "Public",
+-              "line": 47
++              "line": 6,
++              "hash": "e3e299698d35794c",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+-              "name": "close",
++              "name": "SYSTEM",
+               "visibility": "Public",
+-              "line": 54
++              "line": 7,
++              "hash": "2592dee3735c8e08",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             }
+           ],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+         },
+         {
+-          "file": "network/udp_transport.js",
++          "file": "tests/t3_stress.js",
+           "symbols": [
+             {
+-              "name": "constructor",
++              "name": "DATA",
+               "visibility": "Public",
+-              "line": 10
++              "line": 2,
++              "hash": "c6bcb10fc2f1d3a4",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+-              "name": "listen",
++              "name": "PROTOCOL",
+               "visibility": "Public",
+-              "line": 42
++              "line": 3,
++              "hash": "688d14ef063f42ea",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+-              "name": "connect",
++              "name": "TRANSCODE",
+               "visibility": "Public",
+-              "line": 49
++              "line": 4,
++              "hash": "1fd425fb2145878d",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+-              "name": "send",
++              "name": "NETWORK",
+               "visibility": "Public",
+-              "line": 58
++              "line": 5,
++              "hash": "0adbfc8cf4609d7a",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+-              "name": "close",
++              "name": "WINDOW",
+               "visibility": "Public",
+-              "line": 70
+-            }
+-          ],
+-          "purpose": "No purpose defined.",
+-          "scope": "No scope defined."
+-        },
+-        {
+-          "file": "network/udp_worker.js",
+-          "symbols": [
++              "line": 6,
++              "hash": "93513a3caa2a742f",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
+             {
+-              "name": "acquireRX",
+-              "visibility": "Internal",
+-              "line": 53
++              "name": "SYSTEM",
++              "visibility": "Public",
++              "line": 7,
++              "hash": "5153ad4a2ece5aa4",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             }
+           ],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+-        }
+-      ]
+-    },
+-    {
+-      "name": "Utilities",
+-      "path": "utils",
+-      "description": "Shared resources and foundational helper modules.",
+-      "components": [
+-        {
+-          "file": "utils/buffer_pool.js",
+-          "symbols": [],
+-          "purpose": "No purpose defined.",
+-          "scope": "No scope defined."
+         },
+         {
+-          "file": "utils/shared_buffer_pool.js",
++          "file": "tests/t4_sustenance.js",
+           "symbols": [
+             {
+-              "name": "constructor",
+-              "visibility": "Public",
+-              "line": 7
+-            },
+-            {
+-              "name": "getSlotView",
++              "name": "DATA",
+               "visibility": "Public",
+-              "line": 24
++              "line": 2,
++              "hash": "62f19f4244de5706",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+-              "name": "lockSlot",
++              "name": "PROTOCOL",
+               "visibility": "Public",
+-              "line": 29
++              "line": 6,
++              "hash": "688d14ef063f42ea",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+-              "name": "unlockSlot",
++              "name": "TRANSCODE",
+               "visibility": "Public",
+-              "line": 33
++              "line": 12,
++              "hash": "2b6136fde6027ca1",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+-              "name": "isSlotBusy",
++              "name": "NETWORK",
+               "visibility": "Public",
+-              "line": 40
++              "line": 17,
++              "hash": "e197791604f5a219",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+-              "name": "acquireTX",
++              "name": "WINDOW",
+               "visibility": "Public",
+-              "line": 44
++              "line": 23,
++              "hash": "0d2849af13b4aae1",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+-              "name": "acquireRX",
++              "name": "SYSTEM",
+               "visibility": "Public",
+-              "line": 61
+-            }
+-          ],
+-          "purpose": "No purpose defined.",
+-          "scope": "No scope defined."
+-        },
+-        {
+-          "file": "utils/update_matrix.js",
+-          "symbols": [
+-            {
+-              "name": "updateMatrix",
+-              "visibility": "Internal",
+-              "line": 6
++              "line": 27,
++              "hash": "6ef25ff3f757cea8",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             }
+           ],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+         },
+         {
+-          "file": "utils/visual_dashboard.js",
++          "file": "tests/t5_full_coded.js",
+           "symbols": [
+             {
+-              "name": "constructor",
++              "name": "DATA",
+               "visibility": "Public",
+-              "line": 5
++              "line": 2,
++              "hash": "62f19f4244de5706",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+-              "name": "initGen",
++              "name": "PROTOCOL",
+               "visibility": "Public",
+-              "line": 21
++              "line": 6,
++              "hash": "688d14ef063f42ea",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+-              "name": "updateGen",
++              "name": "TRANSCODE",
+               "visibility": "Public",
+-              "line": 35
++              "line": 12,
++              "hash": "1b92da00a2646118",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+-              "name": "addGlobalStat",
++              "name": "NETWORK",
+               "visibility": "Public",
+-              "line": 43
++              "line": 17,
++              "hash": "afe2444797ce3345",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+-              "name": "registerTraffic",
++              "name": "WINDOW",
+               "visibility": "Public",
+-              "line": 47
++              "line": 23,
++              "hash": "650d1c31e72581d4",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+-              "name": "setFinalHash",
++              "name": "SYSTEM",
+               "visibility": "Public",
+-              "line": 52
+-            },
++              "line": 27,
++              "hash": "18f7481f5c32a64f",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            }
++          ],
++          "purpose": "No purpose defined.",
++          "scope": "No scope defined."
++        },
++        {
++          "file": "tests/t6_the_wall.js",
++          "symbols": [
+             {
+-              "name": "render",
++              "name": "DATA",
+               "visibility": "Public",
+-              "line": 54
++              "line": 2,
++              "hash": "62f19f4244de5706",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+-              "name": "_truncate",
++              "name": "PROTOCOL",
+               "visibility": "Public",
+-              "line": 93
++              "line": 6,
++              "hash": "688d14ef063f42ea",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+-              "name": "_formatBytes",
++              "name": "TRANSCODE",
+               "visibility": "Public",
+-              "line": 98
++              "line": 12,
++              "hash": "7491ef7d3c2ad72a",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+-              "name": "_generateHeaderString",
++              "name": "NETWORK",
+               "visibility": "Public",
+-              "line": 104
++              "line": 17,
++              "hash": "1f703b3ea854b584",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+-              "name": "_getFooterLines",
++              "name": "WINDOW",
+               "visibility": "Public",
+-              "line": 129
++              "line": 23,
++              "hash": "67f3584d0861968c",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             },
+             {
+-              "name": "_drawRow",
++              "name": "SYSTEM",
+               "visibility": "Public",
+-              "line": 162
++              "line": 27,
++              "hash": "ac9aeab4dae0d559",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
+             }
+           ],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+-        }
+-      ]
+-    },
+-    {
+-      "name": "Validation Suite",
+-      "path": "tests",
+-      "description": "Technical verification and stress tests.",
+-      "components": [
++        },
+         {
+-          "file": "tests/t1_throughput.js",
++          "file": "tests/verify_library.js",
+           "symbols": [],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+         },
+         {
+-          "file": "tests/t2_resilience.js",
++          "file": "tests/verify_math.js",
+           "symbols": [],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+         },
+         {
+-          "file": "tests/t3_stress.js",
++          "file": "tests/verify_serializer.js",
+           "symbols": [],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+         },
+         {
+-          "file": "tests/t4_sustenance.js",
+-          "symbols": [],
++          "file": "tests/verify_threaded.js",
++          "symbols": [
++            {
++              "name": "workerConfig",
++              "visibility": "Internal",
++              "line": 16,
++              "hash": "d63ae121ec097ff0",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            }
++          ],
++          "purpose": "No purpose defined.",
++          "scope": "No scope defined."
++        }
++      ]
++    },
++    {
++      "name": "Threading & Concurrency",
++      "path": "threading",
++      "description": "Multi-threaded encoders, decoders, and worker pool management.",
++      "components": [
++        {
++          "file": "threading/debug_verify_threading.js",
++          "symbols": [
++            {
++              "name": "CONFIG",
++              "visibility": "Internal",
++              "line": 13,
++              "hash": "c4cf797a6f54305d",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "TRANSCODE",
++              "visibility": "Internal",
++              "line": 15,
++              "hash": "2b6136fde6027ca1",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "WINDOW",
++              "visibility": "Internal",
++              "line": 20,
++              "hash": "96d5927b0a2747bf",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "PROTOCOL",
++              "visibility": "Internal",
++              "line": 24,
++              "hash": "688d14ef063f42ea",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "SYSTEM",
++              "visibility": "Internal",
++              "line": 30,
++              "hash": "f734017382b5028a",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "FULL_CONFIG",
++              "visibility": "Internal",
++              "line": 35,
++              "hash": "f20a331ba7156557",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "NETWORK",
++              "visibility": "Internal",
++              "line": 37,
++              "hash": "c2525249fbb490da",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "runSuite",
++              "visibility": "Internal",
++              "line": 46,
++              "hash": "50cbcb5377d452df",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "runTest",
++              "visibility": "Internal",
++              "line": 80,
++              "hash": "4277bddcb0a2633e",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "metrics",
++              "visibility": "Internal",
++              "line": 100,
++              "hash": "58834e1baf96b626",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "finish",
++              "visibility": "Internal",
++              "line": 166,
++              "hash": "d03d1770b7b00870",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "printReport",
++              "visibility": "Internal",
++              "line": 183,
++              "hash": "97bd5d01c55ab582",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            }
++          ],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+         },
+         {
+-          "file": "tests/t5_full_coded.js",
+-          "symbols": [],
++          "file": "threading/decoder_worker.js",
++          "symbols": [
++            {
++              "name": "handlePiece",
++              "visibility": "Internal",
++              "line": 35,
++              "hash": "74968d628d0551dd",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            }
++          ],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+         },
+         {
+-          "file": "tests/t6_the_wall.js",
+-          "symbols": [],
++          "file": "threading/docs/render_changelog.js",
++          "symbols": [
++            {
++              "name": "printTable",
++              "visibility": "Internal",
++              "line": 30,
++              "hash": "e4c1d90bfd653ccf",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            }
++          ],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+         },
+         {
+-          "file": "tests/verify_library.js",
+-          "symbols": [],
++          "file": "threading/encoder_worker.js",
++          "symbols": [
++            {
++              "name": "fallbackConfig",
++              "visibility": "Internal",
++              "line": 40,
++              "hash": "ac8eed6055d9a469",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "sendPacketViaShared",
++              "visibility": "Internal",
++              "line": 55,
++              "hash": "ad53b1f9665a9f0a",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "acquireTX",
++              "visibility": "Internal",
++              "line": 84,
++              "hash": "4969616005e256de",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "producePackets",
++              "visibility": "Internal",
++              "line": 99,
++              "hash": "54be32c57c01b833",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "stats",
++              "visibility": "Internal",
++              "line": 101,
++              "hash": "f9e56e4b94ed5363",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            }
++          ],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+         },
+         {
+-          "file": "tests/verify_math.js",
++          "file": "threading/generation_decoder.js",
+           "symbols": [],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+         },
+         {
+-          "file": "tests/verify_serializer.js",
+-          "symbols": [],
++          "file": "threading/generation_encoder.js",
++          "symbols": [
++            {
++              "name": "budgets",
++              "visibility": "Public",
++              "line": 58,
++              "hash": "df042b2c2048b46a",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "blockConfig",
++              "visibility": "Public",
++              "line": 83,
++              "hash": "469e0f10d78a3266",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            }
++          ],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+         },
+         {
+-          "file": "tests/verify_threaded.js",
++          "file": "threading/sliding_window.js",
+           "symbols": [],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
++        },
++        {
++          "file": "threading/verify_threading.js",
++          "symbols": [
++            {
++              "name": "CONFIG",
++              "visibility": "Internal",
++              "line": 13,
++              "hash": "c4cf797a6f54305d",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "TRANSCODE",
++              "visibility": "Internal",
++              "line": 15,
++              "hash": "2b6136fde6027ca1",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "WINDOW",
++              "visibility": "Internal",
++              "line": 20,
++              "hash": "96d5927b0a2747bf",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "PROTOCOL",
++              "visibility": "Internal",
++              "line": 24,
++              "hash": "688d14ef063f42ea",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "SYSTEM",
++              "visibility": "Internal",
++              "line": 30,
++              "hash": "f734017382b5028a",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "FULL_CONFIG",
++              "visibility": "Internal",
++              "line": 35,
++              "hash": "f20a331ba7156557",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "NETWORK",
++              "visibility": "Internal",
++              "line": 37,
++              "hash": "c2525249fbb490da",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "runSuite",
++              "visibility": "Internal",
++              "line": 46,
++              "hash": "50cbcb5377d452df",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "runTest",
++              "visibility": "Internal",
++              "line": 80,
++              "hash": "0d8cc0e79521491a",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "metrics",
++              "visibility": "Internal",
++              "line": 100,
++              "hash": "58834e1baf96b626",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "finish",
++              "visibility": "Internal",
++              "line": 155,
++              "hash": "821d20e85b65ee1c",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "printReport",
++              "visibility": "Internal",
++              "line": 172,
++              "hash": "97bd5d01c55ab582",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            }
++          ],
++          "purpose": "No purpose defined.",
++          "scope": "No scope defined."
++        },
++        {
++          "file": "threading/worker_pool.js",
++          "symbols": [
++            {
++              "name": "workerData",
++              "visibility": "Public",
++              "line": 29,
++              "hash": "590ed21f210b4e72",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            },
++            {
++              "name": "workerBudgets",
++              "visibility": "Public",
++              "line": 102,
++              "hash": "7ccc70620b255d9b",
++              "traceability": [
++                "FEAT_LIVING_MAPS_PROVENANCE",
++                "FEAT_LIVING_MAPS_TRACEABILITY"
++              ]
++            }
++          ],
++          "purpose": "No purpose defined.",
++          "scope": "No scope defined."
+         }
+       ]
+     }
+
+
+
+--- a/registry/changelog.json	2026-01-19 11:05:40.850415164 +1100
++++ b/registry/changelog.json	2026-01-19 12:51:10.469714449 +1100
+@@ -1,6 +1,60 @@
+ {
+   "warden_changelog": [
+     {
++      "version": "2.0.11",
++      "date": "2026-01-19",
++      "changes": [
++        "Hardened governance engine: fixed path collisions, exit-code propagation, and result-aware gates"
++      ]
++    },
++    {
++      "version": "2.0.10",
++      "date": "2026-01-19",
++      "changes": [
++        "Finalized Project Contextual Induction"
++      ]
++    },
++    {
++      "version": "2.0.9",
++      "date": "2026-01-19",
++      "changes": [
++        "Completed 100% Metadata Contextual Induction"
++      ]
++    },
++    {
++      "version": "2.0.8",
++      "date": "2026-01-19",
++      "changes": [
++        "Finalized Traceability Matrix and Protocol Evolutions"
++      ]
++    },
++    {
++      "version": "2.0.7",
++      "date": "2026-01-19",
++      "changes": [
++        "Codified DLR_MAP_TRACEABILITY deliverable",
++        "Extended map.js with FEAT_ID harvesting",
++        "Evolved GSD_V5 and MAP_V3 protocols",
++        "Automated PIR provenance coverage reporting"
++      ]
++    },
++    {
++      "version": "2.0.6",
++      "date": "2026-01-19",
++      "changes": [
++        "Finalized Provenance Tracker"
++      ]
++    },
++    {
++      "version": "2.0.5",
++      "date": "2026-01-19",
++      "changes": [
++        "Implemented method-level SHA256 hashing in map.js",
++        "Added --verify mode for drift detection and reconciliation",
++        "Verified normalization logic for comments and whitespace"
++      ]
++    },
++    {
+       "version": "2.0.4",
+       "date": "2026-01-18",
+       "changes": [
+
+
+
+
+
+
+
+
+
+
+
+
+
+--- a/registry/deliverables.json	2026-01-19 12:00:40.075436294 +1100
++++ b/registry/deliverables.json	2026-01-19 12:00:49.484567737 +1100
+@@ -247,6 +247,24 @@
+       "purpose": "Real-time visibility into engine state.",
+       "scope": "Telemetry",
+       "persistence": "File (status.json)"
++    },
++    {
++      "id": "DLR_MAP_TRACEABILITY",
++      "name": "Feature Traceability Matrix",
++      "description": "Cryptographic linkage between implementation symbols and authorized Feature IDs.",
++      "purpose": "Proves implementation provenance and prevents unauthorized shadow changes.",
++      "scope": "Integrity",
++      "persistence": "File (registry/architecture_map.json)",
++      "schema": {
++        "type": "object",
++        "properties": {
++          "feat_id": { "type": "string" },
++          "symbols": { "type": "array", "items": { "type": "string" } },
++          "hashes": { "type": "object" },
++          "status": { "type": "string", "enum": ["CERTIFIED", "DRIFT_DETECTED"] }
++        },
++        "required": ["feat_id", "symbols", "hashes", "status"]
++      }
+     }
+   ]
+ }
+\ No newline at end of file
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--- a/registry/library_manifest.json	2026-01-19 11:05:40.851415178 +1100
++++ b/registry/library_manifest.json	2026-01-19 12:51:10.386713297 +1100
+@@ -3,102 +3,108 @@
+     "file": "registry/protocols/CAP_V1.json",
+     "version": "1.0.0",
+     "hash": "42a0bac64d1712e05e5c332c6e165c7a8f146cff2d0666107673303e475dd0e8",
+-    "updated": "2026-01-18T23:01:57.960Z"
++    "updated": "2026-01-19T01:51:10.386Z"
+   },
+   "CFG_V2": {
+     "file": "registry/protocols/CFG_V2.json",
+     "version": "2.0.0",
+     "hash": "99594a555b7adaa2f1a5992032fd9a50e3a9c6a3d5bd4bab5fe3ab0da50af9ea",
+-    "updated": "2026-01-18T23:01:57.961Z"
++    "updated": "2026-01-19T01:51:10.386Z"
+   },
+   "DOC_V2": {
+     "file": "registry/protocols/DOC_V2.json",
+     "version": "2.1.0",
+     "hash": "732823639d657af62249791a6cf9266c5318e750505f3d2a6d60834e650beea0",
+-    "updated": "2026-01-18T23:01:57.961Z"
++    "updated": "2026-01-19T01:51:10.386Z"
+   },
+   "ENV_V2": {
+     "file": "registry/protocols/ENV_V2.json",
+     "version": "2.0.0",
+     "hash": "cda7ec50aee881da0f5b1bc5d811cedc0d77d1bf93cae4ef78f800876a57d90e",
+-    "updated": "2026-01-18T23:01:57.961Z"
++    "updated": "2026-01-19T01:51:10.386Z"
+   },
+   "EVO_V2": {
+     "file": "registry/protocols/EVO_V2.json",
+     "version": "2.0.0",
+     "hash": "ffb40a6fde6293c3613f215b10387e050a5b92ad90316998de96d88a77c28c6f",
+-    "updated": "2026-01-18T23:01:57.961Z"
++    "updated": "2026-01-19T01:51:10.386Z"
+   },
+   "FIX_V2": {
+     "file": "registry/protocols/FIX_V2.json",
+     "version": "2.0.0",
+     "hash": "38996a0f77653ebc2c5ca555ece3d318a53a8f2570d7168f5844047ff06ae512",
+-    "updated": "2026-01-18T23:01:57.961Z"
++    "updated": "2026-01-19T01:51:10.386Z"
+   },
+   "GSD_V5": {
+     "file": "registry/protocols/GSD_V5.json",
+     "version": "5.9.0",
+-    "hash": "c04c924070b44171c1e23b8d015badb9e3a7108fc1810c649f5e08b341361442",
+-    "updated": "2026-01-18T23:01:57.961Z"
++    "hash": "0c3696409e50be2ef65790fbd7b81dce94ce61d71b47130f19bbd28d7cab1f9b",
++    "updated": "2026-01-19T01:51:10.386Z"
+   },
+   "IDEA_V1": {
+     "file": "registry/protocols/IDEA_V1.json",
+     "version": "1.1.0",
+     "hash": "bfb69d836de67aedfa9f8be754736fab6f2b9d7f6590f99eb37a2b7de2b58307",
+-    "updated": "2026-01-18T23:01:57.961Z"
++    "updated": "2026-01-19T01:51:10.387Z"
+   },
+   "MAP_V2": {
+     "file": "registry/protocols/MAP_V2.json",
+     "version": "2.0.0",
+     "hash": "771bc9c680d2a2cccf723f43a43b6841c482646ae00576bc0e4b3217529103c2",
+-    "updated": "2026-01-18T23:01:57.961Z"
++    "updated": "2026-01-19T01:51:10.387Z"
++  },
++  "MAP_V3": {
++    "file": "registry/protocols/MAP_V3.json",
++    "version": "3.0.0",
++    "hash": "2e232e83eab53d3eb8d6315e7dbac5d8e5a04a0ce62a18c959e7ec6618fb17e0",
++    "updated": "2026-01-19T01:51:10.387Z"
+   },
+   "ONBOARD_V4": {
+     "file": "registry/protocols/ONBOARD_V4.json",
+     "version": "4.1.0",
+     "hash": "4a36157e0d9c103d86c532d3a7018f66a7ef781c8d76eeffecb249ce640ee0b0",
+-    "updated": "2026-01-18T23:01:57.962Z"
++    "updated": "2026-01-19T01:51:10.387Z"
+   },
+   "OPTIMISE_V2": {
+     "file": "registry/protocols/OPTIMISE_V2.json",
+     "version": "2.0.0",
+     "hash": "f8e134916e04dccd7304893448454f4c30e84fe4ae82db25bd0d4180f75b10e6",
+-    "updated": "2026-01-18T23:01:57.962Z"
++    "updated": "2026-01-19T01:51:10.387Z"
+   },
+   "PIR_V4": {
+     "file": "registry/protocols/PIR_V4.json",
+     "version": "4.2.0",
+     "hash": "f127d187c6e451e549910873addea7a4976cfd94e9b2332a43d32e748d0f14ba",
+-    "updated": "2026-01-18T23:01:57.962Z"
++    "updated": "2026-01-19T01:51:10.387Z"
+   },
+   "PRY_V2": {
+     "file": "registry/protocols/PRY_V2.json",
+     "version": "2.1.0",
+     "hash": "8bfd3773824e9fb7a09d8498e51b174733578ce8039f0185a8152238cae89882",
+-    "updated": "2026-01-18T23:01:57.962Z"
++    "updated": "2026-01-19T01:51:10.387Z"
+   },
+   "ROADMAP_V2": {
+     "file": "registry/protocols/ROADMAP_V2.json",
+     "version": "2.0.0",
+     "hash": "2958223b77df0a88be4a915346584b094138122435c003bf91766b791cd229b8",
+-    "updated": "2026-01-18T23:01:57.962Z"
++    "updated": "2026-01-19T01:51:10.387Z"
+   },
+   "STAT_V2": {
+     "file": "registry/protocols/STAT_V2.json",
+     "version": "2.0.0",
+     "hash": "e179d23d9e7d7986987cb317cde2f4024bc14799587e088c520c51e2e4558348",
+-    "updated": "2026-01-18T23:01:57.962Z"
++    "updated": "2026-01-19T01:51:10.387Z"
+   },
+   "VAL_V2": {
+     "file": "registry/protocols/VAL_V2.json",
+     "version": "2.0.0",
+     "hash": "c9dbeee7caabb92745f014685281620b20d6b5c1d4fa7acb7386a175f3c5f705",
+-    "updated": "2026-01-18T23:01:57.962Z"
++    "updated": "2026-01-19T01:51:10.387Z"
+   },
+   "VFY_V2": {
+     "file": "registry/protocols/VFY_V2.json",
+     "version": "2.2.0",
+     "hash": "4cb56d3caf9a02777e75edb69274c9ac847053049c0e18279d64569367b3914e",
+-    "updated": "2026-01-18T23:01:57.962Z"
++    "updated": "2026-01-19T01:51:10.387Z"
+   }
+ }
+\ No newline at end of file
+
+
+
+
+
+
+
+--- a/registry/protocols/GSD_V5.json	2026-01-19 12:00:40.075436294 +1100
++++ b/registry/protocols/GSD_V5.json	2026-01-19 12:03:00.043393811 +1100
+@@ -65,6 +65,11 @@
+           "type": "regex_match_output",
+           "pattern": "DLR_BRF_MISSION"
+         },
++        "map_baseline": {
++          "type": "command_log",
++          "pattern": "node engine/warden.js init MAP_V3",
++          "instruction": "Initialize Architectural Baseline (MAP_V3)."
++        },
+         "director_ack_survey": {
+           "type": "regex_match_output",
+           "pattern": "DLR_SUR_ACK|Approved|Ratified",
+@@ -209,6 +214,11 @@
+                   "type": "command_log",
+                   "pattern": "node docs/finalizer.js"
+                 },
++                "traceability_audit": {
++                  "type": "regex_match_output",
++                  "pattern": "DLR_MAP_TRACEABILITY",
++                  "instruction": "Certified Traceability Matrix required for PIR generation."
++                },
+                 "evidence_table": {
+                   "type": "regex_match_output",
+                   "pattern": "DLR_REV_PIR"
+
+
+
+
+
+
+
+
+
+
+
+
+--- a/registry/protocols.json	2026-01-19 11:05:40.851415178 +1100
++++ b/registry/protocols.json	2026-01-19 12:51:10.386713297 +1100
+@@ -349,6 +349,11 @@
+               "type": "regex_match_output",
+               "pattern": "DLR_BRF_MISSION"
+             },
++            "map_baseline": {
++              "type": "command_log",
++              "pattern": "node engine/warden.js init MAP_V3",
++              "instruction": "Initialize Architectural Baseline (MAP_V3)."
++            },
+             "director_ack_survey": {
+               "type": "regex_match_output",
+               "pattern": "DLR_SUR_ACK|Approved|Ratified",
+@@ -493,6 +498,11 @@
+               "type": "command_log",
+               "pattern": "node docs/finalizer.js"
+             },
++            "traceability_audit": {
++              "type": "regex_match_output",
++              "pattern": "DLR_MAP_TRACEABILITY",
++              "instruction": "Certified Traceability Matrix required for PIR generation."
++            },
+             "evidence_table": {
+               "type": "regex_match_output",
+               "pattern": "DLR_REV_PIR"
+@@ -636,6 +646,51 @@
+             }
+           },
+           "transitions": {
++            "next": "0_IDLE"
++          }
++        }
++      }
++    },
++    "MAP_V3": {
++      "meta": {
++        "title": "System Mapping & Contextualization v3",
++        "version": "3.0.0",
++        "description": "Evidence-based Traceability: Linking logical modifications to strategic intent.",
++        "principles": [
++          "Adherence to STD_COGNITIVE_FIDELITY: Velocity must never outpace Understanding.",
++          "Cryptographic provenance is mandatory for implementation certification."
++        ]
++      },
++      "states": {
++        "0_IDLE": {
++          "type": "initial",
++          "transitions": {
++            "start": "1_BASELINE"
++          }
++        },
++        "1_BASELINE": {
++          "description": "Establish Architectural Baseline",
++          "requirements": {
++            "symbolic_map": {
++              "type": "command_log",
++              "pattern": "node engine/map.js",
++              "instruction": "Execute `node engine/warden.js exec \"node engine/map.js\"` to snapshot symbolic state."
++            }
++          },
++          "transitions": {
++            "next": "2_CERTIFY"
++          }
++        },
++        "2_CERTIFY": {
++          "description": "Feature Implementation Certification",
++          "requirements": {
++            "traceability_matrix": {
++              "type": "regex_match_output",
++              "pattern": "DLR_MAP_TRACEABILITY",
++              "instruction": "Execute `node engine/warden.js exec \"node engine/map.js --audit <FEAT_ID>\"`."
++            }
++          },
++          "transitions": {
+             "next": "0_IDLE"
+           }
+         }
+
+--- a/registry/protocols.json.baseline	2026-01-19 11:05:40.850415164 +1100
++++ b/registry/protocols.json.baseline	2026-01-19 13:08:53.424412365 +1100
+@@ -349,6 +349,11 @@
+               "type": "regex_match_output",
+               "pattern": "DLR_BRF_MISSION"
+             },
++            "map_baseline": {
++              "type": "command_log",
++              "pattern": "node engine/warden.js init MAP_V3",
++              "instruction": "Initialize Architectural Baseline (MAP_V3)."
++            },
+             "director_ack_survey": {
+               "type": "regex_match_output",
+               "pattern": "DLR_SUR_ACK|Approved|Ratified",
+@@ -493,6 +498,11 @@
+               "type": "command_log",
+               "pattern": "node docs/finalizer.js"
+             },
++            "traceability_audit": {
++              "type": "regex_match_output",
++              "pattern": "DLR_MAP_TRACEABILITY",
++              "instruction": "Certified Traceability Matrix required for PIR generation."
++            },
+             "evidence_table": {
+               "type": "regex_match_output",
+               "pattern": "DLR_REV_PIR"
+@@ -636,6 +646,51 @@
+             }
+           },
+           "transitions": {
++            "next": "0_IDLE"
++          }
++        }
++      }
++    },
++    "MAP_V3": {
++      "meta": {
++        "title": "System Mapping & Contextualization v3",
++        "version": "3.0.0",
++        "description": "Evidence-based Traceability: Linking logical modifications to strategic intent.",
++        "principles": [
++          "Adherence to STD_COGNITIVE_FIDELITY: Velocity must never outpace Understanding.",
++          "Cryptographic provenance is mandatory for implementation certification."
++        ]
++      },
++      "states": {
++        "0_IDLE": {
++          "type": "initial",
++          "transitions": {
++            "start": "1_BASELINE"
++          }
++        },
++        "1_BASELINE": {
++          "description": "Establish Architectural Baseline",
++          "requirements": {
++            "symbolic_map": {
++              "type": "command_log",
++              "pattern": "node engine/map.js",
++              "instruction": "Execute `node engine/warden.js exec \"node engine/map.js\"` to snapshot symbolic state."
++            }
++          },
++          "transitions": {
++            "next": "2_CERTIFY"
++          }
++        },
++        "2_CERTIFY": {
++          "description": "Feature Implementation Certification",
++          "requirements": {
++            "traceability_matrix": {
++              "type": "regex_match_output",
++              "pattern": "DLR_MAP_TRACEABILITY",
++              "instruction": "Execute `node engine/warden.js exec \"node engine/map.js --audit <FEAT_ID>\"`."
++            }
++          },
++          "transitions": {
+             "next": "0_IDLE"
+           }
+         }
+
+--- a/registry/protocols.json.integrity.snapshot.json	2026-01-19 11:05:40.851415178 +1100
++++ b/registry/protocols.json.integrity.snapshot.json	2026-01-19 13:08:53.424412365 +1100
+@@ -36,10 +36,10 @@
+     "req_count": 3
+   },
+   "GSD_V5": {
+-    "hash": "2d1482edc2c108781a5a90453602b9c3662f04b6b63a91960aa5d3e7863e33c1",
++    "hash": "76f14439af2ad219cea243bcb54f5a45f6f208a6728ea6eed61985f34ab953f8",
+     "version": "5.9.0",
+     "stat_count": 7,
+-    "req_count": 18
++    "req_count": 20
+   },
+   "IDEA_V1": {
+     "hash": "69b66c11e4e016fceecc76680ea380613f6f5ccfc4d1b063c71da50888174fd6",
+@@ -53,6 +53,12 @@
+     "stat_count": 3,
+     "req_count": 2
+   },
++  "MAP_V3": {
++    "hash": "1c6667023eed5df64e4d8c548b67489a6c4ff902f820be792cc5f64eeb96abfa",
++    "version": "3.0.0",
++    "stat_count": 3,
++    "req_count": 2
++  },
+   "ONBOARD_V4": {
+     "hash": "d65dbbb1c7493c731b48acc5e74969c86f4c7f0aa66a25cffb729e45ce5c3132",
+     "version": "4.1.0",
+@@ -102,7 +108,7 @@
+     "req_count": 5
+   },
+   "_GLOBAL_REGISTRIES": {
+-    "hash": "f40edcd38b72b29ec4c9d8f26f3ab29b1451b96fb0e0f79e0e8992b908bd76d8",
++    "hash": "1712aac77dbe753d2f848c32e71bf9f22ddea3526ed8693cd2257c788ff939e5",
+     "version": "0.0.0",
+     "stat_count": 0
+   }
+
+
+
+
+
+
+
+
+

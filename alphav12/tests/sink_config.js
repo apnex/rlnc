@@ -1,0 +1,13 @@
+module.exports = {
+    PROTOCOL: { MAGIC_BYTE: 0xAA, VERSION: 0x01, HEADER_SIZE: 8, PIECE_COUNT: 16 },
+    TRANSCODE: { PIECE_COUNT: 64, PIECE_SIZE: 1024, SYSTEMATIC: true },
+    NETWORK: {
+        LOSS_RATE: 0.0,
+        LATENCY: 0,
+        JITTER: 0,
+        PORT: 46642
+    },
+    WINDOW: { SIZE: 8, TIMEOUT: 1000 },
+    SYSTEM: { TICK_RATE: 100, THREADS: 1, GLOBAL_TIMEOUT: 60000 },
+    TOTAL_GENS: 64
+};

@@ -1,3 +1,8 @@
+/**
+ * Buffer Allocation Pool
+ * @warden-purpose Efficient reuse of Buffer objects to minimize GC pressure.
+ * @warden-scope Utilities
+ */
 // Simple buffer reuse to reduce GC pressure
 const POOL_SIZE = 100;
 const BUFFER_SIZE = 65536; // Default max

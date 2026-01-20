@@ -1,0 +1,343 @@
+
+
+
+
+
+
+
+--- a/engine/map.js	2026-01-19 11:05:40.849415150 +1100
++++ b/engine/map.js	2026-01-19 11:11:14.122105237 +1100
+@@ -1,126 +1,157 @@
+ const fs = require('fs');
+ const path = require('path');
+-const { resolve, ENGINE, SOURCES } = require('./path_resolver');
++const { resolve, SOURCES } = require('./path_resolver');
+ 
+ /**
+- * WARDEN CARTOGRAPHER (MAP_V2)
+- * Dynamic Architecture & Protocol Topology Generator
++ * LIVING ARCHITECTURE MAPPER (FEAT_LIVING_MAPS_DISCOVERY)
++ * @warden-purpose Automates project discovery and orientation for ZKEs.
++ * @warden-scope Governance Tooling
+  */
+ 
+-function showHeader(title) {
+-    console.log(`%% WARDEN MAP: ${title}`);
+-    console.log(`%% Generated: ${new Date().toISOString()}\n`);
++const MANIFEST_PATH = resolve.registry('project_manifest.json');
++const OUTPUT_JSON = path.join(process.cwd(), 'registry', 'architecture_map.json');
++const OUTPUT_MD = path.join(process.cwd(), 'docs', 'ARCHITECTURE_MAP.md');
++
++function loadManifest() {
++    if (!fs.existsSync(MANIFEST_PATH)) {
++        console.error(`❌ Error: Project Manifest missing at ${MANIFEST_PATH}`);
++        process.exit(1);
++    }
++    return JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf8'));
+ }
+ 
+-/**
+- * PHYSICAL LAYER: Dependency Mapping
+- */
+-function getDependencies() {
+-    const files = fs.readdirSync(ENGINE).filter(f => f.endsWith('.js'));
+-    const deps = [];
++function extractSymbols(filePath) {
++    const content = fs.readFileSync(filePath, 'utf8');
++    const symbols = [];
+     
+-    files.forEach(file => {
+-        const content = fs.readFileSync(path.join(ENGINE, file), 'utf8');
+-        // Match require statements with relative paths
+-        const matches = content.matchAll(/require\(['"](\.?\.?\/[a-zA-Z0-9_\/]+)['"]\)/g);
+-        for (const match of matches) {
+-            let depPath = match[1];
+-            let depName = path.basename(depPath, '.js');
+-            deps.push({ from: file, to: depName });
++    // Refined Regex: Exclude JS keywords and capture cleaner function names
++    const funcRegex = /(?:function\s+([a-zA-Z0-9_]+)|(?:const|let|var)\s+([a-zA-Z0-9_]+)\s*=\s*(?:\([^)]*\)|[a-zA-Z0-9_]+)\s*=>|^\s*([a-zA-Z0-9_]+)\s*\([^)]*\)\s*\{)/gm;
++    const keywords = ['if', 'for', 'while', 'switch', 'catch', 'return'];
++    
++    // Regex for Qualitative Metadata (JSDoc)
++    const purposeRegex = /@warden-purpose\s+(.+)/;
++    const scopeRegex = /@warden-scope\s+(.+)/;
++
++    let match;
++    while ((match = funcRegex.exec(content)) !== null) {
++        const name = match[1] || match[2] || match[3];
++        if (name && !keywords.includes(name)) {
++            // Improved visibility heuristic
++            const isExported = content.includes(`exports.${name}`) || 
++                               content.includes(`module.exports`) || 
++                               content.includes(`export function ${name}`) ||
++                               content.includes(`export const ${name}`);
++            
++            symbols.push({
++                name,
++                visibility: (isExported || name === 'constructor') ? 'Public' : 'Internal',
++                line: content.substring(0, match.index).split('\n').length
++            });
+         }
+-    });
+-    return deps;
+-}
++    }
+ 
+-function renderDeps() {
+-    const deps = getDependencies();
+-    console.log("graph TD");
+-    console.log("  subgraph Engine");
+-    const nodes = new Set();
+-    deps.forEach(d => {
+-        nodes.add(d.from);
+-        nodes.add(d.to);
+-        console.log(`    ${d.from.replace('.js', '')} --> ${d.to}`);
+-    });
+-    console.log("  end");
+-}
++    const purposeMatch = content.match(purposeRegex);
++    const scopeMatch = content.match(scopeRegex);
+ 
+-/**
+- * LOGICAL LAYER: Protocol Mapping
+- */
+-function getProtocol(id) {
+-    const protoPath = resolve.registry('protocols', `${id}.json`);
+-    if (!fs.existsSync(protoPath)) {
+-        // Fallback to protocols.json if modular one not found
+-        const full = JSON.parse(fs.readFileSync(SOURCES.PROTOCOLS, 'utf8'));
+-        return full.protocol_library[id];
++    return {
++        symbols,
++        purpose: purposeMatch ? purposeMatch[1].trim() : "No purpose defined.",
++        scope: scopeMatch ? scopeMatch[1].trim() : "No scope defined."
++    };
++}
++
++function scanDomain(domain) {
++    const projectRoot = process.cwd();
++    const domainPath = path.join(projectRoot, domain.path);
++    const components = [];
++
++    if (!fs.existsSync(domainPath)) {
++        console.warn(`  [!] Warning: Domain path ${domainPath} not found.`);
++        return components;
+     }
+-    return JSON.parse(fs.readFileSync(protoPath, 'utf8'));
+-}
+ 
+-function renderProtocol(id) {
+-    const proto = getProtocol(id);
+-    if (!proto) {
+-        console.error(`❌ Error: Protocol ${id} not found.`);
+-        process.exit(1);
++    function walk(dir) {
++        const items = fs.readdirSync(dir);
++        items.forEach(item => {
++            const fullPath = path.join(dir, item);
++            if (fs.statSync(fullPath).isDirectory()) {
++                walk(fullPath);
++            } else if (item.endsWith('.js')) {
++                const relativePath = path.relative(projectRoot, fullPath);
++                console.log(`  [🔍] Mapping ${relativePath}...`);
++                const analysis = extractSymbols(fullPath);
++                components.push({
++                    file: relativePath,
++                    ...analysis
++                });
++            }
++        });
+     }
+ 
+-    console.log(`graph LR`);
+-    console.log(`  subgraph ${id} [${proto.meta.title}]`);
+-    
+-    Object.entries(proto.states).forEach(([name, data]) => {
+-        const label = name;
+-        if (data.type === 'initial') {
+-            console.log(`    START(( )) --> ${name}`);
+-        }
++    walk(domainPath);
++    return components;
++}
+ 
+-        if (data.transitions) {
+-            Object.entries(data.transitions).forEach(([trigger, target]) => {
+-                const targetName = typeof target === 'object' ? target.target : target;
+-                console.log(`    ${name} -- "${trigger}" --> ${targetName}`);
+-            });
+-        }
++function generateMarkdown(map) {
++    let md = `# Architecture Map: ${map.project_name}\n\n`;
++    md += `**Generated:** ${new Date().toISOString()}\n`;
++    md += `**Scope:** Target Project Investigation (FEAT_LIVING_MAPS_DISCOVERY)\n\n`;
++
++    map.domains.forEach(domain => {
++        md += `## Domain: ${domain.name}\n`;
++        md += `> ${domain.description}\n\n`;
++
++        domain.components.forEach(comp => {
++            md += `### Component: \`${comp.file}\`\n`;
++            md += `*   **Purpose:** ${comp.purpose}\n`;
++            md += `*   **Scope:** ${comp.scope}\n\n`;
++            
++            if (comp.symbols.length > 0) {
++                md += `| Symbol | Visibility | Line |\n`;
++                md += `| :--- | :--- | :--- |\n`;
++                comp.symbols.forEach(s => {
++                    md += `| \`${s.name}\` | ${s.visibility} | ${s.line} |\n`;
++                });
++                md += `\n`;
++            } else {
++                md += `*No symbols detected.*\n\n`;
++            }
++        });
++        md += `---\n\n`;
+     });
+-    console.log(`  end`);
+-}
+ 
+-/**
+- * SYSTEM LAYER: High-Level Topology
+- */
+-function renderSystem() {
+-    console.log("graph TB");
+-    console.log("  subgraph System [Warden Architecture]");
+-    console.log("    Engine --> Registry");
+-    console.log("    Engine --> Validation");
+-    console.log("    Warden[warden.js] --> Engine");
+-    console.log("    Warden --> Registry");
+-    console.log("    Validation --> Engine");
+-    console.log("    Validation --> Registry");
+-    console.log("    Registry --> Protocols[protocols.json]");
+-    console.log("    Registry --> Standards[standards.json]");
+-    console.log("    Engine --> History");
+-    console.log("  end");
++    return md;
+ }
+ 
+-const [,, command, arg] = process.argv;
++function run() {
++    console.log("\n====================================================");
++    console.log("      🗺️  WARDEN: ARCHITECTURE MAPPER");
++    console.log("====================================================\n");
++
++    const manifest = loadManifest();
++    const map = {
++        project_name: manifest.project_name,
++        timestamp: new Date().toISOString(),
++        domains: []
++    };
++
++    manifest.domains.forEach(domain => {
++        console.log(`[Domain] Investigating ${domain.name}...`);
++        const components = scanDomain(domain);
++        map.domains.push({
++            ...domain,
++            components
++        });
++    });
+ 
+-switch (command) {
+-    case 'system':
+-        showHeader("System Topology");
+-        renderSystem();
+-        break;
+-    case 'protocol':
+-        if (!arg) {
+-            console.error("Usage: node engine/map.js protocol <ID>");
+-            process.exit(1);
+-        }
+-        showHeader(`Protocol Flow: ${arg}`);
+-        renderProtocol(arg);
+-        break;
+-    case 'deps':
+-        showHeader("Code Dependencies");
+-        renderDeps();
+-        break;
+-    default:
+-        console.log("Usage: node engine/map.js [system | protocol <ID> | deps]");
++    fs.writeFileSync(OUTPUT_JSON, JSON.stringify(map, null, 2));
++    console.log(`\n[✅] Machine-readable map saved to ${path.relative(resolve.root(), OUTPUT_JSON)}`);
++
++    const mdContent = generateMarkdown(map);
++    fs.writeFileSync(OUTPUT_MD, mdContent);
++    console.log(`[✅] Human-readable guide saved to ${path.relative(resolve.root(), OUTPUT_MD)}`);
++    
++    console.log("\n[DLR_MAP_STRUCT] Architecture Mapping Complete.");
+ }
++
++run();
+\ No newline at end of file
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,20 +1,45 @@
+/**
+ * Binary Data Serializer (v2 - Ratified in CON-013)
+ * @warden-purpose 16-byte structured header for session and loss tracking.
+ * @warden-scope Transport Layer
+ */
 const CodedPiece = require('./coded_piece');
 
 class PacketSerializer {
-    static serializeTo(piece, config, targetView) {
-        const headerSize = config.HEADER_SIZE || 8;
+    // Header v2 Schema:
+    // [0..1]   Magic (0xAA01)
+    // [2..3]   Flags
+    // [4..7]   SessionID
+    // [8..11]  GenID
+    // [12..15] SequenceID
+    // Total: 16 Bytes
+
+    static serializeTo(piece, config, targetView, sequence = 0, sessionId = 0) {
         let offset = 0;
 
-        targetView[offset++] = config.MAGIC_BYTE;
-        targetView[offset++] = config.VERSION;
-        targetView[offset++] = 0; // Reserved
+        // Magic & Version (Flags)
+        targetView[offset++] = 0xAA;
+        targetView[offset++] = 0x01;
+        targetView[offset++] = config.FLAGS || 0;
         targetView[offset++] = 0; // Reserved
 
-        // GenID (Big Endian)
+        // SessionID
+        targetView[offset++] = (sessionId >> 24) & 0xFF;
+        targetView[offset++] = (sessionId >> 16) & 0xFF;
+        targetView[offset++] = (sessionId >> 8) & 0xFF;
+        targetView[offset++] = sessionId & 0xFF;
+
+        // GenID
         targetView[offset++] = (piece.genId >> 24) & 0xFF;
         targetView[offset++] = (piece.genId >> 16) & 0xFF;
         targetView[offset++] = (piece.genId >> 8) & 0xFF;
         targetView[offset++] = piece.genId & 0xFF;
+
+        // SequenceID
+        targetView[offset++] = (sequence >> 24) & 0xFF;
+        targetView[offset++] = (sequence >> 16) & 0xFF;
+        targetView[offset++] = (sequence >> 8) & 0xFF;
+        targetView[offset++] = sequence & 0xFF;
 
         // Coeffs
         for (let i = 0; i < piece.coeffs.length; i++) {
@@ -26,39 +51,15 @@ class PacketSerializer {
         return offset + piece.data.length;
     }
 
-    static serialize(piece, config) {
-        // Header: Magic(1) + Ver(1) + Reserved(2) + GenID(4) = 8
-        const headerSize = config.HEADER_SIZE || 8;
-        const totalSize = headerSize + piece.coeffs.length + piece.data.length;
-        
-        const buf = Buffer.allocUnsafe(totalSize);
-        let offset = 0;
-
-        buf.writeUInt8(config.MAGIC_BYTE, offset++);
-        buf.writeUInt8(config.VERSION, offset++);
-        buf.writeUInt16BE(0, offset); offset += 2; // Reserved
-        buf.writeUInt32BE(piece.genId, offset); offset += 4;
-        
-        // Coeffs
-        for(let i=0; i<piece.coeffs.length; i++) {
-            buf[offset++] = piece.coeffs[i];
-        }
-
-        // Data
-        piece.data.copy(buf, offset);
-        
-        return buf;
-    }
-
     static deserialize(buf, config) {
-        const headerSize = config.HEADER_SIZE || 8;
-        if (buf.length < headerSize) return null;
-        if (buf[0] !== config.MAGIC_BYTE) return null;
+        if (buf.length < 16) return null;
+        if (buf[0] !== 0xAA || buf[1] !== 0x01) return null;
 
-        // Manual Big-Endian Read for Uint8Array compatibility
-        const genId = (buf[4] << 24) | (buf[5] << 16) | (buf[6] << 8) | buf[7];
-        let offset = 8;
+        const sessionId = (buf[4] << 24) | (buf[5] << 16) | (buf[6] << 8) | buf[7];
+        const genId = (buf[8] << 24) | (buf[9] << 16) | (buf[10] << 8) | buf[11];
+        const sequence = (buf[12] << 24) | (buf[13] << 16) | (buf[14] << 8) | buf[15];
         
+        let offset = 16;
         const N = config.PIECE_COUNT || 64; 
         const S = config.PIECE_SIZE || 1024;
         
@@ -66,7 +67,10 @@ class PacketSerializer {
         offset += N;
         const data = buf.subarray(offset, offset + S);
 
-        return new CodedPiece(genId, coeffs, data);
+        const piece = new CodedPiece(genId, coeffs, data);
+        piece.sessionId = sessionId;
+        piece.sequence = sequence;
+        return piece;
     }
 }
 module.exports = PacketSerializer;

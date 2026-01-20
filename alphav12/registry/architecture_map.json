@@ -1,0 +1,1906 @@
+{
+  "project_name": "RLNC AlphaV12",
+  "timestamp": "2026-01-19T10:49:32.585Z",
+  "domains": [
+    {
+      "name": "Core Engine",
+      "path": "core",
+      "description": "Mathematical logic, GF256 operations, and RLNC encoders/decoders.",
+      "components": [
+        {
+          "file": "core/block_decoder.js",
+          "symbols": [
+            {
+              "name": "constructor",
+              "visibility": "Public",
+              "line": 14,
+              "hash": "d0af7fb56c6ebc23",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "addPiece",
+              "visibility": "Public",
+              "line": 35,
+              "hash": "931c8e36270470b9",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "_insertRow",
+              "visibility": "Public",
+              "line": 67,
+              "hash": "854fb2d613e3af9e",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "_finalize",
+              "visibility": "Public",
+              "line": 79,
+              "hash": "c51836a163e0a8e5",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "getData",
+              "visibility": "Public",
+              "line": 98,
+              "hash": "d107a77befc62797",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            }
+          ],
+          "purpose": "Reconstructs original data blocks from linear combinations.",
+          "scope": "Core Implementation"
+        },
+        {
+          "file": "core/block_encoder.js",
+          "symbols": [
+            {
+              "name": "constructor",
+              "visibility": "Public",
+              "line": 10,
+              "hash": "7e3e46cd07835388",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "codedPiece",
+              "visibility": "Public",
+              "line": 58,
+              "hash": "7e11d0a5e030a966",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            }
+          ],
+          "purpose": "Pure atomic math primitive focused on linear combinations.",
+          "scope": "Core Mathematical Logic"
+        },
+        {
+          "file": "core/docs/render_changelog.js",
+          "symbols": [
+            {
+              "name": "printTable",
+              "visibility": "Internal",
+              "line": 22,
+              "hash": "8039c70121e62c19",
+              "traceability": []
+            }
+          ],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "core/engine.js",
+          "symbols": [
+            {
+              "name": "constructor",
+              "visibility": "Public",
+              "line": 27,
+              "hash": "3c5c8f4f6d6ee10e",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "_wireComponents",
+              "visibility": "Public",
+              "line": 130,
+              "hash": "35bff2e13fc4d07d",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "_finish",
+              "visibility": "Public",
+              "line": 212,
+              "hash": "f8842b5f0f721580",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            }
+          ],
+          "purpose": "Primary engine managing encoder/decoder lifecycles.",
+          "scope": "Core Implementation"
+        },
+        {
+          "file": "core/galois_matrix.js",
+          "symbols": [
+            {
+              "name": "constructor",
+              "visibility": "Public",
+              "line": 13,
+              "hash": "0ec74037620a662c",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "get",
+              "visibility": "Public",
+              "line": 28,
+              "hash": "b8185fa18f349e49",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "set",
+              "visibility": "Public",
+              "line": 30,
+              "hash": "e7edee21cc951704",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "addRow",
+              "visibility": "Public",
+              "line": 37,
+              "hash": "09bee947adf9ffb1",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "extractData",
+              "visibility": "Public",
+              "line": 46,
+              "hash": "04610178665a3fb8",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "normalizeRow",
+              "visibility": "Public",
+              "line": 53,
+              "hash": "2247b5ddbafe95b3",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "solve",
+              "visibility": "Public",
+              "line": 67,
+              "hash": "2bbfed29bf0a0e4c",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "multiplyAdd",
+              "visibility": "Public",
+              "line": 99,
+              "hash": "1487aea534b71c0b",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "normalize",
+              "visibility": "Public",
+              "line": 144,
+              "hash": "c6dfb7cdaa04ef7e",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "_findPivot",
+              "visibility": "Public",
+              "line": 175,
+              "hash": "d87560fdcab9a1e3",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "_swapRows",
+              "visibility": "Public",
+              "line": 183,
+              "hash": "9184e66bf6177eca",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "getAugmentedRow",
+              "visibility": "Public",
+              "line": 193,
+              "hash": "9dc7dda16bc8234b",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            }
+          ],
+          "purpose": "Matrix operations for linear independence verification.",
+          "scope": "Mathematical Logic"
+        },
+        {
+          "file": "core/gf256.js",
+          "symbols": [
+            {
+              "name": "init",
+              "visibility": "Public",
+              "line": 16,
+              "hash": "66c755d2f8cd74c3",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            }
+          ],
+          "purpose": "High-performance Galois Field arithmetic (GF256).",
+          "scope": "Mathematical Logic"
+        },
+        {
+          "file": "core/sink.js",
+          "symbols": [
+            {
+              "name": "constructor",
+              "visibility": "Public",
+              "line": 18,
+              "hash": "693d9adb8a32e7ff",
+              "traceability": []
+            },
+            {
+              "name": "_wireComponents",
+              "visibility": "Public",
+              "line": 95,
+              "hash": "25ee9f239e59812e",
+              "traceability": []
+            },
+            {
+              "name": "processHeader",
+              "visibility": "Public",
+              "line": 99,
+              "hash": "125fd0edfe5e1f71",
+              "traceability": []
+            },
+            {
+              "name": "_finish",
+              "visibility": "Public",
+              "line": 167,
+              "hash": "f7aa6661ed4d870a",
+              "traceability": []
+            }
+          ],
+          "purpose": "Orchestrates packet reception and decoding pipelines.",
+          "scope": "Core Implementation"
+        },
+        {
+          "file": "core/source.js",
+          "symbols": [
+            {
+              "name": "constructor",
+              "visibility": "Public",
+              "line": 19,
+              "hash": "38ff05eb13ae4148",
+              "traceability": []
+            },
+            {
+              "name": "_wireComponents",
+              "visibility": "Public",
+              "line": 99,
+              "hash": "82fc4fdca406ed39",
+              "traceability": []
+            },
+            {
+              "name": "_finish",
+              "visibility": "Public",
+              "line": 135,
+              "hash": "236efb2e66cbbcd3",
+              "traceability": []
+            }
+          ],
+          "purpose": "Orchestrates data ingestion and encoding pipelines.",
+          "scope": "Core Implementation"
+        },
+        {
+          "file": "core/verify_coders.js",
+          "symbols": [
+            {
+              "name": "runCoderTest",
+              "visibility": "Internal",
+              "line": 23,
+              "hash": "0146a560adf6eb23",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "printReport",
+              "visibility": "Internal",
+              "line": 91,
+              "hash": "1779be2675ecdb6c",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            }
+          ],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "core/verify_comparative_v10.js",
+          "symbols": [
+            {
+              "name": "profile",
+              "visibility": "Internal",
+              "line": 21,
+              "hash": "396a0c2c2333836d",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "run",
+              "visibility": "Internal",
+              "line": 90,
+              "hash": "7ffad8e0a1882b42",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            }
+          ],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "core/verify_full_buffer_deadlock.js",
+          "symbols": [
+            {
+              "name": "runTest",
+              "visibility": "Internal",
+              "line": 17,
+              "hash": "a2cb33df34cef18b",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            }
+          ],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "core/verify_incremental_stress.js",
+          "symbols": [
+            {
+              "name": "run",
+              "visibility": "Internal",
+              "line": 24,
+              "hash": "1ec7ece063f3ad3e",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            }
+          ],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "core/verify_matrix.js",
+          "symbols": [
+            {
+              "name": "runStressTest",
+              "visibility": "Internal",
+              "line": 13,
+              "hash": "30a06dfe7d5b1ba3",
+              "traceability": []
+            }
+          ],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "core/verify_sbox.js",
+          "symbols": [],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "core/verify_sbox_upper_bound.js",
+          "symbols": [
+            {
+              "name": "runUpperBoundProfile",
+              "visibility": "Internal",
+              "line": 22,
+              "hash": "a932df92688fa174",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "printReport",
+              "visibility": "Internal",
+              "line": 86,
+              "hash": "e986a185c09d0a68",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            }
+          ],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        }
+      ]
+    },
+    {
+      "name": "Transport Layer",
+      "path": "network",
+      "description": "Networking protocols (UDP), worker pools, and serialization.",
+      "components": [
+        {
+          "file": "network/coded_piece.js",
+          "symbols": [
+            {
+              "name": "constructor",
+              "visibility": "Public",
+              "line": 7,
+              "hash": "569e9b79645908cc",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            }
+          ],
+          "purpose": "Represents a single linear combination and its coefficients.",
+          "scope": "Transport Layer"
+        },
+        {
+          "file": "network/loopback_transport.js",
+          "symbols": [
+            {
+              "name": "constructor",
+              "visibility": "Public",
+              "line": 7,
+              "hash": "221ac642ff6352b6",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "listen",
+              "visibility": "Public",
+              "line": 10,
+              "hash": "af3710f8adf107de",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "connect",
+              "visibility": "Public",
+              "line": 12,
+              "hash": "8120e46abd9d13df",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "send",
+              "visibility": "Public",
+              "line": 13,
+              "hash": "88d28df0e5e4db39",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "close",
+              "visibility": "Public",
+              "line": 18,
+              "hash": "2252fc18b2e75684",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            }
+          ],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "network/network_simulator.js",
+          "symbols": [
+            {
+              "name": "constructor",
+              "visibility": "Public",
+              "line": 8,
+              "hash": "8c3d241ea956a333",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "listen",
+              "visibility": "Public",
+              "line": 29,
+              "hash": "b47c1436d81d6672",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "connect",
+              "visibility": "Public",
+              "line": 33,
+              "hash": "2a7242f3efadc547",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "send",
+              "visibility": "Public",
+              "line": 41,
+              "hash": "07a6bf9e9d83713c",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "_injectImpairment",
+              "visibility": "Public",
+              "line": 46,
+              "hash": "6ce0d70e087d09fc",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "close",
+              "visibility": "Public",
+              "line": 77,
+              "hash": "c8dd0ff8235776ff",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            }
+          ],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "network/packet_serializer.js",
+          "symbols": [],
+          "purpose": "16-byte structured header for session and loss tracking.",
+          "scope": "Transport Layer"
+        },
+        {
+          "file": "network/transport.js",
+          "symbols": [
+            {
+              "name": "constructor",
+              "visibility": "Public",
+              "line": 14,
+              "hash": "55380c91e6be8784",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "listen",
+              "visibility": "Public",
+              "line": 25,
+              "hash": "052380d1816740b6",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "connect",
+              "visibility": "Public",
+              "line": 34,
+              "hash": "2da6db896802a2d4",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "send",
+              "visibility": "Public",
+              "line": 44,
+              "hash": "09eac11515e060bc",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "onPacket",
+              "visibility": "Public",
+              "line": 52,
+              "hash": "a6b9cf206e811a81",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "close",
+              "visibility": "Public",
+              "line": 59,
+              "hash": "fcc176ad902b243b",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            }
+          ],
+          "purpose": "Orchestrates data movement between network worker threads.",
+          "scope": "Networking"
+        },
+        {
+          "file": "network/udp_transport.js",
+          "symbols": [
+            {
+              "name": "constructor",
+              "visibility": "Public",
+              "line": 15,
+              "hash": "c6c765149eb82619",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "listen",
+              "visibility": "Public",
+              "line": 47,
+              "hash": "f63d27b6a062ddc7",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "connect",
+              "visibility": "Public",
+              "line": 54,
+              "hash": "e0c1f118436868f6",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "send",
+              "visibility": "Public",
+              "line": 64,
+              "hash": "9f3386997da7f8b7",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "close",
+              "visibility": "Public",
+              "line": 74,
+              "hash": "6b07009fc4cb6060",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            }
+          ],
+          "purpose": "High-throughput UDP-based data transit using dgram.",
+          "scope": "Networking"
+        },
+        {
+          "file": "network/udp_worker.js",
+          "symbols": [
+            {
+              "name": "acquireRX",
+              "visibility": "Internal",
+              "line": 72,
+              "hash": "7ea2bf0d6e45d02a",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            }
+          ],
+          "purpose": "Non-blocking UDP processing via worker threads.",
+          "scope": "Networking"
+        }
+      ]
+    },
+    {
+      "name": "Utilities",
+      "path": "utils",
+      "description": "Shared resources and foundational helper modules.",
+      "components": [
+        {
+          "file": "utils/buffer_pool.js",
+          "symbols": [],
+          "purpose": "Efficient reuse of Buffer objects to minimize GC pressure.",
+          "scope": "Utilities"
+        },
+        {
+          "file": "utils/shared_buffer_pool.js",
+          "symbols": [
+            {
+              "name": "constructor",
+              "visibility": "Public",
+              "line": 12,
+              "hash": "a5f1064f1067286f",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "getSlotView",
+              "visibility": "Public",
+              "line": 29,
+              "hash": "bfd1d20a641f8ebd",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "lockSlot",
+              "visibility": "Public",
+              "line": 34,
+              "hash": "e4df5041c71a4eaa",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "unlockSlot",
+              "visibility": "Public",
+              "line": 38,
+              "hash": "665d69ed63be9260",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "isSlotBusy",
+              "visibility": "Public",
+              "line": 45,
+              "hash": "00f9c7448e9c1e4c",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "acquireTX",
+              "visibility": "Public",
+              "line": 49,
+              "hash": "a410c16c93304b1e",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "acquireRX",
+              "visibility": "Public",
+              "line": 66,
+              "hash": "9c76b88e4f9ad494",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            }
+          ],
+          "purpose": "Zero-copy shared data sharing between threads.",
+          "scope": "Utilities"
+        },
+        {
+          "file": "utils/update_matrix.js",
+          "symbols": [
+            {
+              "name": "updateMatrix",
+              "visibility": "Internal",
+              "line": 6,
+              "hash": "f17217970e8e8918",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            }
+          ],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "utils/visual_dashboard.js",
+          "symbols": [
+            {
+              "name": "stripAnsi",
+              "visibility": "Public",
+              "line": 7,
+              "hash": "2ca69e05f79058ca",
+              "traceability": []
+            },
+            {
+              "name": "visualWidth",
+              "visibility": "Public",
+              "line": 14,
+              "hash": "b0a0874884f944f6",
+              "traceability": []
+            },
+            {
+              "name": "padBox",
+              "visibility": "Public",
+              "line": 18,
+              "hash": "5314d60fb0870f32",
+              "traceability": []
+            },
+            {
+              "name": "constructor",
+              "visibility": "Public",
+              "line": 26,
+              "hash": "7e62063971486014",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "render",
+              "visibility": "Public",
+              "line": 34,
+              "hash": "98284078d7557cd0",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "constructor",
+              "visibility": "Public",
+              "line": 57,
+              "hash": "574d27dc2bf94660",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "render",
+              "visibility": "Public",
+              "line": 61,
+              "hash": "f59f54f5fa16e1d3",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "constructor",
+              "visibility": "Public",
+              "line": 99,
+              "hash": "3269fc124e346d83",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "render",
+              "visibility": "Public",
+              "line": 106,
+              "hash": "cb5cbde40c0190fa",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "constructor",
+              "visibility": "Public",
+              "line": 133,
+              "hash": "05a88f3f89fc1cfc",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "initGen",
+              "visibility": "Public",
+              "line": 147,
+              "hash": "74a4ed48e79bf8cd",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "updateGen",
+              "visibility": "Public",
+              "line": 158,
+              "hash": "091c6b842ec60266",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "registerTraffic",
+              "visibility": "Public",
+              "line": 169,
+              "hash": "6e9a4b297dcce76a",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "addGlobalStat",
+              "visibility": "Public",
+              "line": 174,
+              "hash": "1f10e57c9b2ebdbf",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "setFinalHash",
+              "visibility": "Public",
+              "line": 182,
+              "hash": "d1a3d6009fa87167",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "render",
+              "visibility": "Public",
+              "line": 184,
+              "hash": "9c380c926f85639f",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            }
+          ],
+          "purpose": "Assembles decoupled UI widgets into a strategic dashboard with perfect alignment.",
+          "scope": "Utilities"
+        }
+      ]
+    },
+    {
+      "name": "Validation Suite",
+      "path": "tests",
+      "description": "Technical verification and stress tests.",
+      "components": [
+        {
+          "file": "tests/h1_hardening_verify.js",
+          "symbols": [],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "tests/h2_sink_config.js",
+          "symbols": [],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "tests/h2_source_config.js",
+          "symbols": [],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "tests/sink_config.js",
+          "symbols": [],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "tests/source_config.js",
+          "symbols": [],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "tests/t1_throughput.js",
+          "symbols": [],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "tests/t2_resilience.js",
+          "symbols": [],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "tests/t3_stress.js",
+          "symbols": [],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "tests/t4_sustenance.js",
+          "symbols": [],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "tests/t5_full_coded.js",
+          "symbols": [],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "tests/t6_the_wall.js",
+          "symbols": [],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "tests/verify_library.js",
+          "symbols": [],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "tests/verify_math.js",
+          "symbols": [],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "tests/verify_serializer.js",
+          "symbols": [],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "tests/verify_threaded.js",
+          "symbols": [],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        }
+      ]
+    },
+    {
+      "name": "Threading & Concurrency",
+      "path": "threading",
+      "description": "Multi-threaded encoders, decoders, and worker pool management.",
+      "components": [
+        {
+          "file": "threading/debug_verify_threading.js",
+          "symbols": [
+            {
+              "name": "runSuite",
+              "visibility": "Internal",
+              "line": 46,
+              "hash": "50cbcb5377d452df",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "runTest",
+              "visibility": "Internal",
+              "line": 80,
+              "hash": "4277bddcb0a2633e",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "finish",
+              "visibility": "Internal",
+              "line": 166,
+              "hash": "d03d1770b7b00870",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "printReport",
+              "visibility": "Internal",
+              "line": 183,
+              "hash": "97bd5d01c55ab582",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            }
+          ],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "threading/decoder_worker.js",
+          "symbols": [
+            {
+              "name": "handlePiece",
+              "visibility": "Internal",
+              "line": 35,
+              "hash": "74968d628d0551dd",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            }
+          ],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "threading/docs/render_changelog.js",
+          "symbols": [
+            {
+              "name": "printTable",
+              "visibility": "Internal",
+              "line": 30,
+              "hash": "e4c1d90bfd653ccf",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            }
+          ],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "threading/encoder_worker.js",
+          "symbols": [
+            {
+              "name": "sendPacketViaShared",
+              "visibility": "Internal",
+              "line": 55,
+              "hash": "ad53b1f9665a9f0a",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "acquireTX",
+              "visibility": "Internal",
+              "line": 84,
+              "hash": "4969616005e256de",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "producePackets",
+              "visibility": "Internal",
+              "line": 99,
+              "hash": "54be32c57c01b833",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            }
+          ],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "threading/generation_decoder.js",
+          "symbols": [
+            {
+              "name": "constructor",
+              "visibility": "Public",
+              "line": 5,
+              "hash": "0d62b76d1c9e0405",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "terminate",
+              "visibility": "Public",
+              "line": 25,
+              "hash": "960fb27a538386b0",
+              "traceability": []
+            },
+            {
+              "name": "addPiece",
+              "visibility": "Public",
+              "line": 33,
+              "hash": "1ac017a60f63f3be",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "getReconstructedFile",
+              "visibility": "Public",
+              "line": 44,
+              "hash": "48cee088266f9e73",
+              "traceability": []
+            }
+          ],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "threading/generation_encoder.js",
+          "symbols": [
+            {
+              "name": "constructor",
+              "visibility": "Public",
+              "line": 11,
+              "hash": "e17078686d6eb874",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "produce",
+              "visibility": "Public",
+              "line": 56,
+              "hash": "38a95bb75e9145cd",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "_activateGeneration",
+              "visibility": "Public",
+              "line": 75,
+              "hash": "6ec7f2aaf65b813f",
+              "traceability": []
+            },
+            {
+              "name": "terminate",
+              "visibility": "Public",
+              "line": 93,
+              "hash": "960fb27a538386b0",
+              "traceability": []
+            }
+          ],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "threading/sliding_window.js",
+          "symbols": [
+            {
+              "name": "constructor",
+              "visibility": "Public",
+              "line": 8,
+              "hash": "fa773e2c1bd82053",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "setTotalGenerations",
+              "visibility": "Public",
+              "line": 21,
+              "hash": "31154cb9b9778411",
+              "traceability": []
+            },
+            {
+              "name": "_slide",
+              "visibility": "Public",
+              "line": 26,
+              "hash": "0fc4d77ff7e26b6f",
+              "traceability": []
+            },
+            {
+              "name": "acknowledge",
+              "visibility": "Public",
+              "line": 33,
+              "hash": "e881c7748f788502",
+              "traceability": []
+            },
+            {
+              "name": "markSolved",
+              "visibility": "Public",
+              "line": 43,
+              "hash": "7d755ba941dec8f3",
+              "traceability": []
+            },
+            {
+              "name": "isFinished",
+              "visibility": "Public",
+              "line": 47,
+              "hash": "7fd672e96865054a",
+              "traceability": []
+            }
+          ],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "threading/verify_threading.js",
+          "symbols": [
+            {
+              "name": "runSuite",
+              "visibility": "Internal",
+              "line": 46,
+              "hash": "50cbcb5377d452df",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "runTest",
+              "visibility": "Internal",
+              "line": 80,
+              "hash": "0d8cc0e79521491a",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "finish",
+              "visibility": "Internal",
+              "line": 155,
+              "hash": "821d20e85b65ee1c",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "printReport",
+              "visibility": "Internal",
+              "line": 172,
+              "hash": "97bd5d01c55ab582",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            }
+          ],
+          "purpose": "No purpose defined.",
+          "scope": "No scope defined."
+        },
+        {
+          "file": "threading/worker_pool.js",
+          "symbols": [
+            {
+              "name": "constructor",
+              "visibility": "Public",
+              "line": 14,
+              "hash": "437512f5b76652db",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "dispatch",
+              "visibility": "Public",
+              "line": 64,
+              "hash": "18f5c8db47113695",
+              "traceability": []
+            },
+            {
+              "name": "addJob",
+              "visibility": "Public",
+              "line": 68,
+              "hash": "a36b111f0be30869",
+              "traceability": []
+            },
+            {
+              "name": "produce",
+              "visibility": "Public",
+              "line": 96,
+              "hash": "8d752daf8fdae7b8",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "boost",
+              "visibility": "Public",
+              "line": 117,
+              "hash": "db60e50fb8aa95eb",
+              "traceability": []
+            },
+            {
+              "name": "ack",
+              "visibility": "Public",
+              "line": 121,
+              "hash": "f3dd9b2094ff7c97",
+              "traceability": [
+                "FEAT_CONTEXTUAL_INDUCTION",
+                "FEAT_ENGINE_HARDENING",
+                "FEAT_LIVING_MAPS_PROVENANCE",
+                "FEAT_LIVING_MAPS_TRACEABILITY",
+                "FEAT_MODULAR_DECOUPLING",
+                "FEAT_SIMULATOR_HARDENING"
+              ]
+            },
+            {
+              "name": "terminate",
+              "visibility": "Public",
+              "line": 125,
+              "hash": "8817128111df7b2a",
+              "traceability": []
+            }
+          ],
+          "purpose": "Dynamic management of parallel math operations.",
+          "scope": "Threading"
+        }
+      ]
+    }
+  ]
+}
