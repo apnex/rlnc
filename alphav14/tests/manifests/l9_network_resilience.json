@@ -1,0 +1,25 @@
+{
+  "orchestration": {
+    "driver_type": "TRANSPORT",
+    "layer_id": "L6",
+    "session_id": 48879,
+    "concurrency_model": "PIPELINED_UDP"
+  },
+  "math": {
+    "n": 512,
+    "s": 1400,
+    "systematic_flag": true
+  },
+  "network": {
+    "loss_rate": 0.05,
+    "latency": 5
+  },
+  "data": {
+    "source": "DUMMY",
+    "size": 8388608
+  },
+  "fabric": {
+    "slot_assignment": 4,
+    "ubi_descriptor": 6
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "orchestration": {
+    "driver_type": "STREAM",
+    "layer_id": "L2",
+    "session_id": 57005,
+    "concurrency_model": "SINGLE_WORKER"
+  },
+  "math": {
+    "n": 128,
+    "s": 131072,
+    "systematic_flag": true,
+    "gf_power": 8
+  },
+  "data": {
+    "source": "DUMMY",
+    "size": 67108864
+  },
+  "fabric": {
+    "slot_assignment": 3,
+    "ubi_descriptor": 3,
+    "transport_layer": "LOOPBACK"
+  },
+  "verification": {
+    "integrity": {
+      "hash_algorithm": "SHA256",
+      "mode": "FULL_STREAM_HASH"
+    }
+  }
+}

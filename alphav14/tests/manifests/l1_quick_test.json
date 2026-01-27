@@ -1,0 +1,17 @@
+{
+  "orchestration": {
+    "driver_type": "BLOCK",
+    "layer_id": "L1",
+    "session_id": 4660,
+    "concurrency_model": "SINGLE_WORKER"
+  },
+  "math": {
+    "n": 128,
+    "s": 131072,
+    "systematic_flag": true
+  },
+  "data": {
+    "source": "DUMMY",
+    "size": 16777216
+  }
+}

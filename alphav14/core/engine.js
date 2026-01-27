@@ -1,0 +1,195 @@
+/**
+ * RLNC Orchestration Engine
+ * @warden-purpose Primary engine managing encoder/decoder lifecycles.
+ * @warden-scope Core Implementation
+ */
+const EventEmitter = require('events');
+const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
+
+const GenerationEncoder = require('../threading/generation_encoder');
+const GenerationDecoder = require('../threading/generation_decoder');
+const PacketSerializer = require('../network/packet_serializer');
+const WorkerPool = require('../threading/worker_pool');
+const NetworkSimulator = require('../network/network_simulator');
+const UdpTransport = require('../network/udp_transport');
+const LoopbackTransport = require('../network/loopback_transport');
+const SlidingWindow = require('../threading/sliding_window');
+const SharedBufferPool = require('../utils/shared_buffer_pool');
+
+/**
+ * RLNC v10 UNIFIED ENGINE (CON-004)
+ * Orchestrates Zero-Copy UDP Transport and Shared Memory Threading.
+ */
+class Engine extends EventEmitter {
+    constructor(data, config, filename, sourceHash) {
+        super();
+        this.data = data;
+        this.config = config;
+        this.filename = filename;
+        this.sourceHash = sourceHash;
+        
+        // 1. Shared Data Plane
+        this.ioPool = new SharedBufferPool(
+            config.SYSTEM.POOL_SLOTS || 4096, 
+            config.TRANSCODE.PIECE_SIZE + config.TRANSCODE.PIECE_COUNT + 32
+        );
+
+        // 2. Orchestration
+        this.window = new SlidingWindow(config);
+        this.solvedGenerations = new Set();
+        this.watchdog = null;
+        this.loop = null;
+
+        this.lastRank = new Map();
+        this.lastRankTime = new Map();
+    }
+
+    async run() {
+        return new Promise(async (resolve) => {
+            const globalTimeout = (this.config.SYSTEM && this.config.SYSTEM.GLOBAL_TIMEOUT) || 60000;
+            this.watchdog = setTimeout(() => {
+                console.error(`\n[FATAL] Global Timeout Reached. Aborting.`);
+                this._finish(resolve);
+            }, globalTimeout);
+
+            // 3. Threading (Shared Memory Aware)
+            const threads = this.config.SYSTEM.THREADS || 0;
+            
+            this.encoderPool = new WorkerPool(threads, 'encoder_worker.js', this.ioPool);
+            this.decoderPool = new WorkerPool(threads, 'decoder_worker.js', this.ioPool);
+
+            // 4. Transport Selection (Wrapper Pattern)
+            const transportType = (this.config.NETWORK && this.config.NETWORK.TRANSPORT) || 'udp';
+            let baseTransport;
+
+            if (transportType === 'loopback') {
+                baseTransport = new LoopbackTransport();
+            } else {
+                baseTransport = new UdpTransport(this.ioPool);
+            }
+
+            const netOptions = {
+                lossRate: this.config.NETWORK.LOSS_RATE,
+                delay: this.config.NETWORK.LATENCY,
+                jitter: this.config.NETWORK.JITTER
+            };
+            
+            // Sim-in-Path: Wrap the transport with impairment simulator
+            this.transport = new NetworkSimulator(netOptions, baseTransport);
+            await this.transport.listen(0);
+
+            if (transportType === 'udp') {
+                this.transport.connect('127.0.0.1', baseTransport.port);
+            } else {
+                this.transport.connect('127.0.0.1', 0);
+            }
+
+            // 5. Workers & Logic
+            this.enc = GenerationEncoder.create(this.data, this.config, this.encoderPool, this.window);
+            this.config.TOTAL_GENS = this.enc.totalGenerations;
+            this.window.setTotalGenerations(this.enc.totalGenerations);
+            this.dec = GenerationDecoder.create(this.config, this.decoderPool);
+
+            this._wireComponents();
+
+            // Run Loop
+            const tickRate = this.config.SYSTEM.TICK_RATE || 10;
+            const targetThroughputMB = this.config.SYSTEM.TARGET_THROUGHPUT_MB;
+            const packetsPerTick = Math.ceil((targetThroughputMB * 1024 * 1024) / this.config.TRANSCODE.PIECE_SIZE / (1000 / tickRate));
+
+            this.loop = setInterval(() => {
+                const now = Date.now();
+                const timeout = this.config.WINDOW.TIMEOUT || 1000;
+
+                for (const id of this.window.window) {
+                    // Watchdog & Boost
+                    const lastTime = this.lastRankTime.get(id) || now;
+                    if (now - lastTime > timeout && !this.solvedGenerations.has(id)) {
+                        this.encoderPool.boost(id, 5, this.config.PROTOCOL);
+                        this.lastRankTime.set(id, now); 
+                    }
+                }
+
+                if (!this.window.isFinished()) {
+                    this.enc.produce(packetsPerTick);
+
+                    // v12: Auto-slide window in unidirectional mode
+                    if (this.config.NETWORK.UNIDIRECTIONAL) {
+                        for (const genId of this.window.window) {
+                            const targetRedundancy = this.config.NETWORK.REDUNDANCY;
+                            const sent = this.enc.sentCounts.get(genId) || 0;
+                            if (sent >= this.config.TRANSCODE.PIECE_COUNT * targetRedundancy) {
+                                this.window.acknowledge(genId);
+                            }
+                        }
+                    }
+                }
+
+                if (this.window.isFinished()) {
+                    clearInterval(this.loop);
+                    setTimeout(() => this._finish(resolve), 1000); 
+                }
+            }, tickRate);
+        });
+    }
+
+    _wireComponents() {
+        const workerConfig = { ...this.config.PROTOCOL, ...this.config.TRANSCODE };
+
+        // v10: Handle Shared Packets (Zero-Copy)
+        this.transport.on('packet_shared', (slotIdx, length) => {
+            const slotView = this.ioPool.getSlotView(slotIdx);
+            const header = PacketSerializer.deserialize(slotView.subarray(0, length), this.config.PROTOCOL);
+            
+            if (header) {
+                // v12: Route through decoder instance to track metrics
+                this.dec.addPieceShared(slotIdx, length, header);
+            } else {
+                // Invalid or dropped packet, release slot
+                Atomics.store(this.ioPool.control, 3 + slotIdx, 0);
+            }
+        });
+
+        // Legacy/Simulator Packet Ingest
+        this.transport.on('packet', (buf) => {
+            const header = PacketSerializer.deserialize(buf, this.config.PROTOCOL);
+            if (header) {
+                this.dec.addPiece(buf, header);
+            }
+        });
+
+        this.encoderPool.on('packet_shared', (slotIdx, length) => {
+            this.transport.send(slotIdx, length);
+        });
+
+        this.encoderPool.on('packet', (buf) => {
+            this.transport.send(buf);
+        });
+
+        this.decoderPool.on('solved', (id, data) => {
+            // process.stdout.write(`\n[ENGINE] Gen ${id} SOLVED\n`);
+            this.window.markSolved(id);
+            this.window.acknowledge(id); 
+            this.solvedGenerations.add(id);
+        });
+
+        this.decoderPool.on('rank', (msg) => {
+            this.dec.ranks.set(msg.genId, msg.rank);
+            this.lastRank.set(msg.genId, msg.rank);
+            this.lastRankTime.set(msg.genId, Date.now());
+        });
+    }
+
+    _finish(resolve) {
+        if (this.watchdog) clearTimeout(this.watchdog);
+        if (this.loop) clearInterval(this.loop);
+        this.encoderPool.terminate();
+        this.decoderPool.terminate();
+        this.transport.close();
+        resolve();
+    }
+}
+
+module.exports = Engine;

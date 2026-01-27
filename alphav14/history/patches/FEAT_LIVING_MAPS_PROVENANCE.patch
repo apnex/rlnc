@@ -1,0 +1,1559 @@
+
+
+
+
+
+
+
+--- a/engine/map.js	2026-01-19 11:20:51.394225797 +1100
++++ b/engine/map.js	2026-01-19 11:39:25.789659122 +1100
+@@ -1,34 +1,41 @@
+ const fs = require('fs');
+ const path = require('path');
++const crypto = require('crypto');
+ const { resolve, SOURCES } = require('./path_resolver');
+ 
+ /**
+- * LIVING ARCHITECTURE MAPPER (FEAT_LIVING_MAPS_DISCOVERY)
+- * @warden-purpose Automates project discovery and orientation for ZKEs.
++ * LIVING ARCHITECTURE MAPPER & PROVENANCE TRACKER (CON-008)
++ * @warden-purpose Automates project discovery, orientation, and integrity verification.
+  * @warden-scope Governance Tooling
+  */
+ 
+ const MANIFEST_PATH = resolve.registry('project_manifest.json');
+-const OUTPUT_JSON = path.join(process.cwd(), 'registry', 'architecture_map.json');
+-const OUTPUT_MD = path.join(process.cwd(), 'docs', 'ARCHITECTURE_MAP.md');
++const OUTPUT_JSON = resolve.active('registry', 'architecture_map.json');
++const OUTPUT_MD = resolve.active('docs', 'ARCHITECTURE_MAP.md');
+ 
+ function loadManifest() {
+     if (!fs.existsSync(MANIFEST_PATH)) {
+-        console.error(`❌ Error: Project Manifest missing at ${MANIFEST_PATH}`);
++        console.error('[Error] Project Manifest missing at ' + MANIFEST_PATH);
+         process.exit(1);
+     }
+     return JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf8'));
+ }
+ 
++function getHash(data) {
++    // Normalize data: strip comments FIRST, then whitespace
++    const noComments = data.replace(/\/\*[\s\S]*?\*\/|\/\/.*|\s+/g, '');
++    const normalized = noComments.replace(/\s+/g, '');
++    return crypto.createHash('sha256').update(normalized).digest('hex').substring(0, 16);
++}
++
+ function extractSymbols(filePath) {
+     const content = fs.readFileSync(filePath, 'utf8');
+     const symbols = [];
+     
+-    // Refined Regex: Exclude JS keywords and capture cleaner function names
+-    const funcRegex = /(?:function\s+([a-zA-Z0-9_]+)|(?:const|let|var)\s+([a-zA-Z0-9_]+)\s*=\s*(?:\([^)]*\)|[a-zA-Z0-9_]+)\s*=>|^\s*([a-zA-Z0-9_]+)\s*\([^)]*\)\s*\{)/gm;
++    // Refined Regex: Captures named functions, arrow functions, and object methods
++    const funcRegex = /(?:function\s+([a-zA-Z0-9_]+)|(?:const|let|var)\s+([a-zA-Z0-9_]+)\s*=\s*|([a-zA-Z0-9_]+)\s*:\s*)(?:\([^)]*\)|[a-zA-Z0-9_]+)?\s*(?:=>)?\s*\{/gm;
+     const keywords = ['if', 'for', 'while', 'switch', 'catch', 'return'];
+     
+-    // Regex for Qualitative Metadata (JSDoc)
+     const purposeRegex = /@warden-purpose\s+(.+)/;
+     const scopeRegex = /@warden-scope\s+(.+)/;
+ 
+@@ -36,16 +43,36 @@
+     while ((match = funcRegex.exec(content)) !== null) {
+         const name = match[1] || match[2] || match[3];
+         if (name && !keywords.includes(name)) {
+-            // Improved visibility heuristic
+-            const isExported = content.includes(`exports.${name}`) || 
+-                               content.includes(`module.exports`) || 
+-                               content.includes(`export function ${name}`) ||
+-                               content.includes(`export const ${name}`);
++            const isExported = content.includes('exports.' + name) || 
++                               content.includes('module.exports') || 
++                               content.includes('export function ' + name) ||
++                               content.includes('export const ' + name);
+             
++            // Refined body extraction
++            let body = "";
++            let braceCount = 0;
++            let started = false;
++            for (let i = match.index; i < content.length; i++) {
++                if (content[i] === '{') {
++                    braceCount++;
++                    started = true;
++                } else if (content[i] === '}') {
++                    braceCount--;
++                }
++                if (started && braceCount === 0) {
++                    body = content.substring(match.index, i + 1);
++                    break;
++                }
++            }
++
++            if (name === 'mul') {
++            }
++
+             symbols.push({
+                 name,
+                 visibility: (isExported || name === 'constructor') ? 'Public' : 'Internal',
+-                line: content.substring(0, match.index).split('\n').length
++                line: content.substring(0, match.index).split('\n').length,
++                hash: getHash(body)
+             });
+         }
+     }
+@@ -66,7 +93,7 @@
+     const components = [];
+ 
+     if (!fs.existsSync(domainPath)) {
+-        console.warn(`  [!] Warning: Domain path ${domainPath} not found.`);
++        console.warn('  [!] Warning: Domain path ' + domainPath + ' not found.');
+         return components;
+     }
+ 
+@@ -78,7 +105,6 @@
+                 walk(fullPath);
+             } else if (item.endsWith('.js')) {
+                 const relativePath = path.relative(projectRoot, fullPath);
+-                console.log(`  [🔍] Mapping ${relativePath}...`);
+                 const analysis = extractSymbols(fullPath);
+                 components.push({
+                     file: relativePath,
+@@ -93,42 +119,92 @@
+ }
+ 
+ function generateMarkdown(map) {
+-    let md = `# Architecture Map: ${map.project_name}\n\n`;
+-    md += `**Generated:** ${new Date().toISOString()}\n`;
+-    md += `**Scope:** Target Project Investigation (FEAT_LIVING_MAPS_DISCOVERY)\n\n`;
++    let md = '# Architecture Map: ' + map.project_name + '\n\n';
++    md += '**Generated:** ' + new Date().toISOString() + '\n';
++    md += '**Scope:** Target Project Investigation & Provenance (CON-008)\n\n';
+ 
+     map.domains.forEach(domain => {
+-        md += `## Domain: ${domain.name}\n`;
+-        md += `> ${domain.description}\n\n`;
++        md += '## Domain: ' + domain.name + '\n';
++        md += '> ' + domain.description + '\n\n';
+ 
+         domain.components.forEach(comp => {
+-            md += `### Component: \`${comp.file}\`\n`;
+-            md += `*   **Purpose:** ${comp.purpose}\n`;
+-            md += `*   **Scope:** ${comp.scope}\n\n`;
++            md += '### Component: `' + comp.file + '`\n';
++            md += '*   **Purpose:** ' + comp.purpose + '\n';
++            md += '*   **Scope:** ' + comp.scope + '\n\n';
+             
+             if (comp.symbols.length > 0) {
+-                md += `| Symbol | Visibility | Line |\n`;
+-                md += `| :--- | :--- | :--- |\n`;
++                md += '| Symbol | Visibility | Line | Hash (SHA256) |\n';
++                md += '| :--- | :--- | :--- | :--- |\n';
+                 comp.symbols.forEach(s => {
+-                    md += `| \`${s.name}\` | ${s.visibility} | ${s.line} |\n`;
++                    md += '| `' + s.name + '` | ' + s.visibility + ' | ' + s.line + ' | `' + s.hash + '` |\n';
+                 });
+-                md += `\n`;
++                md += '\n';
+             } else {
+-                md += `*No symbols detected.*\n\n`;
++                md += '*No symbols detected.*\n\n';
+             }
+         });
+-        md += `---\n\n`;
++        md += '---\n\n';
+     });
+ 
+     return md;
+ }
+ 
++function verify(manifest) {
++    console.log("[VERIFY] Reconciling current code against baseline hashes...");
++    if (!fs.existsSync(OUTPUT_JSON)) {
++        console.error("[Error] Baseline map missing. Run without --verify first.");
++        process.exit(1);
++    }
++
++    const baseline = JSON.parse(fs.readFileSync(OUTPUT_JSON, 'utf8'));
++    let totalDrift = 0;
++
++    manifest.domains.forEach(domain => {
++        console.log('[Domain] Auditing ' + domain.name + '...');
++        const components = scanDomain(domain);
++        const baselineDomain = baseline.domains.find(d => d.name === domain.name);
++
++        components.forEach(comp => {
++            const baselineComp = baselineDomain ? baselineDomain.components.find(c => c.file === comp.file) : null;
++            
++            comp.symbols.forEach(s => {
++                const baselineSymbol = baselineComp ? baselineComp.symbols.find(bs => bs.name === s.name) : null;
++                
++                if (comp.file === 'core/gf256.js' && s.name === 'mul') {
++                }
++
++                if (!baselineSymbol) {
++                    console.warn('  [NEW] ' + comp.file + ' -> ' + s.name + ' (Unregistered symbol)');
++                    totalDrift++;
++                } else if (baselineSymbol.hash !== s.hash) {
++                    console.error('  [DRIFT] ' + comp.file + ' -> ' + s.name + ' (Hash Mismatch! ' + baselineSymbol.hash + ' -> ' + s.hash + ')');
++                    totalDrift++;
++                }
++            });
++        });
++    });
++
++    if (totalDrift === 0) {
++        console.log("\n[Success] INTEGRITY VERIFIED: No architectural drift detected.");
++    } else {
++        console.log('\n[Failure] AUDIT FAILED: ' + totalDrift + ' drift events detected.');
++        process.exit(1);
++    }
++}
++
+ function run() {
++    const isVerify = process.argv.some(arg => arg === '--verify');
++    const manifest = loadManifest();
++
+     console.log("\n====================================================");
+-    console.log("      🗺️  WARDEN: ARCHITECTURE MAPPER");
++    console.log('      WARDEN: ' + (isVerify ? 'PROVENANCE VERIFIER' : 'ARCHITECTURE MAPPER'));
+     console.log("====================================================\n");
+ 
+-    const manifest = loadManifest();
++    if (isVerify) {
++        verify(manifest);
++        return;
++    }
++
+     const map = {
+         project_name: manifest.project_name,
+         timestamp: new Date().toISOString(),
+@@ -136,7 +212,7 @@
+     };
+ 
+     manifest.domains.forEach(domain => {
+-        console.log(`[Domain] Investigating ${domain.name}...`);
++        console.log('[Domain] Investigating ' + domain.name + '...');
+         const components = scanDomain(domain);
+         map.domains.push({
+             ...domain,
+@@ -145,13 +221,13 @@
+     });
+ 
+     fs.writeFileSync(OUTPUT_JSON, JSON.stringify(map, null, 2));
+-    console.log(`\n[✅] Machine-readable map saved to ${path.relative(resolve.root(), OUTPUT_JSON)}`);
++    console.log('\n[Success] Machine-readable map saved to registry/architecture_map.json');
+ 
+     const mdContent = generateMarkdown(map);
+     fs.writeFileSync(OUTPUT_MD, mdContent);
+-    console.log(`[✅] Human-readable guide saved to ${path.relative(resolve.root(), OUTPUT_MD)}`);
++    console.log('[Success] Human-readable guide saved to docs/ARCHITECTURE_MAP.md');
+     
+-    console.log("\n[DLR_MAP_STRUCT] Architecture Mapping Complete.");
++    console.log("\n[DLR_MAP_STRUCT] Architecture Mapping & Provenance Complete.");
+ }
+ 
+ run();
+\ No newline at end of file
+
+
+
+
+
+
+
+
+
+--- a/registry/architecture_map.json	2026-01-19 11:20:51.394225797 +1100
++++ b/registry/architecture_map.json	2026-01-19 11:39:25.845659898 +1100
+@@ -1,6 +1,6 @@
+ {
+   "project_name": "RLNC AlphaV12",
+-  "timestamp": "2026-01-19T00:08:30.189Z",
++  "timestamp": "2026-01-19T00:39:25.835Z",
+   "domains": [
+     {
+       "name": "Core Engine",
+@@ -9,50 +9,13 @@
+       "components": [
+         {
+           "file": "core/block_decoder.js",
+-          "symbols": [
+-            {
+-              "name": "constructor",
+-              "visibility": "Public",
+-              "line": 9
+-            },
+-            {
+-              "name": "addPiece",
+-              "visibility": "Public",
+-              "line": 30
+-            },
+-            {
+-              "name": "_insertRow",
+-              "visibility": "Public",
+-              "line": 62
+-            },
+-            {
+-              "name": "_finalize",
+-              "visibility": "Public",
+-              "line": 74
+-            },
+-            {
+-              "name": "getData",
+-              "visibility": "Public",
+-              "line": 93
+-            }
+-          ],
++          "symbols": [],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+         },
+         {
+           "file": "core/block_encoder.js",
+-          "symbols": [
+-            {
+-              "name": "constructor",
+-              "visibility": "Public",
+-              "line": 10
+-            },
+-            {
+-              "name": "codedPiece",
+-              "visibility": "Public",
+-              "line": 58
+-            }
+-          ],
++          "symbols": [],
+           "purpose": "Pure atomic math primitive focused on linear combinations.",
+           "scope": "Core Mathematical Logic"
+         },
+@@ -62,7 +25,8 @@
+             {
+               "name": "printTable",
+               "visibility": "Internal",
+-              "line": 22
++              "line": 22,
++              "hash": "8039c70121e62c19"
+             }
+           ],
+           "purpose": "No purpose defined.",
+@@ -72,19 +36,16 @@
+           "file": "core/engine.js",
+           "symbols": [
+             {
+-              "name": "constructor",
+-              "visibility": "Public",
+-              "line": 22
+-            },
+-            {
+-              "name": "_wireComponents",
++              "name": "netOptions",
+               "visibility": "Public",
+-              "line": 125
++              "line": 61,
++              "hash": "c84ad48f636d0940"
+             },
+             {
+-              "name": "_finish",
++              "name": "workerConfig",
+               "visibility": "Public",
+-              "line": 195
++              "line": 127,
++              "hash": "3b537acc6bda2d83"
+             }
+           ],
+           "purpose": "No purpose defined.",
+@@ -92,78 +53,36 @@
+         },
+         {
+           "file": "core/galois_matrix.js",
++          "symbols": [],
++          "purpose": "No purpose defined.",
++          "scope": "No scope defined."
++        },
++        {
++          "file": "core/gf256.js",
+           "symbols": [
+             {
+-              "name": "constructor",
+-              "visibility": "Public",
+-              "line": 8
+-            },
+-            {
+-              "name": "get",
+-              "visibility": "Public",
+-              "line": 23
+-            },
+-            {
+-              "name": "set",
+-              "visibility": "Public",
+-              "line": 25
+-            },
+-            {
+-              "name": "addRow",
+-              "visibility": "Public",
+-              "line": 32
+-            },
+-            {
+-              "name": "extractData",
+-              "visibility": "Public",
+-              "line": 41
+-            },
+-            {
+-              "name": "normalizeRow",
+-              "visibility": "Public",
+-              "line": 48
+-            },
+-            {
+-              "name": "solve",
+-              "visibility": "Public",
+-              "line": 62
+-            },
+-            {
+-              "name": "multiplyAdd",
+-              "visibility": "Public",
+-              "line": 94
+-            },
+-            {
+-              "name": "normalize",
++              "name": "init",
+               "visibility": "Public",
+-              "line": 139
++              "line": 11,
++              "hash": "66c755d2f8cd74c3"
+             },
+             {
+-              "name": "_findPivot",
++              "name": "GF256",
+               "visibility": "Public",
+-              "line": 170
++              "line": 39,
++              "hash": "ea6385ce0b6cd008"
+             },
+             {
+-              "name": "_swapRows",
++              "name": "mul",
+               "visibility": "Public",
+-              "line": 178
++              "line": 48,
++              "hash": "c9981d6123421685"
+             },
+             {
+-              "name": "getAugmentedRow",
+-              "visibility": "Public",
+-              "line": 188
+-            }
+-          ],
+-          "purpose": "No purpose defined.",
+-          "scope": "No scope defined."
+-        },
+-        {
+-          "file": "core/gf256.js",
+-          "symbols": [
+-            {
+-              "name": "init",
++              "name": "div",
+               "visibility": "Public",
+-              "line": 11
++              "line": 57,
++              "hash": "34286ca1b611722b"
+             }
+           ],
+           "purpose": "No purpose defined.",
+@@ -173,14 +92,34 @@
+           "file": "core/verify_coders.js",
+           "symbols": [
+             {
++              "name": "CONFIG",
++              "visibility": "Internal",
++              "line": 11,
++              "hash": "1d546addfab06436"
++            },
++            {
++              "name": "ENCODER_CONFIG",
++              "visibility": "Internal",
++              "line": 14,
++              "hash": "1ec8c519382c8bfc"
++            },
++            {
+               "name": "runCoderTest",
+               "visibility": "Internal",
+-              "line": 23
++              "line": 23,
++              "hash": "0146a560adf6eb23"
++            },
++            {
++              "name": "stats",
++              "visibility": "Internal",
++              "line": 36,
++              "hash": "5f26b7fa9029371d"
+             },
+             {
+               "name": "printReport",
+               "visibility": "Internal",
+-              "line": 91
++              "line": 91,
++              "hash": "1779be2675ecdb6c"
+             }
+           ],
+           "purpose": "No purpose defined.",
+@@ -190,14 +129,34 @@
+           "file": "core/verify_comparative_v10.js",
+           "symbols": [
+             {
++              "name": "CONFIG",
++              "visibility": "Internal",
++              "line": 11,
++              "hash": "825917ad579a8bef"
++            },
++            {
++              "name": "ENCODER_CONFIG",
++              "visibility": "Internal",
++              "line": 13,
++              "hash": "7187a232b118b4b1"
++            },
++            {
+               "name": "profile",
+               "visibility": "Internal",
+-              "line": 21
++              "line": 21,
++              "hash": "396a0c2c2333836d"
++            },
++            {
++              "name": "stats",
++              "visibility": "Internal",
++              "line": 25,
++              "hash": "33656ed5b14a210d"
+             },
+             {
+               "name": "run",
+               "visibility": "Internal",
+-              "line": 90
++              "line": 90,
++              "hash": "7ffad8e0a1882b42"
+             }
+           ],
+           "purpose": "No purpose defined.",
+@@ -207,9 +166,16 @@
+           "file": "core/verify_full_buffer_deadlock.js",
+           "symbols": [
+             {
++              "name": "CONFIG",
++              "visibility": "Internal",
++              "line": 11,
++              "hash": "8517e31e3c81700d"
++            },
++            {
+               "name": "runTest",
+               "visibility": "Internal",
+-              "line": 17
++              "line": 17,
++              "hash": "a2cb33df34cef18b"
+             }
+           ],
+           "purpose": "No purpose defined.",
+@@ -219,9 +185,28 @@
+           "file": "core/verify_incremental_stress.js",
+           "symbols": [
+             {
++              "name": "CONFIG",
++              "visibility": "Internal",
++              "line": 12,
++              "hash": "d635b18a4ab27e40"
++            },
++            {
++              "name": "ENCODER_CONFIG",
++              "visibility": "Internal",
++              "line": 15,
++              "hash": "ec770fc4b5d6e221"
++            },
++            {
+               "name": "run",
+               "visibility": "Internal",
+-              "line": 24
++              "line": 24,
++              "hash": "1ec7ece063f3ad3e"
++            },
++            {
++              "name": "stats",
++              "visibility": "Internal",
++              "line": 32,
++              "hash": "1e4a67076b732dc0"
+             }
+           ],
+           "purpose": "No purpose defined.",
+@@ -233,7 +218,14 @@
+             {
+               "name": "runStressTest",
+               "visibility": "Internal",
+-              "line": 13
++              "line": 13,
++              "hash": "30a06dfe7d5b1ba3"
++            },
++            {
++              "name": "stats",
++              "visibility": "Internal",
++              "line": 16,
++              "hash": "e3e68061bdeff987"
+             }
+           ],
+           "purpose": "No purpose defined.",
+@@ -249,14 +241,34 @@
+           "file": "core/verify_sbox_upper_bound.js",
+           "symbols": [
+             {
++              "name": "CONFIG",
++              "visibility": "Internal",
++              "line": 11,
++              "hash": "6abae0df7fa7efe5"
++            },
++            {
++              "name": "ENCODER_CONFIG",
++              "visibility": "Internal",
++              "line": 14,
++              "hash": "7187a232b118b4b1"
++            },
++            {
+               "name": "runUpperBoundProfile",
+               "visibility": "Internal",
+-              "line": 22
++              "line": 22,
++              "hash": "a932df92688fa174"
++            },
++            {
++              "name": "stats",
++              "visibility": "Internal",
++              "line": 34,
++              "hash": "5f26b7fa9029371d"
+             },
+             {
+               "name": "printReport",
+               "visibility": "Internal",
+-              "line": 86
++              "line": 86,
++              "hash": "e986a185c09d0a68"
+             }
+           ],
+           "purpose": "No purpose defined.",
+@@ -271,372 +283,696 @@
+       "components": [
+         {
+           "file": "network/coded_piece.js",
++          "symbols": [],
++          "purpose": "No purpose defined.",
++          "scope": "No scope defined."
++        },
++        {
++          "file": "network/loopback_transport.js",
++          "symbols": [],
++          "purpose": "No purpose defined.",
++          "scope": "No scope defined."
++        },
++        {
++          "file": "network/network_simulator.js",
++          "symbols": [],
++          "purpose": "No purpose defined.",
++          "scope": "No scope defined."
++        },
++        {
++          "file": "network/packet_serializer.js",
++          "symbols": [],
++          "purpose": "No purpose defined.",
++          "scope": "No scope defined."
++        },
++        {
++          "file": "network/transport.js",
++          "symbols": [],
++          "purpose": "No purpose defined.",
++          "scope": "No scope defined."
++        },
++        {
++          "file": "network/udp_transport.js",
+           "symbols": [
+             {
+-              "name": "constructor",
++              "name": "workerData",
+               "visibility": "Public",
+-              "line": 2
++              "line": 20,
++              "hash": "10f190b247197807"
+             }
+           ],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+         },
+         {
+-          "file": "network/loopback_transport.js",
++          "file": "network/udp_worker.js",
+           "symbols": [
+             {
+-              "name": "constructor",
+-              "visibility": "Public",
+-              "line": 7
+-            },
++              "name": "acquireRX",
++              "visibility": "Internal",
++              "line": 53,
++              "hash": "7ea2bf0d6e45d02a"
++            }
++          ],
++          "purpose": "No purpose defined.",
++          "scope": "No scope defined."
++        }
++      ]
++    },
++    {
++      "name": "Utilities",
++      "path": "utils",
++      "description": "Shared resources and foundational helper modules.",
++      "components": [
++        {
++          "file": "utils/buffer_pool.js",
++          "symbols": [
+             {
+-              "name": "listen",
++              "name": "get",
+               "visibility": "Public",
+-              "line": 10
++              "line": 7,
++              "hash": "e683ebc83b6171c9"
+             },
+             {
+-              "name": "connect",
++              "name": "release",
+               "visibility": "Public",
+-              "line": 12
++              "line": 12,
++              "hash": "a469fd778ac57ba5"
++            }
++          ],
++          "purpose": "No purpose defined.",
++          "scope": "No scope defined."
++        },
++        {
++          "file": "utils/shared_buffer_pool.js",
++          "symbols": [],
++          "purpose": "No purpose defined.",
++          "scope": "No scope defined."
++        },
++        {
++          "file": "utils/update_matrix.js",
++          "symbols": [
++            {
++              "name": "updateMatrix",
++              "visibility": "Internal",
++              "line": 6,
++              "hash": "f17217970e8e8918"
+             },
+             {
+-              "name": "send",
+-              "visibility": "Public",
+-              "line": 13
++              "name": "newEntry",
++              "visibility": "Internal",
++              "line": 14,
++              "hash": "dd7c47ee164c100e"
+             },
+             {
+-              "name": "close",
+-              "visibility": "Public",
+-              "line": 18
++              "name": "matrix",
++              "visibility": "Internal",
++              "line": 22,
++              "hash": "7b343db37ae8b99d"
+             }
+           ],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+         },
+         {
+-          "file": "network/network_simulator.js",
++          "file": "utils/visual_dashboard.js",
++          "symbols": [],
++          "purpose": "No purpose defined.",
++          "scope": "No scope defined."
++        }
++      ]
++    },
++    {
++      "name": "Validation Suite",
++      "path": "tests",
++      "description": "Technical verification and stress tests.",
++      "components": [
++        {
++          "file": "tests/t1_throughput.js",
+           "symbols": [
+             {
+-              "name": "constructor",
++              "name": "DATA",
+               "visibility": "Public",
+-              "line": 7
++              "line": 2,
++              "hash": "72b4a2cd0217612e"
+             },
+             {
+-              "name": "listen",
++              "name": "PROTOCOL",
+               "visibility": "Public",
+-              "line": 27
++              "line": 3,
++              "hash": "4a5720c7d3f29af4"
+             },
+             {
+-              "name": "connect",
++              "name": "TRANSCODE",
+               "visibility": "Public",
+-              "line": 31
++              "line": 4,
++              "hash": "15157f8d9f910cb4"
+             },
+             {
+-              "name": "send",
++              "name": "NETWORK",
+               "visibility": "Public",
+-              "line": 35
++              "line": 5,
++              "hash": "6d8e0d4990bbb595"
+             },
+             {
+-              "name": "_injectImpairment",
++              "name": "WINDOW",
+               "visibility": "Public",
+-              "line": 40
++              "line": 6,
++              "hash": "e3e299698d35794c"
+             },
+             {
+-              "name": "close",
++              "name": "SYSTEM",
+               "visibility": "Public",
+-              "line": 66
++              "line": 7,
++              "hash": "1921f004ef0b0e01"
+             }
+           ],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+         },
+         {
+-          "file": "network/packet_serializer.js",
+-          "symbols": [],
+-          "purpose": "No purpose defined.",
+-          "scope": "No scope defined."
+-        },
+-        {
+-          "file": "network/transport.js",
++          "file": "tests/t2_resilience.js",
+           "symbols": [
+             {
+-              "name": "constructor",
++              "name": "DATA",
+               "visibility": "Public",
+-              "line": 9
++              "line": 2,
++              "hash": "62f19f4244de5706"
+             },
+             {
+-              "name": "listen",
++              "name": "PROTOCOL",
+               "visibility": "Public",
+-              "line": 20
++              "line": 3,
++              "hash": "688d14ef063f42ea"
+             },
+             {
+-              "name": "connect",
++              "name": "TRANSCODE",
+               "visibility": "Public",
+-              "line": 29
++              "line": 4,
++              "hash": "2b6136fde6027ca1"
+             },
+             {
+-              "name": "send",
++              "name": "NETWORK",
+               "visibility": "Public",
+-              "line": 39
++              "line": 5,
++              "hash": "ed6c325ea1836102"
+             },
+             {
+-              "name": "onPacket",
++              "name": "WINDOW",
+               "visibility": "Public",
+-              "line": 47
++              "line": 6,
++              "hash": "e3e299698d35794c"
+             },
+             {
+-              "name": "close",
++              "name": "SYSTEM",
+               "visibility": "Public",
+-              "line": 54
++              "line": 7,
++              "hash": "2592dee3735c8e08"
+             }
+           ],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+         },
+         {
+-          "file": "network/udp_transport.js",
++          "file": "tests/t3_stress.js",
+           "symbols": [
+             {
+-              "name": "constructor",
++              "name": "DATA",
+               "visibility": "Public",
+-              "line": 10
++              "line": 2,
++              "hash": "c6bcb10fc2f1d3a4"
+             },
+             {
+-              "name": "listen",
++              "name": "PROTOCOL",
+               "visibility": "Public",
+-              "line": 42
++              "line": 3,
++              "hash": "688d14ef063f42ea"
+             },
+             {
+-              "name": "connect",
++              "name": "TRANSCODE",
+               "visibility": "Public",
+-              "line": 49
++              "line": 4,
++              "hash": "1fd425fb2145878d"
+             },
+             {
+-              "name": "send",
++              "name": "NETWORK",
+               "visibility": "Public",
+-              "line": 58
++              "line": 5,
++              "hash": "0adbfc8cf4609d7a"
+             },
+             {
+-              "name": "close",
++              "name": "WINDOW",
+               "visibility": "Public",
+-              "line": 70
+-            }
+-          ],
+-          "purpose": "No purpose defined.",
+-          "scope": "No scope defined."
+-        },
+-        {
+-          "file": "network/udp_worker.js",
+-          "symbols": [
++              "line": 6,
++              "hash": "93513a3caa2a742f"
++            },
+             {
+-              "name": "acquireRX",
+-              "visibility": "Internal",
+-              "line": 53
++              "name": "SYSTEM",
++              "visibility": "Public",
++              "line": 7,
++              "hash": "5153ad4a2ece5aa4"
+             }
+           ],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+-        }
+-      ]
+-    },
+-    {
+-      "name": "Utilities",
+-      "path": "utils",
+-      "description": "Shared resources and foundational helper modules.",
+-      "components": [
+-        {
+-          "file": "utils/buffer_pool.js",
+-          "symbols": [],
+-          "purpose": "No purpose defined.",
+-          "scope": "No scope defined."
+         },
+         {
+-          "file": "utils/shared_buffer_pool.js",
++          "file": "tests/t4_sustenance.js",
+           "symbols": [
+             {
+-              "name": "constructor",
+-              "visibility": "Public",
+-              "line": 7
+-            },
+-            {
+-              "name": "getSlotView",
++              "name": "DATA",
+               "visibility": "Public",
+-              "line": 24
++              "line": 2,
++              "hash": "62f19f4244de5706"
+             },
+             {
+-              "name": "lockSlot",
++              "name": "PROTOCOL",
+               "visibility": "Public",
+-              "line": 29
++              "line": 6,
++              "hash": "688d14ef063f42ea"
+             },
+             {
+-              "name": "unlockSlot",
++              "name": "TRANSCODE",
+               "visibility": "Public",
+-              "line": 33
++              "line": 12,
++              "hash": "2b6136fde6027ca1"
+             },
+             {
+-              "name": "isSlotBusy",
++              "name": "NETWORK",
+               "visibility": "Public",
+-              "line": 40
++              "line": 17,
++              "hash": "e197791604f5a219"
+             },
+             {
+-              "name": "acquireTX",
++              "name": "WINDOW",
+               "visibility": "Public",
+-              "line": 44
++              "line": 23,
++              "hash": "0d2849af13b4aae1"
+             },
+             {
+-              "name": "acquireRX",
++              "name": "SYSTEM",
+               "visibility": "Public",
+-              "line": 61
++              "line": 27,
++              "hash": "6ef25ff3f757cea8"
+             }
+           ],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+         },
+         {
+-          "file": "utils/update_matrix.js",
+-          "symbols": [
+-            {
+-              "name": "updateMatrix",
+-              "visibility": "Internal",
+-              "line": 6
+-            }
+-          ],
+-          "purpose": "No purpose defined.",
+-          "scope": "No scope defined."
+-        },
+-        {
+-          "file": "utils/visual_dashboard.js",
++          "file": "tests/t5_full_coded.js",
+           "symbols": [
+             {
+-              "name": "constructor",
++              "name": "DATA",
+               "visibility": "Public",
+-              "line": 5
++              "line": 2,
++              "hash": "62f19f4244de5706"
+             },
+             {
+-              "name": "initGen",
++              "name": "PROTOCOL",
+               "visibility": "Public",
+-              "line": 21
++              "line": 6,
++              "hash": "688d14ef063f42ea"
+             },
+             {
+-              "name": "updateGen",
++              "name": "TRANSCODE",
+               "visibility": "Public",
+-              "line": 35
++              "line": 12,
++              "hash": "1b92da00a2646118"
+             },
+             {
+-              "name": "addGlobalStat",
++              "name": "NETWORK",
+               "visibility": "Public",
+-              "line": 43
++              "line": 17,
++              "hash": "afe2444797ce3345"
+             },
+             {
+-              "name": "registerTraffic",
++              "name": "WINDOW",
+               "visibility": "Public",
+-              "line": 47
++              "line": 23,
++              "hash": "650d1c31e72581d4"
+             },
+             {
+-              "name": "setFinalHash",
++              "name": "SYSTEM",
+               "visibility": "Public",
+-              "line": 52
+-            },
++              "line": 27,
++              "hash": "18f7481f5c32a64f"
++            }
++          ],
++          "purpose": "No purpose defined.",
++          "scope": "No scope defined."
++        },
++        {
++          "file": "tests/t6_the_wall.js",
++          "symbols": [
+             {
+-              "name": "render",
++              "name": "DATA",
+               "visibility": "Public",
+-              "line": 54
++              "line": 2,
++              "hash": "62f19f4244de5706"
+             },
+             {
+-              "name": "_truncate",
++              "name": "PROTOCOL",
+               "visibility": "Public",
+-              "line": 93
++              "line": 6,
++              "hash": "688d14ef063f42ea"
+             },
+             {
+-              "name": "_formatBytes",
++              "name": "TRANSCODE",
+               "visibility": "Public",
+-              "line": 98
++              "line": 12,
++              "hash": "7491ef7d3c2ad72a"
+             },
+             {
+-              "name": "_generateHeaderString",
++              "name": "NETWORK",
+               "visibility": "Public",
+-              "line": 104
++              "line": 17,
++              "hash": "1f703b3ea854b584"
+             },
+             {
+-              "name": "_getFooterLines",
++              "name": "WINDOW",
+               "visibility": "Public",
+-              "line": 129
++              "line": 23,
++              "hash": "67f3584d0861968c"
+             },
+             {
+-              "name": "_drawRow",
++              "name": "SYSTEM",
+               "visibility": "Public",
+-              "line": 162
++              "line": 27,
++              "hash": "ac9aeab4dae0d559"
+             }
+           ],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+-        }
+-      ]
+-    },
+-    {
+-      "name": "Validation Suite",
+-      "path": "tests",
+-      "description": "Technical verification and stress tests.",
+-      "components": [
++        },
+         {
+-          "file": "tests/t1_throughput.js",
++          "file": "tests/verify_library.js",
+           "symbols": [],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+         },
+         {
+-          "file": "tests/t2_resilience.js",
++          "file": "tests/verify_math.js",
+           "symbols": [],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+         },
+         {
+-          "file": "tests/t3_stress.js",
++          "file": "tests/verify_serializer.js",
+           "symbols": [],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+         },
+         {
+-          "file": "tests/t4_sustenance.js",
+-          "symbols": [],
++          "file": "tests/verify_threaded.js",
++          "symbols": [
++            {
++              "name": "workerConfig",
++              "visibility": "Internal",
++              "line": 16,
++              "hash": "d63ae121ec097ff0"
++            }
++          ],
++          "purpose": "No purpose defined.",
++          "scope": "No scope defined."
++        }
++      ]
++    },
++    {
++      "name": "Threading & Concurrency",
++      "path": "threading",
++      "description": "Multi-threaded encoders, decoders, and worker pool management.",
++      "components": [
++        {
++          "file": "threading/debug_verify_threading.js",
++          "symbols": [
++            {
++              "name": "CONFIG",
++              "visibility": "Internal",
++              "line": 13,
++              "hash": "c4cf797a6f54305d"
++            },
++            {
++              "name": "TRANSCODE",
++              "visibility": "Internal",
++              "line": 15,
++              "hash": "2b6136fde6027ca1"
++            },
++            {
++              "name": "WINDOW",
++              "visibility": "Internal",
++              "line": 20,
++              "hash": "96d5927b0a2747bf"
++            },
++            {
++              "name": "PROTOCOL",
++              "visibility": "Internal",
++              "line": 24,
++              "hash": "688d14ef063f42ea"
++            },
++            {
++              "name": "SYSTEM",
++              "visibility": "Internal",
++              "line": 30,
++              "hash": "f734017382b5028a"
++            },
++            {
++              "name": "FULL_CONFIG",
++              "visibility": "Internal",
++              "line": 35,
++              "hash": "f20a331ba7156557"
++            },
++            {
++              "name": "NETWORK",
++              "visibility": "Internal",
++              "line": 37,
++              "hash": "c2525249fbb490da"
++            },
++            {
++              "name": "runSuite",
++              "visibility": "Internal",
++              "line": 46,
++              "hash": "50cbcb5377d452df"
++            },
++            {
++              "name": "runTest",
++              "visibility": "Internal",
++              "line": 80,
++              "hash": "4277bddcb0a2633e"
++            },
++            {
++              "name": "metrics",
++              "visibility": "Internal",
++              "line": 100,
++              "hash": "58834e1baf96b626"
++            },
++            {
++              "name": "finish",
++              "visibility": "Internal",
++              "line": 166,
++              "hash": "d03d1770b7b00870"
++            },
++            {
++              "name": "printReport",
++              "visibility": "Internal",
++              "line": 183,
++              "hash": "97bd5d01c55ab582"
++            }
++          ],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+         },
+         {
+-          "file": "tests/t5_full_coded.js",
+-          "symbols": [],
++          "file": "threading/decoder_worker.js",
++          "symbols": [
++            {
++              "name": "handlePiece",
++              "visibility": "Internal",
++              "line": 35,
++              "hash": "74968d628d0551dd"
++            }
++          ],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+         },
+         {
+-          "file": "tests/t6_the_wall.js",
+-          "symbols": [],
++          "file": "threading/docs/render_changelog.js",
++          "symbols": [
++            {
++              "name": "printTable",
++              "visibility": "Internal",
++              "line": 30,
++              "hash": "e4c1d90bfd653ccf"
++            }
++          ],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+         },
+         {
+-          "file": "tests/verify_library.js",
+-          "symbols": [],
++          "file": "threading/encoder_worker.js",
++          "symbols": [
++            {
++              "name": "fallbackConfig",
++              "visibility": "Internal",
++              "line": 40,
++              "hash": "ac8eed6055d9a469"
++            },
++            {
++              "name": "sendPacketViaShared",
++              "visibility": "Internal",
++              "line": 55,
++              "hash": "ad53b1f9665a9f0a"
++            },
++            {
++              "name": "acquireTX",
++              "visibility": "Internal",
++              "line": 84,
++              "hash": "4969616005e256de"
++            },
++            {
++              "name": "producePackets",
++              "visibility": "Internal",
++              "line": 99,
++              "hash": "54be32c57c01b833"
++            },
++            {
++              "name": "stats",
++              "visibility": "Internal",
++              "line": 101,
++              "hash": "f9e56e4b94ed5363"
++            }
++          ],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+         },
+         {
+-          "file": "tests/verify_math.js",
++          "file": "threading/generation_decoder.js",
+           "symbols": [],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+         },
+         {
+-          "file": "tests/verify_serializer.js",
+-          "symbols": [],
++          "file": "threading/generation_encoder.js",
++          "symbols": [
++            {
++              "name": "budgets",
++              "visibility": "Public",
++              "line": 58,
++              "hash": "df042b2c2048b46a"
++            },
++            {
++              "name": "blockConfig",
++              "visibility": "Public",
++              "line": 83,
++              "hash": "469e0f10d78a3266"
++            }
++          ],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
+         },
+         {
+-          "file": "tests/verify_threaded.js",
++          "file": "threading/sliding_window.js",
+           "symbols": [],
+           "purpose": "No purpose defined.",
+           "scope": "No scope defined."
++        },
++        {
++          "file": "threading/verify_threading.js",
++          "symbols": [
++            {
++              "name": "CONFIG",
++              "visibility": "Internal",
++              "line": 13,
++              "hash": "c4cf797a6f54305d"
++            },
++            {
++              "name": "TRANSCODE",
++              "visibility": "Internal",
++              "line": 15,
++              "hash": "2b6136fde6027ca1"
++            },
++            {
++              "name": "WINDOW",
++              "visibility": "Internal",
++              "line": 20,
++              "hash": "96d5927b0a2747bf"
++            },
++            {
++              "name": "PROTOCOL",
++              "visibility": "Internal",
++              "line": 24,
++              "hash": "688d14ef063f42ea"
++            },
++            {
++              "name": "SYSTEM",
++              "visibility": "Internal",
++              "line": 30,
++              "hash": "f734017382b5028a"
++            },
++            {
++              "name": "FULL_CONFIG",
++              "visibility": "Internal",
++              "line": 35,
++              "hash": "f20a331ba7156557"
++            },
++            {
++              "name": "NETWORK",
++              "visibility": "Internal",
++              "line": 37,
++              "hash": "c2525249fbb490da"
++            },
++            {
++              "name": "runSuite",
++              "visibility": "Internal",
++              "line": 46,
++              "hash": "50cbcb5377d452df"
++            },
++            {
++              "name": "runTest",
++              "visibility": "Internal",
++              "line": 80,
++              "hash": "0d8cc0e79521491a"
++            },
++            {
++              "name": "metrics",
++              "visibility": "Internal",
++              "line": 100,
++              "hash": "58834e1baf96b626"
++            },
++            {
++              "name": "finish",
++              "visibility": "Internal",
++              "line": 155,
++              "hash": "821d20e85b65ee1c"
++            },
++            {
++              "name": "printReport",
++              "visibility": "Internal",
++              "line": 172,
++              "hash": "97bd5d01c55ab582"
++            }
++          ],
++          "purpose": "No purpose defined.",
++          "scope": "No scope defined."
++        },
++        {
++          "file": "threading/worker_pool.js",
++          "symbols": [
++            {
++              "name": "workerData",
++              "visibility": "Public",
++              "line": 29,
++              "hash": "590ed21f210b4e72"
++            },
++            {
++              "name": "workerBudgets",
++              "visibility": "Public",
++              "line": 102,
++              "hash": "7ccc70620b255d9b"
++            }
++          ],
++          "purpose": "No purpose defined.",
++          "scope": "No scope defined."
+         }
+       ]
+     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

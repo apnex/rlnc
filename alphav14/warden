@@ -1,0 +1,12 @@
+#!/usr/bin/env node
+const { spawnSync } = require('child_process');
+const path = require('path');
+
+const ENGINE_ROOT = "/home/apnex/warden";
+
+const result = spawnSync('node', [path.join(ENGINE_ROOT, 'engine', 'warden.js'), ...process.argv.slice(2)], {
+    stdio: 'inherit',
+    env: { ...process.env, WARDEN_ENGINE_ROOT: ENGINE_ROOT, WARDEN_TARGET_ROOT: process.cwd() }
+});
+
+process.exit(result.status);

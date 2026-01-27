@@ -1,0 +1,21 @@
+{
+  "orchestration": {
+    "driver_type": "ENGINE",
+    "layer_id": "L5",
+    "session_id": 65535,
+    "concurrency_model": "AUTONOMOUS_ENGINE"
+  },
+  "math": {
+    "n": 512,
+    "s": 944,
+    "systematic_flag": true
+  },
+  "data": {
+    "source": "DUMMY",
+    "size": 4194304
+  },
+  "fabric": {
+    "slot_assignment": 3,
+    "ubi_descriptor": 5
+  }
+}

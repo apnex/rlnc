@@ -1,0 +1,20 @@
+{
+  "orchestration": {
+    "driver_type": "MATH",
+    "layer_id": "L0",
+    "session_id": 43981
+  },
+  "math": {
+    "n": 128,
+    "s": 524288,
+    "systematic_flag": true
+  },
+  "data": {
+    "source": "DUMMY",
+    "size": 1677721600
+  },
+  "fabric": {
+    "slot_assignment": 1,
+    "ubi_descriptor": 1
+  }
+}

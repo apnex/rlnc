@@ -1,0 +1,65 @@
+{
+  "version": "8.0.0",
+  "project": "Alpha-v8",
+  "codename": "Velocity",
+  "status": {
+    "completion_estimate": "65%",
+    "active_focus": "M3: UDP Transport Layer"
+  },
+  "milestones": [
+    { "id": "V7-BASE", "title": "Structural Baseline", "status": "COMPLETED" },
+    { "id": "V8-VEL", "title": "Velocity Architecture", "status": "COMPLETED" },
+    { "id": "V8-NET", "title": "Real-world Networking", "status": "IN-PROGRESS" },
+    { "id": "V8-INT", "title": "Network-Aware Intelligence", "status": "PLANNED" }
+  ],
+  "objectives": [
+    {
+      "domain": "Core",
+      "title": "WASM Math Kernel",
+      "description": "Port gf256.js logic to WASM/AssemblyScript for SIMD parallelization.",
+      "sqa_anchors": ["Performance", "Efficiency"],
+      "goal": "10x throughput vs pure JS implementation.",
+      "status": "PARTIAL"
+    },
+    {
+      "domain": "Threading",
+      "title": "Adaptive Concurrency",
+      "description": "Unified hardware-aware scaling across all engine modules.",
+      "sqa_anchors": ["Scalability", "Robustness"],
+      "goal": "Automatic core saturation across all platforms.",
+      "status": "COMPLETED"
+    },
+    {
+      "domain": "Network",
+      "title": "UDP Transport Layer",
+      "description": "Replace simulation with real node:dgram UDP/IP transport.",
+      "sqa_anchors": ["Portability", "Reliability"],
+      "goal": "Stable P2P transmission over localhost and LAN.",
+      "status": "NOT STARTED"
+    },
+    {
+      "domain": "Intelligence",
+      "title": "Dynamic MTU Discovery (M5)",
+      "description": "Active probing of the network path to determine fragmentation limits.",
+      "sqa_anchors": ["Portability", "Robustness"],
+      "goal": "Determine largest safe PIECE_SIZE without OS-level fragmentation.",
+      "status": "NOT STARTED"
+    },
+    {
+      "domain": "Intelligence",
+      "title": "Elastic Symbol Resizing (M5)",
+      "description": "Real-time bucketing of data based on current MTU discovery.",
+      "sqa_anchors": ["Scalability", "Resilience"],
+      "goal": "Pivot symbol sizes mid-session to maximize bandwidth utilization.",
+      "status": "NOT STARTED"
+    },
+    {
+      "domain": "Intelligence",
+      "title": "Congestion-Aware Density (M5)",
+      "description": "Adaptive tuning of symbol frequency vs size based on buffer telemetry.",
+      "sqa_anchors": ["Efficiency", "Reliability"],
+      "goal": "Prevent self-congestion and NIC buffer overflows.",
+      "status": "NOT STARTED"
+    }
+  ]
+}

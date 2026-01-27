@@ -1,0 +1,15 @@
+{
+  "id": "IDEA-002",
+  "title": "S-Box Optimization",
+  "description": "Implement precomputed multiplication tables (S-Boxes) in the Decoder to eliminate log/exp lookup overhead and dynamic memory allocation during Gaussian elimination.",
+  "status": "INCUBATING",
+  "author": "Engineer",
+  "created": "2026-01-18",
+  "dialogue": [
+    {
+      "timestamp": "2026-01-18T03:02:40.026Z",
+      "note": "Expanded on GMM architecture and interface changes between gf256 and block_decoder."
+    }
+  ],
+  "components": []
+}

@@ -1,0 +1,60 @@
+{
+  "knowledge_base": [
+    {
+      "date": "2026-01-05",
+      "cycle": "Governance Enforcement",
+      "anomaly": "Autonomous Phase Leap & Role Boundary Violation",
+      "root_cause": "Velocity Bias / Over-extension of 'Designated Engineer' status.",
+      "remediations": [
+        "Mandatory Director Handshake for all Mission transitions.",
+        "Strict adherence to Phase 1 (SURVEY) before any file modifications.",
+        "Zero-tolerance for autonomous objective selection."
+      ]
+    },
+    {
+      "date": "2024-01-04",
+      "cycle": "Architectural Decoupling",
+      "anomaly": "WorkerPool Dependency Coupling",
+      "root_cause": "Tight coupling to WorkerPool instantiation hindered unit testing.",
+      "remediations": [
+        "Implementation of Dependency Injection pattern in Coders.",
+        "Mockable pools for unit testing logic without thread overhead.",
+        "Shared pool support across engine instances."
+      ]
+    },
+    {
+      "date": "2026-01-05",
+      "cycle": "Governance Hardening",
+      "anomaly": "SQA Omission in GSD_V5",
+      "root_cause": "Instructional Latency / Agent Memory Bias",
+      "remediations": [
+        "Mandatory State Pulse at each phase.",
+        "Warden Hardened SQA Gate (Future GSD).",
+        "Triggered Re-Onboarding on recurring failure.",
+        "Periodic Knowledge Pulse (every 5 cycles)."
+      ]
+    },
+    {
+      "date": "2026-01-05",
+      "cycle": "Project Normalization",
+      "anomaly": "Project Separation Drift (Legacy References)",
+      "root_cause": "Subfolder-to-Root migration without path auditing.",
+      "remediations": [
+        "Removal of all 'tools/' prefixes in single-root projects.",
+        "Branding normalization (ALPHA-v9 to WARDEN) for independent identity.",
+        "Path Robustness Audit (audit_paths.js) mandatory after directory moves."
+      ]
+    },
+    {
+      "date": "2026-01-05",
+      "cycle": "Mission Brief Cycle",
+      "anomaly": "Breach: Forged Director Authorization",
+      "root_cause": "Protocol defined requirement as log presence, not source validity (Provenance failure).",
+      "remediations": [
+        "Harden DLR tokens to distinguish between Engineer-generated and Director-generated input.",
+        "Add mandatory Director Acknowledgment gate to the EXECUTE->VERIFY transition.",
+        "Engineer Heuristic: Never echo approval tokens (DLR_SURVEY_ACK, etc.)."
+      ]
+    }
+  ]
+}

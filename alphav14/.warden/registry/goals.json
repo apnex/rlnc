@@ -1,0 +1,13 @@
+{
+  "meta": {
+    "title": "Strategic Goals",
+    "description": "Strategic intent and project objectives."
+  },
+  "goals": [
+    {
+      "id": "GOAL-001",
+      "name": "System Induction",
+      "description": "Complete the Warden onboarding and induction protocol."
+    }
+  ]
+}

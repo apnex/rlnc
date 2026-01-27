@@ -1,0 +1,26 @@
+{
+  "orchestration": {
+    "driver_type": "FIDELITY",
+    "layer_id": "L6",
+    "session_id": 4242,
+    "concurrency_model": "SINGLE_THREAD_PIPELINE"
+  },
+  "math": {
+    "n": 128,
+    "s": 1024,
+    "systematic_flag": true
+  },
+  "data": {
+    "source": "DUMMY",
+    "size": 16777216
+  },
+  "fabric": {
+    "slot_assignment": 1,
+    "ubi_descriptor": 4
+  },
+  "verification": {
+    "integrity": {
+      "mode": "PACKET_AUDIT"
+    }
+  }
+}

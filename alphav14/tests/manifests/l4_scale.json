@@ -1,0 +1,21 @@
+{
+  "orchestration": {
+    "driver_type": "SCALE",
+    "layer_id": "L4",
+    "session_id": 54321,
+    "concurrency_model": "PARALLEL_POOL"
+  },
+  "math": {
+    "n": 256,
+    "s": 1400,
+    "systematic_flag": true
+  },
+  "data": {
+    "source": "DUMMY",
+    "size": 8388608
+  },
+  "fabric": {
+    "slot_assignment": 2,
+    "ubi_descriptor": 4
+  }
+}

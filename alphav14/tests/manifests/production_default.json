@@ -1,0 +1,25 @@
+{
+  "orchestration": {
+    "driver_type": "ENGINE",
+    "layer_id": "PROD",
+    "session_id": 1,
+    "concurrency_model": "UNIFIED"
+  },
+  "math": {
+    "n": 512,
+    "s": 944,
+    "systematic_flag": false
+  },
+  "network": {
+    "loss_rate": 0.0,
+    "transport_layer": "UDP_JUMBO"
+  },
+  "data": {
+    "source": "DUMMY",
+    "size": 4194304
+  },
+  "fabric": {
+    "slot_assignment": 1,
+    "ubi_descriptor": 1
+  }
+}

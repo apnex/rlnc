@@ -1,0 +1,15 @@
+{
+  "orchestration": {
+    "session_id": 5001,
+    "session_count": 1,
+    "driver_type": "QUADRANT",
+    "layer_id": "L0-QUAD"
+  },
+  "math": {
+    "n": 128,
+    "s": 1024
+  },
+  "data": {
+    "size": 131072
+  }
+}

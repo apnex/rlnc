@@ -1,0 +1,20 @@
+{
+  "orchestration": {
+    "driver_type": "POOL",
+    "layer_id": "L3",
+    "session_id": 12345,
+    "concurrency_model": "SINGLE_WORKER"
+  },
+  "math": {
+    "n": 512,
+    "s": 1024
+  },
+  "data": {
+    "source": "DUMMY",
+    "size": 4194304
+  },
+  "fabric": {
+    "slot_assignment": 1,
+    "ubi_descriptor": 3
+  }
+}

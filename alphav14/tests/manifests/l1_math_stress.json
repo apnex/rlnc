@@ -1,0 +1,29 @@
+{
+  "orchestration": {
+    "driver_type": "BLOCK",
+    "layer_id": "L1",
+    "session_id": 4660,
+    "concurrency_model": "SINGLE_WORKER"
+  },
+  "math": {
+    "n": 128,
+    "s": 131072,
+    "systematic_flag": true,
+    "gf_power": 8
+  },
+  "data": {
+    "source": "DUMMY",
+    "size": 167772160
+  },
+  "fabric": {
+    "slot_assignment": 2,
+    "ubi_descriptor": 2,
+    "transport_layer": "LOOPBACK"
+  },
+  "verification": {
+    "integrity": {
+      "hash_algorithm": "SHA256",
+      "mode": "BIT_PERFECT"
+    }
+  }
+}

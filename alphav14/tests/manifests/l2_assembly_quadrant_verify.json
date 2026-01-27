@@ -1,0 +1,17 @@
+{
+  "orchestration": {
+    "session_id": 6001,
+    "session_count": 1,
+    "driver_type": "ASSEMBLY",
+    "layer_id": "L1-ASM-QUAD"
+  },
+  "math": {
+    "n": 128,
+    "s": 131072,
+    "systematic_flag": false,
+    "kernel": "QUADRANT"
+  },
+  "data": {
+    "size": 16777216
+  }
+}
